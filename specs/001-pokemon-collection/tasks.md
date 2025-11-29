@@ -36,7 +36,7 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 - [x] T006 [P] Configure Vitest (vitest.config.js) for React component testing
 - [x] T007 [P] Create .gitignore with node_modules, dist, .env, pnpm-lock.yaml exclusions
 - [x] T008 [P] Create index.html entry point with React root div
-- [x] T009 [P] Create src/main.jsx Vite entry point rendering React App
+- [x] T009 [P] Create src/main.tsx Vite entry point rendering React App
 - [x] T010 [P] Create directory structure: src/{components,services,hooks,models,styles,utils}, tests/{unit,integration,contract}
 
 ---
@@ -47,21 +47,21 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [x] T011 [P] Create Pokemon model (src/models/Pokemon.js) with index, name, image, collected, wishlist properties and validation
-- [x] T012 [P] Create Pokemon.test.js (tests/unit/models/Pokemon.test.js) - tests MUST FAIL initially (TDD red phase)
-- [x] T013 [P] Create Collection model (src/models/Collection.js) with id, pokemon array, timestamps
-- [x] T014 [P] Create Collection.test.js (tests/unit/models/Collection.test.js) - TDD red phase
+- [x] T011 [P] Create Pokemon model (src/models/Pokemon.ts) with index, name, image, collected, wishlist properties and validation
+- [x] T012 [P] Create Pokemon.test.ts (tests/unit/models/Pokemon.test.ts) - tests MUST FAIL initially (TDD red phase)
+- [x] T013 [P] Create Collection model (src/models/Collection.ts) with id, pokemon array, timestamps
+- [x] T014 [P] Create Collection.test.ts (tests/unit/models/Collection.test.ts) - TDD red phase
 - [x] T015 Implement Pokemon model to pass T012 tests (TDD green phase)
 - [x] T016 Implement Collection model to pass T014 tests (TDD green phase)
-- [x] T017 [P] Create collectionStorage.js service (src/services/collectionStorage.js) with localStorage interface
-- [x] T018 [P] Create collectionStorage.test.js (tests/unit/services/collectionStorage.test.js) with CRUD operations tests - TDD red
+- [x] T017 [P] Create collectionStorage.ts service (src/services/collectionStorage.ts) with localStorage interface
+- [x] T018 [P] Create collectionStorage.test.ts (tests/unit/services/collectionStorage.test.ts) with CRUD operations tests - TDD red
 - [x] T019 Implement collectionStorage to pass T018 tests (TDD green phase)
-- [x] T020 [P] Create pokemonApi.js service (src/services/pokemonApi.js) with PokeAPI fetch and caching
-- [x] T021 [P] Create pokemonApi.test.js (tests/contract/pokemonApi.test.js) with API contract validation - TDD red
+- [x] T020 [P] Create pokemonApi.ts service (src/services/pokemonApi.ts) with PokeAPI fetch and caching
+- [x] T021 [P] Create pokemonApi.test.ts (tests/contract/pokemonApi.test.ts) with API contract validation - TDD red
 - [x] T022 Implement pokemonApi to pass T021 tests (TDD green phase)
-- [x] T023 [P] Create constants.js (src/utils/constants.js) with API URLs, storage keys, Pokemon index range
-- [x] T024 [P] Create useCollection hook (src/hooks/useCollection.js) for collection state management
-- [x] T025 [P] Create useCollection.test.js (tests/unit/hooks/useCollection.test.js) with state tests - TDD red
+- [x] T023 [P] Create constants.ts (src/utils/constants.ts) with API URLs, storage keys, Pokemon index range
+- [x] T024 [P] Create useCollection hook (src/hooks/useCollection.ts) for collection state management
+- [x] T025 [P] Create useCollection.test.ts (tests/unit/hooks/useCollection.test.ts) with state tests - TDD red
 - [x] T026 Implement useCollection hook to pass T025 tests (TDD green phase)
 
 **Checkpoint**: Foundation ready - all models, services, and hooks functional. User story implementation can now begin in parallel.
@@ -76,25 +76,25 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 ### Tests for User Story 1 (TDD - Write FIRST, ensure FAIL before implementation)
 
-- [ ] T027 [P] [US1] Create pokemonService.test.js (tests/unit/services/pokemonService.test.js) with collectPokemon tests - TDD red
-- [ ] T028 [P] [US1] Create PokemonCard.test.jsx (tests/unit/components/PokemonCard.test.jsx) with render and collect button tests - TDD red
-- [ ] T029 [P] [US1] Create CollectionList.test.jsx (tests/unit/components/CollectionList.test.jsx) with collected Pokemon display tests - TDD red
-- [ ] T030 [P] [US1] Create PokemonSearch.test.jsx (tests/unit/components/PokemonSearch.test.jsx) with search input tests - TDD red
-- [ ] T031 [P] [US1] Create App.test.jsx (tests/unit/components/App.test.jsx) - US1 basic render test - TDD red
-- [ ] T032 [P] [US1] Create integration test (tests/integration/collection.us1.test.jsx) - search → collect → verify in list - TDD red
+- [x] T027 [P] [US1] Create pokemonService.test.ts (tests/unit/services/pokemonService.test.ts) with collectPokemon tests - TDD red
+- [x] T028 [P] [US1] Create PokemonCard.test.tsx (tests/unit/components/PokemonCard.test.tsx) with render and collect button tests - TDD red
+- [x] T029 [P] [US1] Create CollectionList.test.tsx (tests/unit/components/CollectionList.test.tsx) with collected Pokemon display tests - TDD red
+- [x] T030 [P] [US1] Create PokemonSearch.test.tsx (tests/unit/components/PokemonSearch.test.tsx) with search input tests - TDD red
+- [x] T031 [P] [US1] Create App.test.tsx (tests/unit/components/App.test.tsx) - US1 basic render test - TDD red
+- [x] T032 [P] [US1] Create integration test (tests/integration/collection.us1.test.tsx) - search → collect → verify in list - TDD red
 
 ### Implementation for User Story 1
 
-- [ ] T033 [US1] Implement pokemonService.js (src/services/pokemonService.js) with collectPokemon(index) - pass T027
-- [ ] T034 [P] [US1] Create PokemonCard.jsx component (src/components/PokemonCard.jsx) with Pokemon display and Collect button - pass T028
-- [ ] T035 [P] [US1] Create CollectionList.jsx component (src/components/CollectionList.jsx) displaying collected Pokemon with badge - pass T029
-- [ ] T036 [P] [US1] Create PokemonSearch.jsx component (src/components/PokemonSearch.jsx) with index input and search handler - pass T030
-- [ ] T037 [US1] Create App.jsx main component (src/components/App.jsx) with US1 layout: search + card + collection list - pass T031
-- [ ] T038 [US1] Create App.css (src/styles/App.css) with basic layout styling (minimal approach)
-- [ ] T039 [US1] Create components.css (src/styles/components.css) with card and badge styling
-- [ ] T040 [US1] Run T032 integration test and verify pass (search → collect → list) - pass T032
-- [ ] T041 [US1] Add logging for collection operations (console.log in pokemonService)
-- [ ] T042 [US1] Manual testing: Verify F5 page reload preserves collected Pokemon (localStorage persistence)
+- [x] T033 [US1] Implement pokemonService.ts (src/services/pokemonService.ts) with collectPokemon(index) - pass T027
+- [x] T034 [P] [US1] Create PokemonCard.tsx component (src/components/PokemonCard.tsx) with Pokemon display and Collect button - pass T028
+- [x] T035 [P] [US1] Create CollectionList.tsx component (src/components/CollectionList.tsx) displaying collected Pokemon with badge - pass T029
+- [x] T036 [P] [US1] Create PokemonSearch.tsx component (src/components/PokemonSearch.tsx) with index input and search handler - pass T030
+- [x] T037 [US1] Create App.tsx main component (src/components/App.tsx) with US1 layout: search + card + collection list - pass T031
+- [x] T038 [US1] Create App.css (src/styles/App.css) with basic layout styling (minimal approach)
+- [x] T039 [US1] Create components.css (src/styles/components.css) with card and badge styling
+- [x] T040 [US1] Run T032 integration test and verify pass (search → collect → list) - pass T032
+- [x] T041 [US1] Add logging for collection operations (console.log in pokemonService)
+- [x] T042 [US1] Manual testing: Verify F5 page reload preserves collected Pokemon (localStorage persistence)
 
 **Checkpoint**: User Story 1 complete and independently functional. Users can search by index, mark collected, see collection with badges, data persists across page reloads.
 
@@ -108,18 +108,18 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 ### Tests for User Story 2 (TDD - Write FIRST, ensure FAIL before implementation)
 
-- [ ] T043 [P] [US2] Create addToWishlist tests in pokemonService.test.js - TDD red
-- [ ] T044 [P] [US2] Create WishlistList.test.jsx (tests/unit/components/WishlistList.test.jsx) with display tests - TDD red
+- [ ] T043 [P] [US2] Create addToWishlist tests in pokemonService.test.ts - TDD red
+- [ ] T044 [P] [US2] Create WishlistList.test.tsx (tests/unit/components/WishlistList.test.tsx) with display tests - TDD red
 - [ ] T045 [P] [US2] Create PokemonCard update tests for wishlist button (in T028, add wishlist scenarios) - TDD red
-- [ ] T046 [P] [US2] Create integration test (tests/integration/wishlist.us2.test.jsx) - search uncollected → add to wishlist - TDD red
-- [ ] T047 [P] [US2] Create validation test (tests/integration/validation.us2.test.jsx) - cannot add collected to wishlist - TDD red
+- [ ] T046 [P] [US2] Create integration test (tests/integration/wishlist.us2.test.tsx) - search uncollected → add to wishlist - TDD red
+- [ ] T047 [P] [US2] Create validation test (tests/integration/validation.us2.test.tsx) - cannot add collected to wishlist - TDD red
 
 ### Implementation for User Story 2
 
-- [ ] T048 [US2] Implement addToWishlist(index) in pokemonService.js with validation (FR-003) - pass T043
-- [ ] T049 [US2] Update PokemonCard.jsx with "Add to Wishlist" button (disabled if collected) - pass T045
-- [ ] T050 [P] [US2] Create WishlistList.jsx component (src/components/WishlistList.jsx) displaying wishlist Pokemon with badge - pass T044
-- [ ] T051 [US2] Update App.jsx to include WishlistList and add/remove wishlist handlers - pass integration test
+- [ ] T048 [US2] Implement addToWishlist(index) in pokemonService.ts with validation (FR-003) - pass T043
+- [ ] T049 [US2] Update PokemonCard.tsx with "Add to Wishlist" button (disabled if collected) - pass T045
+- [ ] T050 [P] [US2] Create WishlistList.tsx component (src/components/WishlistList.tsx) displaying wishlist Pokemon with badge - pass T044
+- [ ] T051 [US2] Update App.tsx to include WishlistList and add/remove wishlist handlers - pass integration test
 - [ ] T052 [US2] Add wishlist styling to components.css (badge distinct from collected)
 - [ ] T053 [US2] Run T046 integration test - wishlist add flow - pass
 - [ ] T054 [US2] Run T047 validation test - collected prevention - pass
@@ -138,16 +138,16 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 ### Tests for User Story 3 (TDD - Write FIRST, ensure FAIL before implementation)
 
-- [ ] T057 [P] [US3] Create navigation tests in App.test.jsx (collection vs wishlist tabs) - TDD red
-- [ ] T058 [P] [US3] Create filter tests in PokemonSearch.test.jsx (search/filter functionality) - TDD red
-- [ ] T059 [P] [US3] Create integration test (tests/integration/navigation.us3.test.jsx) - tab switching and display - TDD red
-- [ ] T060 [P] [US3] Create integration test (tests/integration/search.us3.test.jsx) - search by index returns correct Pokemon - TDD red
+- [ ] T057 [P] [US3] Create navigation tests in App.test.tsx (collection vs wishlist tabs) - TDD red
+- [ ] T058 [P] [US3] Create filter tests in PokemonSearch.test.tsx (search/filter functionality) - TDD red
+- [ ] T059 [P] [US3] Create integration test (tests/integration/navigation.us3.test.tsx) - tab switching and display - TDD red
+- [ ] T060 [P] [US3] Create integration test (tests/integration/search.us3.test.tsx) - search by index returns correct Pokemon - TDD red
 
 ### Implementation for User Story 3
 
-- [ ] T061 [US3] Update App.jsx with tab navigation (My Collection, My Wishlist, Search) - pass T057
+- [ ] T061 [US3] Update App.tsx with tab navigation (My Collection, My Wishlist, Search) - pass T057
 - [ ] T062 [US3] Implement filter logic in useCollection hook or App state for Pokemon index search - pass T058
-- [ ] T063 [US3] Update PokemonSearch.jsx with actual search/filter functionality - pass filtering tests
+- [ ] T063 [US3] Update PokemonSearch.tsx with actual search/filter functionality - pass filtering tests
 - [ ] T064 [US3] Add tab styling to App.css (active/inactive states, clear visual separation)
 - [ ] T065 [US3] Run T059 integration test - tab navigation works - pass
 - [ ] T066 [US3] Run T060 integration test - search by index filters correctly - pass
@@ -163,7 +163,7 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 **Purpose**: Final refinements, testing, documentation, and deployment readiness
 
-- [ ] T070 [P] Add error handling to pokemonApi.js for network failures and rate limiting
+- [ ] T070 [P] Add error handling to pokemonApi.ts for network failures and rate limiting
 - [ ] T071 [P] Add user-facing error messages (toast/alert for failed actions)
 - [ ] T072 [P] Run full test suite: `pnpm test` - all tests must pass
 - [ ] T073 [P] Generate coverage report: `pnpm test:coverage` - target 80%+ coverage
@@ -246,12 +246,12 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 ```
 Write all tests in parallel:
-- T027: pokemonService.test.js (service layer)
-- T028: PokemonCard.test.jsx (component layer)
-- T029: CollectionList.test.jsx (component layer)
-- T030: PokemonSearch.test.jsx (component layer)
-- T031: App.test.jsx (integration)
-- T032: collection.flow.test.jsx (full integration)
+- T027: pokemonService.test.ts (service layer)
+- T028: PokemonCard.test.tsx (component layer)
+- T029: CollectionList.test.tsx (component layer)
+- T030: PokemonSearch.test.tsx (component layer)
+- T031: App.test.tsx (integration)
+- T032: collection.flow.test.tsx (full integration)
 
 All 6 tests should FAIL (RED phase)
 

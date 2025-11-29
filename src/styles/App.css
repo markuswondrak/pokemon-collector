@@ -1,11 +1,144 @@
+/* Main App Layout */
 .app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: #333;
 }
 
-.app h1 {
-  color: #646cff;
-  margin-bottom: 1rem;
+.app-header {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border-bottom: 3px solid #667eea;
+}
+
+.app-header h1 {
+  margin: 0 0 0.5rem;
+  font-size: 2.5rem;
+  color: #667eea;
+}
+
+.app-header p {
+  margin: 0;
+  color: #666;
+  font-size: 1.1rem;
+}
+
+.app-main {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+/* Search Section */
+.search-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+}
+
+/* Pokemon Display */
+.pokemon-display {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 500px;
+}
+
+.pokemon-card-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.search-prompt,
+.loading {
+  text-align: center;
+  color: #999;
+  font-size: 1.1rem;
+}
+
+.error-message {
+  background: #fee;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  border-left: 4px solid #c33;
+}
+
+/* Collection Section */
+.collection-section {
+  grid-column: 1 / -1;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Footer */
+.app-footer {
+  background: rgba(0, 0, 0, 0.7);
+  color: white;
+  text-align: center;
+  padding: 1.5rem;
+  margin-top: auto;
+}
+
+.app-footer p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .app-main {
+    grid-template-columns: 1fr;
+  }
+
+  .search-section {
+    position: static;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header h1 {
+    font-size: 1.8rem;
+  }
+
+  .app-header {
+    padding: 1.5rem;
+  }
+
+  .app-main {
+    padding: 1rem;
+    gap: 1.5rem;
+  }
+
+  .search-section,
+  .pokemon-display,
+  .collection-section {
+    padding: 1.5rem;
+  }
+
+  .pokemon-display {
+    min-height: 400px;
+  }
 }

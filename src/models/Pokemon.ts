@@ -4,10 +4,18 @@
  */
 
 export class Pokemon {
-  constructor(index, name, image) {
+  index: number
+  name: string
+  image: string
+  collected: boolean
+  wishlist: boolean
+
+  constructor(index: number, name: string, image: string) {
     // Validate index
     if (!Number.isInteger(index) || index < 1 || index > 1025) {
-      throw new Error(`Invalid Pokemon index: ${index}. Must be between 1 and 1025.`)
+      throw new Error(
+        `Invalid Pokemon index: ${index}. Must be between 1 and 1025.`
+      )
     }
 
     // Validate name
@@ -32,7 +40,7 @@ export class Pokemon {
    * @param {string} url - The URL to validate
    * @returns {boolean} - True if URL is valid
    */
-  _isValidUrl(url) {
+  private _isValidUrl(url: string): boolean {
     try {
       new URL(url)
       return true
@@ -46,9 +54,11 @@ export class Pokemon {
    * @param {boolean} collected - Whether Pokemon is collected
    * @throws Error if trying to set both collected and wishlist to true
    */
-  setCollected(collected) {
+  setCollected(collected: boolean): void {
     if (collected && this.wishlist) {
-      throw new Error('Pokemon cannot be both collected and in wishlist simultaneously.')
+      throw new Error(
+        'Pokemon cannot be both collected and in wishlist simultaneously.'
+      )
     }
     this.collected = collected
   }
@@ -58,9 +68,11 @@ export class Pokemon {
    * @param {boolean} wishlist - Whether Pokemon is in wishlist
    * @throws Error if trying to set both collected and wishlist to true
    */
-  setWishlist(wishlist) {
+  setWishlist(wishlist: boolean): void {
     if (wishlist && this.collected) {
-      throw new Error('Pokemon cannot be both collected and in wishlist simultaneously.')
+      throw new Error(
+        'Pokemon cannot be both collected and in wishlist simultaneously.'
+      )
     }
     this.wishlist = wishlist
   }
@@ -69,7 +81,13 @@ export class Pokemon {
    * Convert Pokemon to JSON object
    * @returns {Object} - JSON representation of Pokemon
    */
-  toJSON() {
+  toJSON(): {
+    index: number
+    name: string
+    image: string
+    collected: boolean
+    wishlist: boolean
+  } {
     return {
       index: this.index,
       name: this.name,
@@ -85,7 +103,13 @@ export class Pokemon {
    * @returns {Pokemon} - New Pokemon instance
    * @throws Error if JSON data is invalid
    */
-  static fromJSON(json) {
+  static fromJSON(json: {
+    index: number
+    name: string
+    image: string
+    collected?: boolean
+    wishlist?: boolean
+  }): Pokemon {
     const pokemon = new Pokemon(json.index, json.name, json.image)
     if (json.collected) {
       pokemon.setCollected(true)

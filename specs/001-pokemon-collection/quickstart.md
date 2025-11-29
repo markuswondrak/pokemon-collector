@@ -120,13 +120,13 @@ pnpm format
 
 1. **Write test first** (test fails - RED)
    ```bash
-   # Edit tests/unit/services/pokemonService.test.js
+   # Edit tests/unit/services/pokemonService.test.ts
    pnpm test:watch
    ```
 
 2. **Implement feature** (test passes - GREEN)
    ```bash
-   # Edit src/services/pokemonService.js
+   # Edit src/services/pokemonService.ts
    # Watch tests automatically re-run
    ```
 
@@ -140,11 +140,11 @@ pnpm format
 
 | File | Purpose |
 |------|---------|
-| `src/components/App.jsx` | Main app component & state management |
-| `src/services/pokemonApi.js` | PokeAPI calls (search by index, fetch Pokemon data) |
-| `src/services/collectionStorage.js` | localStorage persistence (collected, wishlist) |
-| `src/hooks/useCollection.js` | React hook managing collection state |
-| `src/models/Pokemon.js` | Pokemon entity definition |
+| `src/components/App.tsx` | Main app component & state management |
+| `src/services/pokemonApi.ts` | PokeAPI calls (search by index, fetch Pokemon data) |
+| `src/services/collectionStorage.ts` | localStorage persistence (collected, wishlist) |
+| `src/hooks/useCollection.ts` | React hook managing collection state |
+| `src/models/Pokemon.ts` | Pokemon entity definition |
 | `tests/` | All test files (unit, integration, contract) |
 
 ## Common Tasks

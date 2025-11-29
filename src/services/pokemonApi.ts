@@ -1,13 +1,26 @@
+import axios from 'axios'
+import {
+  POKEMON_ENDPOINT,
+  MIN_POKEMON_INDEX,
+  MAX_POKEMON_INDEX,
+  CACHE_DURATION,
+  API_RATE_LIMIT_DELAY
+} from '../utils/constants'
+import { Pokemon } from '../models/Pokemon'
+
+interface CacheEntry {
+  data: Pokemon
+  timestamp: number
+}
+
 /**
  * Pokemon API Service
  * Handles all PokeAPI calls with caching and rate limiting
  */
+class PokemonApiService {
+  private cache: Map<string, CacheEntry>
+  private lastRequestTime: number
 
-import axios from 'axios'
-import { POKEMON_ENDPOINT, MIN_POKEMON_INDEX, MAX_POKEMON_INDEX, CACHE_DURATION, API_RATE_LIMIT_DELAY } from '../utils/constants'
-import { Pokemon } from '../models/Pokemon'
-
-class PokemonApi {
   constructor() {
     this.cache = new Map()
     this.lastRequestTime = 0
@@ -18,9 +31,15 @@ class PokemonApi {
    * @param {number} index - Pokemon index to validate
    * @throws Error if index is invalid
    */
-  _validateIndex(index) {
-    if (!Number.isInteger(index) || index < MIN_POKEMON_INDEX || index > MAX_POKEMON_INDEX) {
-      throw new Error(`Invalid Pokemon index: ${index}. Must be between ${MIN_POKEMON_INDEX} and ${MAX_POKEMON_INDEX}.`)
+  private _validateIndex(index: number): void {
+    if (
+      !Number.isInteger(index) ||
+      index < MIN_POKEMON_INDEX ||
+      index > MAX_POKEMON_INDEX
+    ) {
+      throw new Error(
+        `Invalid Pokemon index: ${index}. Must be between ${MIN_POKEMON_INDEX} and ${MAX_POKEMON_INDEX}.`
+      )
     }
   }
 
@@ -28,11 +47,16 @@ class PokemonApi {
    * Apply rate limiting delay
    * @private
    */
-  async _applyRateLimit() {
+  private async _applyRateLimit(): Promise<void> {
     const now = Date.now()
     const timeSinceLastRequest = now - this.lastRequestTime
     if (timeSinceLastRequest < API_RATE_LIMIT_DELAY) {
-      await new Promise((resolve) => setTimeout(resolve, API_RATE_LIMIT_DELAY - timeSinceLastRequest))
+      await new Promise((resolve) =>
+        setTimeout(
+          resolve,
+          API_RATE_LIMIT_DELAY - timeSinceLastRequest
+        )
+      )
     }
     this.lastRequestTime = Date.now()
   }
@@ -41,7 +65,7 @@ class PokemonApi {
    * Get cache key for Pokemon
    * @private
    */
-  _getCacheKey(index) {
+  private _getCacheKey(index: number): string {
     return `pokemon_${index}`
   }
 
@@ -51,14 +75,14 @@ class PokemonApi {
    * @returns {Promise<Pokemon>} - Pokemon instance
    * @throws Error if index is invalid or Pokemon not found
    */
-  async fetchPokemon(index) {
+  async fetchPokemon(index: number): Promise<Pokemon> {
     this._validateIndex(index)
 
     // Check cache
     const cacheKey = this._getCacheKey(index)
     if (this.cache.has(cacheKey)) {
       const cached = this.cache.get(cacheKey)
-      if (Date.now() - cached.timestamp < CACHE_DURATION) {
+      if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
         return cached.data
       }
       this.cache.delete(cacheKey)
@@ -74,7 +98,8 @@ class PokemonApi {
       const pokemon = new Pokemon(
         data.id,
         data.name.charAt(0).toUpperCase() + data.name.slice(1),
-        data.sprites.other['official-artwork'].front_default || data.sprites.front_default
+        data.sprites.other['official-artwork'].front_default ||
+          data.sprites.front_default
       )
 
       // Cache result
@@ -84,11 +109,12 @@ class PokemonApi {
       })
 
       return pokemon
-    } catch (error) {
-      if (error.response?.status === 404) {
+    } catch (error: unknown) {
+      const err = error as { response?: { status: number }; message: string }
+      if (err.response?.status === 404) {
         throw new Error(`Pokemon with index ${index} not found`)
       }
-      throw new Error(`Failed to fetch Pokemon: ${error.message}`)
+      throw new Error(`Failed to fetch Pokemon: ${err.message}`)
     }
   }
 
@@ -97,7 +123,7 @@ class PokemonApi {
    * @param {number[]} indices - Array of Pokemon indices
    * @returns {Promise<Pokemon[]>} - Array of Pokemon instances
    */
-  async fetchMultiplePokemon(indices) {
+  async fetchMultiplePokemon(indices: number[]): Promise<Pokemon[]> {
     if (indices.length === 0) {
       return []
     }
@@ -105,7 +131,9 @@ class PokemonApi {
     // Validate all indices first
     indices.forEach((index) => this._validateIndex(index))
 
-    const results = await Promise.all(indices.map((index) => this.fetchPokemon(index)))
+    const results = await Promise.all(
+      indices.map((index) => this.fetchPokemon(index))
+    )
     return results
   }
 
@@ -114,7 +142,7 @@ class PokemonApi {
    * @param {string} query - Search query
    * @returns {Promise<Pokemon[]>} - Array of matching Pokemon
    */
-  async searchPokemon(query) {
+  async searchPokemon(query: string): Promise<Pokemon[]> {
     if (!query || typeof query !== 'string') {
       return []
     }
@@ -136,7 +164,7 @@ class PokemonApi {
         { id: 50, name: 'Diglett' }
       ]
 
-      const results = []
+      const results: Pokemon[] = []
       for (const pokemon of commonPokemon) {
         if (pokemon.name.toLowerCase().includes(searchTerm)) {
           try {
@@ -148,8 +176,9 @@ class PokemonApi {
         }
       }
       return results
-    } catch (error) {
-      throw new Error(`Search failed: ${error.message}`)
+    } catch (error: unknown) {
+      const err = error as { message: string }
+      throw new Error(`Search failed: ${err.message}`)
     }
   }
 
@@ -159,12 +188,20 @@ class PokemonApi {
    * @param {number} end - End index (inclusive)
    * @returns {Promise<Pokemon[]>} - Array of Pokemon in range
    */
-  async getPokemonByRange(start, end) {
-    if (!Number.isInteger(start) || !Number.isInteger(end) || start < MIN_POKEMON_INDEX || end > MAX_POKEMON_INDEX || start > end) {
-      throw new Error(`Invalid range: ${start}-${end}. Must be valid integers with start <= end.`)
+  async getPokemonByRange(start: number, end: number): Promise<Pokemon[]> {
+    if (
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < MIN_POKEMON_INDEX ||
+      end > MAX_POKEMON_INDEX ||
+      start > end
+    ) {
+      throw new Error(
+        `Invalid range: ${start}-${end}. Must be valid integers with start <= end.`
+      )
     }
 
-    const indices = []
+    const indices: number[] = []
     for (let i = start; i <= end; i++) {
       indices.push(i)
     }
@@ -175,10 +212,23 @@ class PokemonApi {
   /**
    * Clear the cache
    */
-  clearCache() {
+  clearCache(): void {
     this.cache.clear()
   }
 }
 
-// Export singleton instance
-export const pokemonApi = new PokemonApi()
+// Export singleton instance and functions
+const instance = new PokemonApiService()
+
+export const pokemonApi = instance
+export const fetchPokemon = (index: number): Promise<Pokemon> =>
+  instance.fetchPokemon(index)
+export const fetchMultiplePokemon = (indices: number[]): Promise<Pokemon[]> =>
+  instance.fetchMultiplePokemon(indices)
+export const searchPokemon = (query: string): Promise<Pokemon[]> =>
+  instance.searchPokemon(query)
+export const getPokemonByRange = (
+  start: number,
+  end: number
+): Promise<Pokemon[]> => instance.getPokemonByRange(start, end)
+export const clearCache = (): void => instance.clearCache()

@@ -11,7 +11,7 @@ Build a React web application using Vite that allows users to organize their Pok
 
 ## Technical Context
 
-**Language/Version**: JavaScript (ES2020+) with Node.js 18+  
+**Language/Version**: TypeScript with Node.js 18+  
 **Primary Dependencies**: React 18, Vite, axios (for API calls), pnpm (build tool)  
 **Storage**: Browser localStorage (client-side only, no backend)
 **Testing**: Vitest, React Testing Library, pnpm for dependency management  
@@ -53,54 +53,55 @@ specs/[###-feature]/
 # React + Vite Single-Page Application
 src/
 ├── components/
-│   ├── PokemonCard.jsx          # Individual Pokemon display with collect/wishlist buttons
-│   ├── CollectionList.jsx       # Display list of collected Pokemon
-│   ├── WishlistList.jsx         # Display list of wishlist Pokemon
-│   ├── PokemonSearch.jsx        # Search/filter input for Pokemon index
-│   └── App.jsx                  # Main app layout and state management
+│   ├── PokemonCard.tsx          # Individual Pokemon display with collect/wishlist buttons
+│   ├── CollectionList.tsx       # Display list of collected Pokemon
+│   ├── WishlistList.tsx         # Display list of wishlist Pokemon
+│   ├── PokemonSearch.tsx        # Search/filter input for Pokemon index
+│   └── App.tsx                  # Main app layout and state management
 │
 ├── services/
-│   ├── pokemonApi.js            # API calls to public Pokemon API (PokeAPI)
-│   ├── collectionStorage.js     # localStorage management for collection/wishlist persistence
-│   └── pokemonService.js        # Business logic for managing collection state
+│   ├── pokemonApi.ts            # API calls to public Pokemon API (PokeAPI)
+│   ├── collectionStorage.ts     # localStorage management for collection/wishlist persistence
+│   └── pokemonService.ts        # Business logic for managing collection state
 │
 ├── hooks/
-│   ├── useCollection.js         # Custom hook for collection state (collected & wishlist)
-│   └── usePokemonApi.js         # Custom hook for Pokemon API calls
+│   ├── useCollection.ts         # Custom hook for collection state (collected & wishlist)
+│   └── usePokemonApi.ts         # Custom hook for Pokemon API calls
 │
 ├── models/
-│   ├── Pokemon.js               # Pokemon entity with index, name, image, collected, wishlist flags
-│   └── Collection.js            # Collection/Wishlist container model
+│   ├── Pokemon.ts               # Pokemon entity with index, name, image, collected, wishlist flags
+│   └── Collection.ts            # Collection/Wishlist container model
 │
 ├── styles/
 │   ├── App.css                  # Main application styling (minimal approach)
 │   └── components.css           # Component-specific styles
 │
 ├── utils/
-│   └── constants.js             # API URLs, storage keys, constants
+│   └── constants.ts             # API URLs, storage keys, constants
 │
-└── main.jsx                     # Vite entry point
+└── main.tsx                     # Vite entry point
 
 tests/
 ├── unit/
 │   ├── services/
-│   │   ├── collectionStorage.test.js
-│   │   └── pokemonService.test.js
+│   │   ├── collectionStorage.test.ts
+│   │   └── pokemonService.test.ts
 │   ├── hooks/
-│   │   └── useCollection.test.js
+│   │   └── useCollection.test.ts
 │   └── models/
-│       └── Pokemon.test.js
+│       └── Pokemon.test.ts
 │
 ├── integration/
-│   └── collection.flow.test.jsx # Full flow: search → collect → view collection
+│   └── collection.flow.test.tsx # Full flow: search → collect → view collection
 │
 └── contract/
-    └── pokemonApi.test.js       # API contract tests (response format validation)
+    └── pokemonApi.test.ts       # API contract tests (response format validation)
 
 index.html                        # Vite entry HTML
-vite.config.js                    # Vite configuration
+vite.config.js                    # Vite configuration (JavaScript)
 package.json                      # Package metadata
 pnpm-lock.yaml                    # pnpm dependency lock file
+tsconfig.json                     # TypeScript configuration
 .eslintrc.json                    # Linting configuration
 .gitignore                        # Git ignore rules
 ```

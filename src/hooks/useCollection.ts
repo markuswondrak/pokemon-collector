@@ -4,26 +4,46 @@
  */
 
 import { useState, useEffect, useCallback } from 'react'
-import { Collection } from '../models/Collection'
 import { Pokemon } from '../models/Pokemon'
-import { collectionStorage } from '../services/collectionStorage'
+import * as collectionStorageModule from '../services/collectionStorage'
 
-export function useCollection() {
-  const [collected, setCollected] = useState([])
-  const [wishlist, setWishlist] = useState([])
+interface PokemonData {
+  index: number
+  name: string
+  image: string | null
+  collected: boolean
+  wishlist: boolean
+}
+
+interface UseCollectionReturn {
+  collected: PokemonData[]
+  wishlist: PokemonData[]
+  addToCollection: (pokemonData: PokemonData | Pokemon) => Promise<void>
+  removeFromCollection: (index: number) => Promise<void>
+  addToWishlist: (pokemonData: PokemonData | Pokemon) => Promise<void>
+  removeFromWishlist: (index: number) => Promise<void>
+  isCollected: (index: number) => boolean
+  isWishlisted: (index: number) => boolean
+  getCollectionCount: () => number
+  getWishlistCount: () => number
+}
+
+export function useCollection(): UseCollectionReturn {
+  const [collected, setCollected] = useState<PokemonData[]>([])
+  const [wishlist, setWishlist] = useState<PokemonData[]>([])
 
   // Load persisted data on mount
   useEffect(() => {
-    const loadData = () => {
+    const loadData = (): void => {
       try {
-        const collectionData = collectionStorage.loadCollection()
-        if (collectionData) {
-          setCollected(collectionData.pokemon || [])
+        const collectionData = collectionStorageModule.collectionStorage.loadCollection()
+        if (collectionData && collectionData.pokemon) {
+          setCollected(collectionData.pokemon)
         }
 
-        const wishlistData = collectionStorage.loadWishlist()
-        if (wishlistData) {
-          setWishlist(wishlistData.pokemon || [])
+        const wishlistData = collectionStorageModule.collectionStorage.loadWishlist()
+        if (wishlistData && wishlistData.pokemon) {
+          setWishlist(wishlistData.pokemon)
         }
       } catch (error) {
         console.error('Failed to load collection data:', error)
@@ -37,22 +57,28 @@ export function useCollection() {
    * Add Pokemon to collection
    */
   const addToCollection = useCallback(
-    async (pokemonData) => {
+    async (pokemonData: PokemonData | Pokemon): Promise<void> => {
       try {
         // Check if already collected
-        if (collected.some((p) => p.index === pokemonData.index)) {
-          throw new Error(`Pokemon ${pokemonData.index} is already in collection.`)
+        const index =
+          pokemonData instanceof Pokemon
+            ? pokemonData.index
+            : pokemonData.index
+        if (collected.some((p) => p.index === index)) {
+          throw new Error(`Pokemon ${index} is already in collection.`)
         }
 
         // Ensure it's a plain JSON object
-        const pokemonJSON = pokemonData instanceof Pokemon ? pokemonData.toJSON() : pokemonData
+        const pokemonJSON =
+          pokemonData instanceof Pokemon
+            ? pokemonData.toJSON()
+            : pokemonData
 
         const newCollected = [...collected, pokemonJSON]
         setCollected(newCollected)
 
         // Persist
-        const collection = new Collection('my-collection', newCollected)
-        collectionStorage.saveCollection(collection.toJSON())
+        collectionStorageModule.collectionStorage.saveCollection(newCollected)
       } catch (error) {
         console.error('Failed to add to collection:', error)
         throw error
@@ -65,14 +91,13 @@ export function useCollection() {
    * Remove Pokemon from collection
    */
   const removeFromCollection = useCallback(
-    async (index) => {
+    async (index: number): Promise<void> => {
       try {
         const newCollected = collected.filter((p) => p.index !== index)
         setCollected(newCollected)
 
         // Persist
-        const collection = new Collection('my-collection', newCollected)
-        collectionStorage.saveCollection(collection.toJSON())
+        collectionStorageModule.collectionStorage.saveCollection(newCollected)
       } catch (error) {
         console.error('Failed to remove from collection:', error)
         throw error
@@ -85,27 +110,33 @@ export function useCollection() {
    * Add Pokemon to wishlist
    */
   const addToWishlist = useCallback(
-    async (pokemonData) => {
+    async (pokemonData: PokemonData | Pokemon): Promise<void> => {
       try {
         // Check if already collected
-        if (collected.some((p) => p.index === pokemonData.index)) {
+        const index =
+          pokemonData instanceof Pokemon
+            ? pokemonData.index
+            : pokemonData.index
+        if (collected.some((p) => p.index === index)) {
           throw new Error('Cannot add collected Pokemon to wishlist.')
         }
 
         // Check if already wishlisted
-        if (wishlist.some((p) => p.index === pokemonData.index)) {
-          throw new Error(`Pokemon ${pokemonData.index} is already in wishlist.`)
+        if (wishlist.some((p) => p.index === index)) {
+          throw new Error(`Pokemon ${index} is already in wishlist.`)
         }
 
         // Ensure it's a plain JSON object
-        const pokemonJSON = pokemonData instanceof Pokemon ? pokemonData.toJSON() : pokemonData
+        const pokemonJSON =
+          pokemonData instanceof Pokemon
+            ? pokemonData.toJSON()
+            : pokemonData
 
         const newWishlist = [...wishlist, pokemonJSON]
         setWishlist(newWishlist)
 
         // Persist
-        const collection = new Collection('my-wishlist', newWishlist)
-        collectionStorage.saveWishlist(collection.toJSON())
+        collectionStorageModule.collectionStorage.saveWishlist(newWishlist)
       } catch (error) {
         console.error('Failed to add to wishlist:', error)
         throw error
@@ -118,14 +149,13 @@ export function useCollection() {
    * Remove Pokemon from wishlist
    */
   const removeFromWishlist = useCallback(
-    async (index) => {
+    async (index: number): Promise<void> => {
       try {
         const newWishlist = wishlist.filter((p) => p.index !== index)
         setWishlist(newWishlist)
 
         // Persist
-        const collection = new Collection('my-wishlist', newWishlist)
-        collectionStorage.saveWishlist(collection.toJSON())
+        collectionStorageModule.collectionStorage.saveWishlist(newWishlist)
       } catch (error) {
         console.error('Failed to remove from wishlist:', error)
         throw error
@@ -138,7 +168,7 @@ export function useCollection() {
    * Check if Pokemon is collected
    */
   const isCollected = useCallback(
-    (index) => {
+    (index: number): boolean => {
       return collected.some((p) => p.index === index)
     },
     [collected]
@@ -148,7 +178,7 @@ export function useCollection() {
    * Check if Pokemon is in wishlist
    */
   const isWishlisted = useCallback(
-    (index) => {
+    (index: number): boolean => {
       return wishlist.some((p) => p.index === index)
     },
     [wishlist]
@@ -157,14 +187,14 @@ export function useCollection() {
   /**
    * Get count of collected Pokemon
    */
-  const getCollectionCount = useCallback(() => {
+  const getCollectionCount = useCallback((): number => {
     return collected.length
   }, [collected])
 
   /**
    * Get count of wishlist Pokemon
    */
-  const getWishlistCount = useCallback(() => {
+  const getWishlistCount = useCallback((): number => {
     return wishlist.length
   }, [wishlist])
 
