@@ -7,10 +7,11 @@
 - Node.js 18+ (check with `node --version`)
 - pnpm 8+ (install with `npm install -g pnpm`)
 - Git
+- TypeScript 5.9+ (included in dev dependencies)
 
 ## Setup Steps
 
-### 1. Initialize React + Vite Project
+### 1. Initialize React + Vite + TypeScript Project
 
 ```bash
 # Navigate to repository root
@@ -30,7 +31,7 @@ pnpm dev  # Should start dev server on http://localhost:5173
 
 ```bash
 # Core dependencies (already in package.json)
-pnpm install  # React 18, Vite, axios
+pnpm install  # React 19, Vite, axios, TypeScript
 
 # Dev dependencies for testing (already in package.json)
 pnpm add -D vitest @testing-library/react @testing-library/jest-dom
@@ -53,12 +54,15 @@ src/
 ├── models/
 ├── styles/
 ├── utils/
-└── main.jsx
+└── main.tsx
 
 tests/
 ├── unit/
 ├── integration/
 └── contract/
+
+tsconfig.json          # TypeScript configuration with strict mode
+eslint.config.js       # ESLint with TypeScript strict checking
 ```
 
 ### 4. Run Development Server
@@ -90,12 +94,19 @@ pnpm build
 
 Output files in `dist/` directory ready for deployment.
 
+### 7. Type Checking
+
+```bash
+# Run TypeScript compiler to check for type errors
+pnpm tsc --noEmit
+```
+
 ## Development Workflow
 
 ### Code Quality Checks
 
 ```bash
-# Run linting
+# Run linting (includes TypeScript strict checks)
 pnpm lint
 
 # Auto-fix linting issues

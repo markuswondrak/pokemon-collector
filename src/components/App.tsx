@@ -1,6 +1,6 @@
 import '../styles/App.css'
 
-function App() {
+function App(): React.ReactElement {
   return (
     <div className="app">
       <h1>Pokemon Collection Organizer</h1>

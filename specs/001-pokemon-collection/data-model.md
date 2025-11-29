@@ -30,8 +30,16 @@ Represents a single Pokemon in the system.
 
 ### Example
 
-```javascript
-{
+```typescript
+interface Pokemon {
+  index: number
+  name: string
+  image: string
+  collected: boolean
+  wishlist: boolean
+}
+
+const example: Pokemon = {
   index: 25,
   name: "Pikachu",
   image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png",

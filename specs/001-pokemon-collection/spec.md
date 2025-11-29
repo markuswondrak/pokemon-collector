@@ -5,6 +5,15 @@
 **Status**: Draft  
 **Input**: User description: "Build an application that can help organize pokemon collection. Pokemon are identified by their index. Pokemon can be selected as collected and added to a wishlist if not already collected"
 
+## Technology Stack
+
+- **Language**: TypeScript 5.9+ (strict mode enabled)
+- **Framework**: React 19
+- **Build Tool**: Vite 7+
+- **Testing**: Vitest + React Testing Library
+- **Linting**: ESLint with TypeScript support (strict type checking)
+- **HTTP Client**: Axios
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Mark Pokemon as Collected (Priority: P1)
