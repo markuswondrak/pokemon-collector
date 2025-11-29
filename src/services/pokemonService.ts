@@ -193,3 +193,38 @@ export function getWishlist(): PokemonData[] {
   const collection = getCollectionList()
   return collection.filter((p: PokemonData) => p.wishlist)
 }
+
+/**
+ * Remove Pokemon from wishlist
+ */
+export function removeFromWishlist(index: number): Promise<boolean> {
+  return Promise.resolve().then(() => {
+    validateIndex(index)
+
+    const collection = getStoredCollection()
+    const existingIndex = collection.findIndex(
+      (p: PokemonData) => p.index === index
+    )
+
+    if (existingIndex < 0) {
+      throw new Error(`Pokemon ${String(index)} not found in wishlist`)
+    }
+
+    const updated = [...collection]
+    updated[existingIndex] = {
+      ...updated[existingIndex],
+      wishlist: false
+    }
+
+    if (!updated[existingIndex].collected) {
+      updated.splice(existingIndex, 1)
+    }
+
+    saveCollection(updated)
+    console.log(
+      `[pokemonService] Removed Pokemon ${String(index)} from wishlist`
+    )
+
+    return true
+  })
+}

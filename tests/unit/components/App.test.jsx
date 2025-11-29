@@ -78,7 +78,8 @@ describe('App Component - User Story 1', () => {
   it('should initialize with empty collection', () => {
     render(<App />);
 
-    expect(screen.getByText(/no pokemon/i)).toBeInTheDocument();
+    const emptyMessages = screen.queryAllByText(/no pokemon/i);
+    expect(emptyMessages.length).toBeGreaterThanOrEqual(1);
   });
 
   it('should have title or header', () => {

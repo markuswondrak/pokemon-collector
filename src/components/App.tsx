@@ -2,6 +2,7 @@ import { useState, useEffect, ReactElement } from 'react'
 import PokemonSearch from './PokemonSearch.tsx'
 import PokemonCard from './PokemonCard.tsx'
 import CollectionList from './CollectionList.tsx'
+import WishlistList from './WishlistList.tsx'
 import * as pokemonApi from '../services/pokemonApi.ts'
 import * as pokemonService from '../services/pokemonService.ts'
 import '../styles/App.css'
@@ -38,13 +39,15 @@ export default function App(): ReactElement {
     try {
       const pokemon = await pokemonApi.fetchPokemon(index)
 
-      // Check if already collected
-      const isCollected = collection.some(p => p.index === index && p.collected)
+      // Check collection for existing status
+      const existing = collection.find(p => p.index === index)
+      const isCollected = existing?.collected ?? false
+      const isWishlisted = existing?.wishlist ?? false
 
       setCurrentPokemon({
         ...pokemon,
         collected: isCollected,
-        wishlist: false
+        wishlist: isWishlisted
       })
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
@@ -103,6 +106,54 @@ export default function App(): ReactElement {
     }
   }
 
+  const handleAddToWishlist = async (index: number): Promise<void> => {
+    try {
+      await pokemonService.addToWishlist(index)
+
+      // Update current Pokemon display
+      if (currentPokemon && currentPokemon.index === index) {
+        setCurrentPokemon({
+          ...currentPokemon,
+          wishlist: true
+        })
+      }
+
+      // Update collection list
+      const updated = pokemonService.getCollectionList()
+      setCollection(updated)
+
+      console.log('[App] Pokemon added to wishlist:', index)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setError(`Failed to add to wishlist: ${message}`)
+      console.error('[App] Wishlist error:', err)
+    }
+  }
+
+  const handleRemoveFromWishlist = async (index: number): Promise<void> => {
+    try {
+      await pokemonService.removeFromWishlist(index)
+
+      // Update current Pokemon display
+      if (currentPokemon && currentPokemon.index === index) {
+        setCurrentPokemon({
+          ...currentPokemon,
+          wishlist: false
+        })
+      }
+
+      // Update collection list
+      const updated = pokemonService.getCollectionList()
+      setCollection(updated)
+
+      console.log('[App] Pokemon removed from wishlist:', index)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err)
+      setError(`Failed to remove from wishlist: ${message}`)
+      console.error('[App] Remove from wishlist error:', err)
+    }
+  }
+
   const handleReset = (): void => {
     setCurrentPokemon(null)
     setError('')
@@ -138,7 +189,7 @@ export default function App(): ReactElement {
                 pokemon={currentPokemon}
                 onCollect={handleCollect}
                 onRemove={handleRemove}
-                onAddToWishlist={() => {}}
+                onAddToWishlist={handleAddToWishlist}
               />
             </div>
           )}
@@ -157,7 +208,14 @@ export default function App(): ReactElement {
             title="My Collection"
             onCollect={handleCollect}
             onRemove={handleRemove}
-            onAddToWishlist={() => {}}
+            onAddToWishlist={handleAddToWishlist}
+          />
+
+          <WishlistList
+            pokemon={collection.filter((p) => p.wishlist)}
+            title="My Wishlist"
+            onRemoveWishlist={handleRemoveFromWishlist}
+            onCollect={handleCollect}
           />
         </section>
       </div>
