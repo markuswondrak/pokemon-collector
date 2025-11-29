@@ -28,6 +28,7 @@
     "esModuleInterop": true,
 
     /* Emit Options */
+    "noEmit": true,
     "jsx": "react-jsx",
     "declaration": true,
     "sourceMap": true,
