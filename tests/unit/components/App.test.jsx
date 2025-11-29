@@ -15,6 +15,9 @@ vi.mock('../../../src/services/pokemonService', () => ({
   removeFromCollection: vi.fn(),
   isCollected: vi.fn(() => false),
 }));
+vi.mock('../../../src/components/AvailableGrid', () => ({
+  default: () => <div data-testid="available-grid">Available Grid</div>,
+}));
 
 import App from '../../../src/components/App.jsx';
 
@@ -45,7 +48,7 @@ describe('App Component - User Story 1', () => {
   it('should render Pokemon card display area', () => {
     const { container } = render(<App />);
 
-    expect(container.querySelector('.pokemon-display')).toBeInTheDocument();
+    expect(container.querySelector('.three-grids-section')).toBeInTheDocument();
   });
 
   it('should render collection list', () => {
@@ -92,7 +95,8 @@ describe('App Component - User Story 1', () => {
   it('should render buttons for user interaction', () => {
     render(<App />);
 
-    const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBeGreaterThan(0);
+    // Verify search button is rendered
+    const searchButton = screen.getByRole('button', { name: /search/i });
+    expect(searchButton).toBeInTheDocument();
   });
 });

@@ -63,7 +63,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     // Step 3: Wait for Pokemon to display
     await waitFor(() => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     // Step 4: Verify Pokemon card shows correct information
     expect(screen.getByText('#25')).toBeInTheDocument();
@@ -76,7 +76,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     // Step 6: Verify collection list is updated
     await waitFor(() => {
       expect(screen.getByText('✓ Collected')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
   });
 
   it('should prevent duplicate collection entries', async () => {
@@ -105,7 +105,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     // Verify collected badge is shown
     const badges = screen.getAllByText('✓ Collected');
@@ -139,7 +139,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     // Mock updated collection after collect
     const collectedPokemon = [
@@ -161,7 +161,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     await waitFor(() => {
       const badges = screen.getAllByText('✓ Collected');
       expect(badges.length).toBeGreaterThan(0);
-    });
+    }, { timeout: 1000 });
   });
 
   it('should handle multiple Pokemon being collected sequentially', async () => {
@@ -183,7 +183,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     const collection = [
       {
@@ -203,7 +203,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     // Now collect second Pokemon (Raichu - index 26)
     searchInput = screen.getByPlaceholderText(/pokemon index/i);
@@ -221,7 +221,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.getByText('Raichu')).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
 
     const updatedCollection = [
       ...collection,
@@ -243,7 +243,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     // Verify both Pokemon in collection
     await waitFor(() => {
       expect(screen.getAllByText('✓ Collected').length).toBeGreaterThanOrEqual(1);
-    });
+    }, { timeout: 1000 });
   });
 
   it('should show error message on API failure', async () => {
@@ -259,6 +259,6 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     await waitFor(() => {
       expect(screen.queryByText(/error|not found/i)).toBeInTheDocument();
-    });
+    }, { timeout: 1000 });
   });
 });

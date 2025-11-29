@@ -7,6 +7,8 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: ['./tests/setup.ts'],
+    // HARD REQUIREMENT: waitFor global timeout is set to 1 second in setup.ts
+    // All tests must complete their async operations within this timeframe
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
