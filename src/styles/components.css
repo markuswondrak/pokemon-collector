@@ -1,0 +1,96 @@
+/* Component-specific styles */
+
+.pokemon-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 1rem;
+  margin: 0.5rem;
+  display: inline-block;
+  text-align: center;
+  min-width: 150px;
+}
+
+.pokemon-card img {
+  width: 100px;
+  height: 100px;
+  object-fit: contain;
+}
+
+.pokemon-card-collected {
+  background-color: rgba(100, 200, 100, 0.1);
+  border-color: #64c864;
+}
+
+.pokemon-card-wishlist {
+  background-color: rgba(100, 150, 200, 0.1);
+  border-color: #6496c8;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  margin: 0.5rem 0.25rem;
+}
+
+.badge-collected {
+  background-color: #64c864;
+  color: white;
+}
+
+.badge-wishlist {
+  background-color: #6496c8;
+  color: white;
+}
+
+.collection-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.search-input {
+  padding: 0.5rem;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+  max-width: 100%;
+}
+
+.button {
+  padding: 0.5rem 1rem;
+  margin: 0.25rem;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.button-primary {
+  background-color: #646cff;
+  color: white;
+}
+
+.button-primary:hover {
+  background-color: #535bf2;
+}
+
+.button-secondary {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.button-secondary:hover {
+  background-color: #d0d0d0;
+}
+
+.button-secondary:disabled {
+  background-color: #f0f0f0;
+  color: #aaa;
+  cursor: not-allowed;
+}

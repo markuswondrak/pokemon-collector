@@ -28,16 +28,16 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Initialize React + Vite project with pnpm at repository root
-- [ ] T002 [P] Install core dependencies: React 18, Vite, axios, react-dom
-- [ ] T003 [P] Install dev dependencies: Vitest, @testing-library/react, @testing-library/jest-dom, ESLint
-- [ ] T004 [P] Configure Vite (vite.config.js) with React plugin and dev/build settings
-- [ ] T005 [P] Configure ESLint (.eslintrc.json) with React and JavaScript rules
-- [ ] T006 [P] Configure Vitest (vitest.config.js) for React component testing
-- [ ] T007 [P] Create .gitignore with node_modules, dist, .env, pnpm-lock.yaml exclusions
-- [ ] T008 [P] Create index.html entry point with React root div
-- [ ] T009 [P] Create src/main.jsx Vite entry point rendering React App
-- [ ] T010 [P] Create directory structure: src/{components,services,hooks,models,styles,utils}, tests/{unit,integration,contract}
+- [x] T001 Initialize React + Vite project with pnpm at repository root
+- [x] T002 [P] Install core dependencies: React 18, Vite, axios, react-dom
+- [x] T003 [P] Install dev dependencies: Vitest, @testing-library/react, @testing-library/jest-dom, ESLint
+- [x] T004 [P] Configure Vite (vite.config.js) with React plugin and dev/build settings
+- [x] T005 [P] Configure ESLint (.eslintrc.json) with React and JavaScript rules
+- [x] T006 [P] Configure Vitest (vitest.config.js) for React component testing
+- [x] T007 [P] Create .gitignore with node_modules, dist, .env, pnpm-lock.yaml exclusions
+- [x] T008 [P] Create index.html entry point with React root div
+- [x] T009 [P] Create src/main.jsx Vite entry point rendering React App
+- [x] T010 [P] Create directory structure: src/{components,services,hooks,models,styles,utils}, tests/{unit,integration,contract}
 
 ---
 
