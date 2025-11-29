@@ -1,295 +1,293 @@
 # Data Model: Pokemon Collection Organizer
 
-## Entity: Pokemon
+**Date**: 2025-11-29 | **Status**: Complete | **Phase**: 1 (Design)
 
-Represents a single Pokemon in the system.
+## Entity Definitions
 
-### Attributes
+### Pokemon
 
-| Attribute | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `index` | number | ✓ | Unique Pokemon identifier (1-1025) from PokeAPI |
-| `name` | string | ✓ | Pokemon name (e.g., "Pikachu") |
-| `image` | string | ✓ | URL to Pokemon image from PokeAPI |
-| `collected` | boolean | ✓ | Is this Pokemon in user's collected list (default: false) |
-| `wishlist` | boolean | ✓ | Is this Pokemon in user's wishlist (default: false) |
-
-### Relationships
-
-- Belongs to one **Collection** (if collected)
-- Belongs to one **Wishlist** (if in wishlist, but NOT collected)
-- Mutually exclusive: Cannot be both collected AND wishlist simultaneously
-
-### Validation Rules
-
-- `index` MUST be between 1 and 1025 (valid PokeAPI range)
-- `index` MUST be unique (only one Pokemon per index allowed)
-- `collected` and `wishlist` MUST NOT both be true simultaneously
-- `name` MUST be non-empty string
-- `image` MUST be valid URL
-
-### Example
+Represents a single Pokemon entry fetched from PokéAPI with collection status.
 
 ```typescript
 interface Pokemon {
-  index: number
-  name: string
-  image: string
-  collected: boolean
-  wishlist: boolean
+  // Immutable identifiers
+  id: number;              // Unique Pokemon index (1-1025)
+  name: string;            // Pokemon name from PokéAPI
+  
+  // Image data
+  imageUrl: string;        // Official artwork image URL
+  
+  // Collection status
+  isCollected: boolean;    // true if in user's collected list
+  isWishlisted: boolean;   // true if in user's wishlist (only if NOT collected per FR-003)
 }
+```
 
-const example: Pokemon = {
-  index: 25,
-  name: "Pikachu",
-  image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png",
-  collected: true,
-  wishlist: false
+**Validation Rules**:
+- `id` MUST be integer in range [1, 1025]
+- `name` MUST be non-empty string (alphanumeric + hyphens)
+- `imageUrl` MUST be valid HTTPS URL
+- `isCollected` and `isWishlisted` MUST NOT both be true (FR-003)
+- Exactly one status is primary (collected XOR wishlisted XOR available)
+
+**State Transitions**:
+```
+Available (isCollected=false, isWishlisted=false)
+  ↔ Collected (isCollected=true, isWishlisted=false)
+  ↔ Wishlisted (isCollected=false, isWishlisted=true)
+```
+
+**Allowed Transitions** (FR-020):
+- Available → Collected (mark as collected)
+- Available → Wishlisted (add to wishlist)
+- Collected → Available (remove from collected)
+- Wishlisted → Available (remove from wishlist)
+- Collected → Wishlisted (remove from collected AND add to wishlist in single atomic operation)
+- Wishlisted → Collected (remove from wishlist AND add to collected in single atomic operation)
+
+---
+
+### Collection
+
+Represents the user's collected Pokemon entries.
+
+```typescript
+interface Collection {
+  // Metadata
+  id: string;              // "collection" (singleton)
+  lastUpdated: number;     // Timestamp of last modification (milliseconds)
+  
+  // Data
+  items: Map<number, Pokemon>; // Pokemon ID → Pokemon mapping
+  count: number;           // Convenience: number of collected items
 }
+```
+
+**Validation Rules**:
+- `id` MUST be exactly "collection"
+- `lastUpdated` MUST be valid timestamp (Date.now())
+- All `items` MUST have `isCollected=true`
+- `count` MUST equal `items.size`
+
+**Invariants**:
+- A Pokemon cannot appear in both Collection and Wishlist simultaneously (FR-003, FR-004)
+- Collection is persisted to storage on every modification
+- Maximum 1025 items (one per Pokemon)
+
+---
+
+### Wishlist
+
+Represents the user's desired Pokemon entries (not yet collected).
+
+```typescript
+interface Wishlist {
+  // Metadata
+  id: string;              // "wishlist" (singleton)
+  lastUpdated: number;     // Timestamp of last modification (milliseconds)
+  
+  // Data
+  items: Map<number, Pokemon>; // Pokemon ID → Pokemon mapping
+  count: number;           // Convenience: number of wishlist items
+}
+```
+
+**Validation Rules**:
+- `id` MUST be exactly "wishlist"
+- `lastUpdated` MUST be valid timestamp (Date.now())
+- All `items` MUST have `isWishlisted=true` and `isCollected=false`
+- `count` MUST equal `items.size`
+
+**Invariants**:
+- A Pokemon cannot appear in both Wishlist and Collection simultaneously (FR-003, FR-004)
+- Wishlist is persisted to storage on every modification
+- Maximum 1025 items (one per Pokemon)
+
+---
+
+### UserCollectionData (Persisted Root)
+
+The complete user state persisted to localStorage.
+
+```typescript
+interface UserCollectionData {
+  version: "1.0";          // Schema version for migrations
+  createdAt: number;       // Initial account creation timestamp
+  lastUpdated: number;     // Last modification timestamp
+  
+  collected: {
+    [pokemonId: number]: {
+      id: number;
+      name: string;
+      imageUrl: string;
+      collectedAt: number; // When user marked as collected
+    };
+  };
+  
+  wishlisted: {
+    [pokemonId: number]: {
+      id: number;
+      name: string;
+      imageUrl: string;
+      wishlistedAt: number; // When user added to wishlist
+    };
+  };
+}
+```
+
+**Storage Key**: `"pokemon-collector:v1"`
+
+**Persistence Contract**:
+- Format: JSON (human-readable)
+- Size: ~2-5 KB for typical user (1000 items)
+- Encoding: UTF-8
+- Backup: Browser localStorage automatically synced (no manual export needed currently)
+
+---
+
+## Derived Grids
+
+Three computed grids derived from Pokemon collection state (FR-008, FR-009):
+
+### Collected Grid
+
+**Criteria**: `isCollected === true`
+**Display**: All Pokemon with collected status
+**Sorting**: By Pokemon index ascending (1-1025, FR-017)
+**Max Items**: 1025
+**Visual Indicator**: Badge/checkmark (FR-006)
+
+### Wishlisted Grid
+
+**Criteria**: `isWishlisted === true && isCollected === false`
+**Display**: All Pokemon with wishlist status only
+**Sorting**: By Pokemon index ascending (1-1025, FR-017)
+**Max Items**: 1025
+**Visual Indicator**: Distinct badge from collected (FR-007)
+
+### Available Grid
+
+**Criteria**: `isCollected === false && isWishlisted === false`
+**Display**: All Pokemon NOT in collection or wishlist
+**Sorting**: By Pokemon index ascending (1-1025, FR-017)
+**Max Items**: 1025
+**Visual Indicator**: No badge
+
+---
+
+## Search & Filtering
+
+### Search by Index
+
+**Input**: Integer 1-1025 or partial number (e.g., "25" matches 25, 125, 225, 250-259)
+**Scope**: Searches across all three grids simultaneously
+**Result**: Pokemon object if found, null if not
+**Performance**: O(1) lookup using Map (FR-010, SC-006)
+
+---
+
+## Relationships & Constraints
+
+```
+┌─────────────┐     ┌─────────────┐
+│ Collection  │     │  Wishlist   │
+│   (sorted)  │     │   (sorted)  │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       │ contains          │ contains
+       │                   │
+       v                   v
+    Pokemon <─────────── Pokemon
+    (id, name,         (id, name,
+     imageUrl,          imageUrl,
+     isCollected=true) isWishlisted=true)
+     
+All remaining Pokemon → Available Grid
+```
+
+**Uniqueness Constraints**:
+- Each Pokemon ID appears at most once across all collections/wishlists (natural consequence of Map keys)
+- No duplicate entries
+
+**Temporal Constraints**:
+- `lastUpdated` timestamps track state changes
+- Enables audit trails if needed (future feature)
+- Supports optimistic UI updates (show change immediately, persist async)
+
+---
+
+## Migration Path
+
+**Current Schema**: Version 1.0 (initial)
+
+**Future Considerations**:
+- Version 2.0: Add categories/tags to wishlist items
+- Version 2.1: Add notes/acquisition URLs to collected items
+- Version 3.0: Multi-user support with cloud backend
+
+**Migration Strategy**:
+- Check `version` field on load
+- If version < current, run migration function
+- Update version after successful migration
+- Log migration for debugging
+
+---
+
+## Type Definitions (TypeScript)
+
+```typescript
+// Core Pokemon entity
+type Pokemon = {
+  readonly id: number;
+  readonly name: string;
+  readonly imageUrl: string;
+  isCollected: boolean;
+  isWishlisted: boolean;
+};
+
+// Collection snapshots
+type Collection = {
+  readonly id: "collection";
+  lastUpdated: number;
+  items: Map<number, Pokemon>;
+  readonly count: number;
+};
+
+type Wishlist = {
+  readonly id: "wishlist";
+  lastUpdated: number;
+  items: Map<number, Pokemon>;
+  readonly count: number;
+};
+
+// Persisted state
+type UserCollectionData = {
+  readonly version: "1.0";
+  createdAt: number;
+  lastUpdated: number;
+  collected: Record<number, PersistablePokemons>;
+  wishlisted: Record<number, PersistablePokemons>;
+};
+
+type PersistablePokemons = {
+  id: number;
+  name: string;
+  imageUrl: string;
+  collectedAt?: number;
+  wishlistedAt?: number;
+};
 ```
 
 ---
 
-## Entity: Collection
+## Summary
 
-Represents the user's collected Pokemon.
+This data model provides:
+- ✅ Clear entity definitions aligned with FR-001 through FR-020
+- ✅ Validation rules preventing invalid states
+- ✅ Atomic state transitions (FR-020)
+- ✅ Efficient O(1) lookups and filtering
+- ✅ Persistent storage schema ready for localStorage
+- ✅ Migration path for future schema evolution
+- ✅ TypeScript strict mode compatibility
 
-### Attributes
-
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Unique collection identifier (default: "my-collection") |
-| `pokemon` | Pokemon[] | Array of Pokemon marked as collected |
-| `createdAt` | date | Date collection was first created |
-| `updatedAt` | date | Date collection was last modified |
-
-### Relationships
-
-- Contains zero or more **Pokemon** entities (collected = true)
-- Each Pokemon in collection is independent
-
-### Operations
-
-- **Add Pokemon**: Add Pokemon to collection (set collected=true)
-- **Remove Pokemon**: Remove Pokemon from collection (set collected=false)
-- **Get All**: Retrieve all collected Pokemon
-- **Get Count**: Return total number of collected Pokemon
-- **Search**: Find Pokemon by index in collection
-
-### Persistence
-
-- Stored in browser localStorage under key: `pokemon_collection`
-- Format: JSON array of Pokemon objects with collected=true
-
-### Example
-
-```javascript
-{
-  id: "my-collection",
-  pokemon: [
-    {
-      index: 25,
-      name: "Pikachu",
-      image: "...",
-      collected: true,
-      wishlist: false
-    },
-    {
-      index: 39,
-      name: "Jigglypuff",
-      image: "...",
-      collected: true,
-      wishlist: false
-    }
-  ],
-  createdAt: "2025-11-29T10:30:00Z",
-  updatedAt: "2025-11-29T14:45:30Z"
-}
-```
-
----
-
-## Entity: Wishlist
-
-Represents the user's desired Pokemon (not yet collected).
-
-### Attributes
-
-| Attribute | Type | Description |
-|-----------|------|-------------|
-| `id` | string | Unique wishlist identifier (default: "my-wishlist") |
-| `pokemon` | Pokemon[] | Array of Pokemon marked for wishlist |
-| `createdAt` | date | Date wishlist was first created |
-| `updatedAt` | date | Date wishlist was last modified |
-
-### Relationships
-
-- Contains zero or more **Pokemon** entities (wishlist=true, collected=false)
-- Mutually exclusive with Collection: Same Pokemon cannot be in both
-
-### Operations
-
-- **Add Pokemon**: Add Pokemon to wishlist (set wishlist=true, collected=false)
-- **Remove Pokemon**: Remove Pokemon from wishlist (set wishlist=false)
-- **Get All**: Retrieve all wishlist Pokemon
-- **Get Count**: Return total number of wishlist items
-- **Search**: Find Pokemon by index in wishlist
-- **Move to Collection**: Transfer Pokemon from wishlist to collection
-
-### Persistence
-
-- Stored in browser localStorage under key: `pokemon_wishlist`
-- Format: JSON array of Pokemon objects with wishlist=true, collected=false
-
-### Example
-
-```javascript
-{
-  id: "my-wishlist",
-  pokemon: [
-    {
-      index: 6,
-      name: "Charizard",
-      image: "...",
-      collected: false,
-      wishlist: true
-    },
-    {
-      index: 150,
-      name: "Mewtwo",
-      image: "...",
-      collected: false,
-      wishlist: true
-    }
-  ],
-  createdAt: "2025-11-29T10:30:00Z",
-  updatedAt: "2025-11-29T14:20:00Z"
-}
-```
-
----
-
-## State Transitions
-
-### Pokemon State Machine
-
-```
-                    ┌─────────────────────────┐
-                    │   Uncollected & Not     │
-                    │   in Wishlist (INITIAL) │
-                    └────────┬────────────────┘
-                             │
-                    ┌────────▼──────────┐
-                    │  Add to Wishlist  │
-                    └────────┬──────────┘
-                             │
-                    ┌────────▼──────────────────────┐
-                    │  In Wishlist, Not Collected   │
-                    └────────┬─────────────┬────────┘
-                             │             │
-                    ┌────────▼──────┐  ┌──▼─────────────┐
-                    │ Mark Collected │  │ Remove from WL │
-                    └────────┬──────┘  └──┬─────────────┘
-                             │            │
-                    ┌────────▼─────────────▼──────────────────┐
-                    │  Collected, Not in Wishlist (TERMINAL)  │
-                    └─────────────────────────────────────────┘
-```
-
-### State Transition Rules
-
-1. **Uncollected & Not Wishlist** → **In Wishlist**: User clicks "Add to Wishlist"
-2. **In Wishlist** → **Uncollected & Not Wishlist**: User clicks "Remove from Wishlist"
-3. **In Wishlist** → **Collected**: User clicks "Mark as Collected"
-4. **Collected** → **Uncollected & Not Wishlist**: User clicks "Remove from Collection"
-5. **Collected** → **Wishlist**: Invalid (Collected takes precedence)
-
----
-
-## API Integration (PokeAPI)
-
-### Pokemon Data from PokeAPI
-
-```javascript
-// API Call Response Format
-{
-  id: 25,
-  name: "pikachu",
-  sprites: {
-    front_default: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png"
-  }
-}
-
-// Mapped to Local Pokemon Model
-{
-  index: 25,
-  name: "Pikachu",
-  image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png",
-  collected: false,
-  wishlist: false
-}
-```
-
-### API Endpoints Used
-
-- **GET /pokemon/{id}** - Fetch Pokemon by index
-  - Response includes: id, name, sprites.front_default
-  - No authentication required
-  - Free tier rate limit: ~100 requests/minute
-
----
-
-## Storage Schema
-
-### localStorage Keys
-
-| Key | Type | Description |
-|-----|------|-------------|
-| `pokemon_collection` | JSON string | Serialized Collection entity |
-| `pokemon_wishlist` | JSON string | Serialized Wishlist entity |
-
-### Storage Format Example
-
-```javascript
-// localStorage['pokemon_collection']
-JSON.stringify({
-  id: "my-collection",
-  pokemon: [{ index: 25, name: "Pikachu", image: "...", collected: true, wishlist: false }],
-  createdAt: "2025-11-29T10:30:00Z",
-  updatedAt: "2025-11-29T14:45:30Z"
-})
-
-// localStorage['pokemon_wishlist']
-JSON.stringify({
-  id: "my-wishlist",
-  pokemon: [{ index: 6, name: "Charizard", image: "...", collected: false, wishlist: true }],
-  createdAt: "2025-11-29T10:30:00Z",
-  updatedAt: "2025-11-29T14:20:00Z"
-})
-```
-
----
-
-## Validation & Constraints
-
-### Data Validation
-
-- **Pokemon Index**: Integer 1-1025, unique per collection/wishlist
-- **Pokemon Name**: Non-empty string, max 50 characters
-- **Pokemon Image**: Valid HTTPS URL
-- **Collected & Wishlist**: Exactly one MUST be false if other is true
-- **Timestamps**: ISO 8601 format
-
-### Business Rules
-
-1. A Pokemon CANNOT be both collected AND in wishlist simultaneously
-2. Adding collected Pokemon to wishlist MUST prevent the action
-3. Removing a Pokemon from collection MUST succeed (idempotent)
-4. Wishlist items NOT collected are separate list
-5. Collection and Wishlist are user-scoped (single user, client-side)
-
-### Constraints
-
-- **Storage Limit**: localStorage ~5-10MB per domain (supports ~1000 Pokemon entries)
-- **Rate Limiting**: PokeAPI free tier ~100 req/minute (sufficient for user browsing)
-- **Offline**: Application works offline for collection/wishlist (Pokemon data cached, new API calls fail gracefully)

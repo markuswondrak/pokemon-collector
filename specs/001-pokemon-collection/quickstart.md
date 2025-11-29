@@ -1,6 +1,8 @@
 # Quick Start: Pokemon Collection Organizer
 
-**Goal**: Get the development environment running in <5 minutes
+**Date**: 2025-11-29 | **Phase**: 1 | **Duration**: <5 minutes setup + 2-3 minutes first run
+
+**Design Artifacts**: See `data-model.md` for entity definitions, `contracts/api-contracts.yaml` for API contracts, `research.md` for technical decisions
 
 ## Prerequisites
 
@@ -138,14 +140,18 @@ pnpm format
 
 ## Key Files & Responsibilities
 
-| File | Purpose |
-|------|---------|
-| `src/components/App.tsx` | Main app component & state management |
-| `src/services/pokemonApi.ts` | PokeAPI calls (search by index, fetch Pokemon data) |
-| `src/services/collectionStorage.ts` | localStorage persistence (collected, wishlist) |
-| `src/hooks/useCollection.ts` | React hook managing collection state |
-| `src/models/Pokemon.ts` | Pokemon entity definition |
-| `tests/` | All test files (unit, integration, contract) |
+| File | Purpose | Design Ref |
+|------|---------|-----------|
+| `src/components/App.tsx` | Main app component, three grids (Collected, Wishlisted, Available) | FR-008, FR-009 |
+| `src/components/PokemonCard.tsx` | Reusable card with image, name, action buttons | FR-013, FR-014, FR-015 |
+| `src/components/CollectionList.tsx` | Grid container with lazy loading | FR-012 |
+| `src/services/pokemonApi.ts` | PokeAPI integration with caching & retry logic | research.md #1, api-contracts.yaml |
+| `src/services/collectionStorage.ts` | localStorage abstraction (migration-ready) | research.md #3, api-contracts.yaml |
+| `src/services/pokemonService.ts` | Business logic: mark collected, add wishlist, state validation | api-contracts.yaml |
+| `src/hooks/useCollection.ts` | React hook managing collection/wishlist state | research.md #6 |
+| `src/models/Pokemon.ts` | Pokemon entity with validation | data-model.md |
+| `src/models/Collection.ts` | Collection entity | data-model.md |
+| `tests/` | All test files (unit, integration, contract) | Constitution II (TDD mandatory) |
 
 ## Common Tasks
 
@@ -206,9 +212,12 @@ pnpm dev -- --port 3000
 
 ## Next Steps
 
-- **Phase 1 Development**: Implement models and services (tests first!)
-- **Phase 2 Development**: Build React components
-- **Phase 3**: Integration testing & deployment
-- **Phase 4**: Polish & optimization
+- **Phase 1 Complete**: Design (data-model.md, contracts/, research.md) ✅
+- **Phase 2 (tasks.md)**: Implementation with TDD
+  - T001: Pokemon & Collection models (tests first)
+  - T002: Storage & API services
+  - T003: React components & hooks
+  - T004: Integration & E2E tests
+- **Phase 3**: Deployment
 
-See `tasks.md` for detailed implementation task list.
+**Implementation approach**: See `tasks.md` for task breakdown and acceptance criteria. Follow TDD red-green-refactor cycle per Constitution II.
