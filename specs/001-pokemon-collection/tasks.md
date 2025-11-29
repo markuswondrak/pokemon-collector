@@ -47,22 +47,22 @@ description: "Task list for Pokemon Collection Organizer feature implementation"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T011 [P] Create Pokemon model (src/models/Pokemon.js) with index, name, image, collected, wishlist properties and validation
-- [ ] T012 [P] Create Pokemon.test.js (tests/unit/models/Pokemon.test.js) - tests MUST FAIL initially (TDD red phase)
-- [ ] T013 [P] Create Collection model (src/models/Collection.js) with id, pokemon array, timestamps
-- [ ] T014 [P] Create Collection.test.js (tests/unit/models/Collection.test.js) - TDD red phase
-- [ ] T015 Implement Pokemon model to pass T012 tests (TDD green phase)
-- [ ] T016 Implement Collection model to pass T014 tests (TDD green phase)
-- [ ] T017 [P] Create collectionStorage.js service (src/services/collectionStorage.js) with localStorage interface
-- [ ] T018 [P] Create collectionStorage.test.js (tests/unit/services/collectionStorage.test.js) with CRUD operations tests - TDD red
-- [ ] T019 Implement collectionStorage to pass T018 tests (TDD green phase)
-- [ ] T020 [P] Create pokemonApi.js service (src/services/pokemonApi.js) with PokeAPI fetch and caching
-- [ ] T021 [P] Create pokemonApi.test.js (tests/contract/pokemonApi.test.js) with API contract validation - TDD red
-- [ ] T022 Implement pokemonApi to pass T021 tests (TDD green phase)
-- [ ] T023 [P] Create constants.js (src/utils/constants.js) with API URLs, storage keys, Pokemon index range
-- [ ] T024 [P] Create useCollection hook (src/hooks/useCollection.js) for collection state management
-- [ ] T025 [P] Create useCollection.test.js (tests/unit/hooks/useCollection.test.js) with state tests - TDD red
-- [ ] T026 Implement useCollection hook to pass T025 tests (TDD green phase)
+- [x] T011 [P] Create Pokemon model (src/models/Pokemon.js) with index, name, image, collected, wishlist properties and validation
+- [x] T012 [P] Create Pokemon.test.js (tests/unit/models/Pokemon.test.js) - tests MUST FAIL initially (TDD red phase)
+- [x] T013 [P] Create Collection model (src/models/Collection.js) with id, pokemon array, timestamps
+- [x] T014 [P] Create Collection.test.js (tests/unit/models/Collection.test.js) - TDD red phase
+- [x] T015 Implement Pokemon model to pass T012 tests (TDD green phase)
+- [x] T016 Implement Collection model to pass T014 tests (TDD green phase)
+- [x] T017 [P] Create collectionStorage.js service (src/services/collectionStorage.js) with localStorage interface
+- [x] T018 [P] Create collectionStorage.test.js (tests/unit/services/collectionStorage.test.js) with CRUD operations tests - TDD red
+- [x] T019 Implement collectionStorage to pass T018 tests (TDD green phase)
+- [x] T020 [P] Create pokemonApi.js service (src/services/pokemonApi.js) with PokeAPI fetch and caching
+- [x] T021 [P] Create pokemonApi.test.js (tests/contract/pokemonApi.test.js) with API contract validation - TDD red
+- [x] T022 Implement pokemonApi to pass T021 tests (TDD green phase)
+- [x] T023 [P] Create constants.js (src/utils/constants.js) with API URLs, storage keys, Pokemon index range
+- [x] T024 [P] Create useCollection hook (src/hooks/useCollection.js) for collection state management
+- [x] T025 [P] Create useCollection.test.js (tests/unit/hooks/useCollection.test.js) with state tests - TDD red
+- [x] T026 Implement useCollection hook to pass T025 tests (TDD green phase)
 
 **Checkpoint**: Foundation ready - all models, services, and hooks functional. User story implementation can now begin in parallel.
 
