@@ -7,16 +7,22 @@ vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
   saveCollection: vi.fn(),
 }));
-vi.mock('../../src/services/pokemonService', () => ({
-  getCollection: vi.fn(() => []),
-  collectPokemon: vi.fn(),
-  removeFromCollection: vi.fn(),
-  isCollected: vi.fn(() => false),
-}));
+vi.mock('../../src/services/pokemonService', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...actual,
+    getCollection: vi.fn(() => []),
+    getCollectionList: vi.fn(() => []),
+    collectPokemon: vi.fn(),
+    removeFromCollection: vi.fn(),
+    isCollected: vi.fn(() => false),
+  };
+});
 
 import App from '../../src/components/App.jsx';
 import * as pokemonApi from '../../src/services/pokemonApi';
 import * as collectionStorage from '../../src/services/collectionStorage';
+import * as pokemonService from '../../src/services/pokemonService';
 
 describe('US1 Integration: Search → Collect → Verify Collection', () => {
   beforeEach(() => {
@@ -33,10 +39,14 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     });
 
     // Mock storage
-    collectionStorage.getCollection.mockReturnValue([]);
+    const mockStorage = [];
+    collectionStorage.getCollection.mockReturnValue(mockStorage);
     collectionStorage.saveCollection.mockImplementation((collection) => {
       return collection;
     });
+    
+    // Mock pokemonService to use the same collection
+    pokemonService.getCollectionList.mockReturnValue(mockStorage);
   });
 
   it('should complete full flow: search → display → collect → verify in list', async () => {
@@ -71,7 +81,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
   it('should prevent duplicate collection entries', async () => {
     // Setup: Pokemon already in collection
-    collectionStorage.getCollection.mockReturnValue([
+    const mockCollection = [
       {
         index: 25,
         name: 'Pikachu',
@@ -79,7 +89,10 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
         collected: true,
         wishlist: false
       }
-    ]);
+    ];
+    
+    collectionStorage.getCollection.mockReturnValue(mockCollection);
+    pokemonService.getCollectionList.mockReturnValue(mockCollection);
 
     render(<App />);
 
@@ -94,16 +107,17 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       expect(screen.getByText('Pikachu')).toBeInTheDocument();
     });
 
-    // Try to collect again
-    const collectBtn = screen.queryByRole('button', { name: /collect/i });
+    // Verify collected badge is shown
+    const badges = screen.getAllByText('✓ Collected');
+    expect(badges.length).toBeGreaterThan(0);
 
-    // Should either be disabled or show error
-    if (collectBtn) {
-      expect(collectBtn).toBeDisabled();
-    } else {
-      // Or remove button should be shown instead
-      expect(screen.getByRole('button', { name: /remove/i })).toBeInTheDocument();
-    }
+    // Verify no collect button in the Pokemon card area
+    const collectBtn = screen.queryByRole('button', { name: /collect/i });
+    expect(collectBtn).not.toBeInTheDocument();
+
+    // Verify remove button is shown instead
+    const removeButtons = screen.getAllByRole('button', { name: /remove/i });
+    expect(removeButtons.length).toBeGreaterThan(0); // Should have at least one remove button
   });
 
   it('should display collected Pokemon with visual badge in collection list', async () => {
@@ -128,7 +142,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     });
 
     // Mock updated collection after collect
-    collectionStorage.getCollection.mockReturnValue([
+    const collectedPokemon = [
       {
         index: 25,
         name: 'Pikachu',
@@ -136,7 +150,9 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
         collected: true,
         wishlist: false
       }
-    ]);
+    ];
+    collectionStorage.getCollection.mockReturnValue(collectedPokemon);
+    pokemonService.getCollectionList.mockReturnValue(collectedPokemon);
 
     const collectBtn = screen.getByRole('button', { name: /collect/i });
     fireEvent.click(collectBtn);
@@ -180,6 +196,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     ];
 
     collectionStorage.getCollection.mockReturnValue(collection);
+    pokemonService.getCollectionList.mockReturnValue(collection);
 
     let collectBtn = screen.getByRole('button', { name: /collect/i });
     fireEvent.click(collectBtn);
@@ -218,6 +235,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     ];
 
     collectionStorage.getCollection.mockReturnValue(updatedCollection);
+    pokemonService.getCollectionList.mockReturnValue(updatedCollection);
 
     collectBtn = screen.getByRole('button', { name: /collect/i });
     fireEvent.click(collectBtn);

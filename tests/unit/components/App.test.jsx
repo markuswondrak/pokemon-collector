@@ -10,6 +10,7 @@ vi.mock('../../../src/services/collectionStorage', () => ({
 }));
 vi.mock('../../../src/services/pokemonService', () => ({
   getCollection: vi.fn(() => []),
+  getCollectionList: vi.fn(() => []),
   collectPokemon: vi.fn(),
   removeFromCollection: vi.fn(),
   isCollected: vi.fn(() => false),

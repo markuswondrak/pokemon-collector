@@ -1,5 +1,5 @@
 import {
-  getCollection,
+  getCollection as getStoredCollection,
   saveCollection
 } from './collectionStorage.ts'
 import { MIN_POKEMON_INDEX, MAX_POKEMON_INDEX } from '../utils/constants'
@@ -33,7 +33,7 @@ export function collectPokemon(index: number): Promise<PokemonData> {
   return Promise.resolve().then(() => {
     validateIndex(index)
 
-    const collection = getCollection()
+    const collection = getStoredCollection()
     const existing = collection.find((p: PokemonData) => p.index === index)
 
     if (existing && existing.collected) {
@@ -79,7 +79,7 @@ export function removeFromCollection(index: number): Promise<boolean> {
   return Promise.resolve().then(() => {
     validateIndex(index)
 
-    const collection = getCollection()
+    const collection = getStoredCollection()
     const existingIndex = collection.findIndex(
       (p: PokemonData) => p.index === index
     )
@@ -111,14 +111,21 @@ export function removeFromCollection(index: number): Promise<boolean> {
  * Get entire collection
  */
 export function getCollectionList(): PokemonData[] {
-  return getCollection()
+  return getStoredCollection()
+}
+
+/**
+ * Alias for getCollectionList (for test compatibility)
+ */
+export function getCollection(): PokemonData[] {
+  return getCollectionList()
 }
 
 /**
  * Get only collected Pokemon
  */
 export function getCollectedPokemon(): PokemonData[] {
-  const collection = getCollection()
+  const collection = getCollectionList()
   return collection.filter((p: PokemonData) => p.collected)
 }
 
@@ -126,7 +133,7 @@ export function getCollectedPokemon(): PokemonData[] {
  * Check if Pokemon is collected
  */
 export function isCollected(index: number): boolean {
-  const collection = getCollection()
+  const collection = getCollectionList()
   const pokemon = collection.find((p: PokemonData) => p.index === index)
   return pokemon ? pokemon.collected : false
 }
@@ -138,7 +145,7 @@ export function addToWishlist(index: number): Promise<PokemonData> {
   return Promise.resolve().then(() => {
     validateIndex(index)
 
-    const collection = getCollection()
+    const collection = getStoredCollection()
     const existing = collection.find((p: PokemonData) => p.index === index)
 
     if (existing && existing.collected) {
@@ -183,6 +190,6 @@ export function addToWishlist(index: number): Promise<PokemonData> {
  * Get wishlist Pokemon
  */
 export function getWishlist(): PokemonData[] {
-  const collection = getCollection()
+  const collection = getCollectionList()
   return collection.filter((p: PokemonData) => p.wishlist)
 }
