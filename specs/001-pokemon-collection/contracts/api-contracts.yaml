@@ -1,0 +1,333 @@
+openapi: 3.0.0
+info:
+  title: Pokemon Collection Organizer - API Contracts
+  version: 1.0.0
+  description: API contracts for Pokemon Collection application (internal services + external PokeAPI)
+
+servers:
+  - url: https://pokeapi.co/api/v2
+    description: PokeAPI - External public Pokemon data source
+
+paths:
+  /pokemon/{id}:
+    get:
+      summary: Get Pokemon by ID/Index
+      description: Fetch Pokemon data from PokeAPI by index number
+      operationId: getPokemonById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1025
+          description: Pokemon index (1-1025)
+          example: 25
+      responses:
+        '200':
+          description: Pokemon found and returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PokemonAPIResponse'
+        '404':
+          description: Pokemon with given ID not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Not found"
+        '429':
+          description: Rate limit exceeded (PokeAPI free tier)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  detail:
+                    type: string
+                    example: "Rate limit exceeded"
+
+components:
+  schemas:
+    PokemonAPIResponse:
+      type: object
+      required:
+        - id
+        - name
+        - sprites
+      properties:
+        id:
+          type: integer
+          description: Pokemon unique identifier (index)
+          example: 25
+        name:
+          type: string
+          description: Pokemon name
+          example: "pikachu"
+        sprites:
+          type: object
+          required:
+            - front_default
+          properties:
+            front_default:
+              type: string
+              format: uri
+              description: URL to Pokemon front-facing image
+              example: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png"
+            back_default:
+              type: string
+              format: uri
+              description: URL to Pokemon back-facing image
+              nullable: true
+            front_shiny:
+              type: string
+              format: uri
+              description: URL to shiny front-facing image
+              nullable: true
+
+    LocalPokemonModel:
+      type: object
+      required:
+        - index
+        - name
+        - image
+        - collected
+        - wishlist
+      properties:
+        index:
+          type: integer
+          description: Pokemon unique identifier
+          minimum: 1
+          maximum: 1025
+          example: 25
+        name:
+          type: string
+          description: Pokemon name (capitalized)
+          example: "Pikachu"
+        image:
+          type: string
+          format: uri
+          description: URL to Pokemon image
+          example: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png"
+        collected:
+          type: boolean
+          description: Is Pokemon in user's collection
+          example: true
+        wishlist:
+          type: boolean
+          description: Is Pokemon in user's wishlist
+          example: false
+
+    Collection:
+      type: object
+      required:
+        - id
+        - pokemon
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Collection identifier
+          example: "my-collection"
+        pokemon:
+          type: array
+          description: List of collected Pokemon
+          items:
+            $ref: '#/components/schemas/LocalPokemonModel'
+        createdAt:
+          type: string
+          format: date-time
+          description: Collection creation timestamp
+          example: "2025-11-29T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Collection last update timestamp
+          example: "2025-11-29T14:45:30Z"
+
+    Wishlist:
+      type: object
+      required:
+        - id
+        - pokemon
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          description: Wishlist identifier
+          example: "my-wishlist"
+        pokemon:
+          type: array
+          description: List of wishlist Pokemon
+          items:
+            $ref: '#/components/schemas/LocalPokemonModel'
+        createdAt:
+          type: string
+          format: date-time
+          description: Wishlist creation timestamp
+          example: "2025-11-29T10:30:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          description: Wishlist last update timestamp
+          example: "2025-11-29T14:20:00Z"
+
+---
+
+# Internal Service Contracts
+
+## pokemonApi Service
+
+### getPokemonByIndex(index: number) → Promise<LocalPokemonModel | null>
+
+**Description**: Fetch Pokemon from PokeAPI and map to local model
+
+**Parameters**:
+- `index` (number): Pokemon index 1-1025
+
+**Returns**:
+- Promise resolving to LocalPokemonModel on success
+- Null if Pokemon not found or API error
+
+**Response Contract**:
+```javascript
+{
+  index: 25,
+  name: "Pikachu",
+  image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/pokemon/25.png",
+  collected: false,
+  wishlist: false
+}
+```
+
+**Error Handling**:
+- 404: Return null (Pokemon doesn't exist)
+- 429: Throw error (rate limit, user retry)
+- Network error: Throw error (user sees error message)
+
+---
+
+## collectionStorage Service
+
+### getCollected() → Pokemon[]
+**Description**: Retrieve all collected Pokemon from localStorage
+**Returns**: Array of Pokemon with collected=true
+
+### addCollected(pokemon: Pokemon) → void
+**Description**: Add Pokemon to collection
+**Precondition**: pokemon.collected=true
+**Side effect**: Updates localStorage, updates updatedAt timestamp
+
+### removeCollected(index: number) → void
+**Description**: Remove Pokemon from collection
+**Side effect**: Updates localStorage, updates updatedAt timestamp
+
+### getWishlist() → Pokemon[]
+**Description**: Retrieve all wishlist Pokemon from localStorage
+**Returns**: Array of Pokemon with wishlist=true
+
+### addWishlist(pokemon: Pokemon) → void
+**Description**: Add Pokemon to wishlist
+**Precondition**: pokemon.wishlist=true, pokemon.collected=false
+**Side effect**: Updates localStorage, updates updatedAt timestamp
+
+### removeWishlist(index: number) → void
+**Description**: Remove Pokemon from wishlist
+**Side effect**: Updates localStorage, updates updatedAt timestamp
+
+### clear() → void
+**Description**: Clear all data (for testing/reset)
+**Side effect**: Removes both collection and wishlist from localStorage
+
+---
+
+## pokemonService (Business Logic)
+
+### collectPokemon(index: number) → Promise<void>
+
+**Description**: Mark a Pokemon as collected
+
+**Algorithm**:
+1. Fetch Pokemon from PokeAPI if not already cached
+2. Set collected=true, wishlist=false
+3. Remove from wishlist if present
+4. Save to collection via collectionStorage
+
+**Invariants**:
+- Cannot add already-collected Pokemon (idempotent)
+- Automatically removes from wishlist if present
+- Updates timestamps
+
+### addToWishlist(index: number) → Promise<void>
+
+**Description**: Add Pokemon to wishlist
+
+**Precondition**: Pokemon NOT collected
+
+**Algorithm**:
+1. Fetch Pokemon from PokeAPI if not already cached
+2. Check if collected (FR-003 rule)
+3. If collected, throw error "Pokemon already in collection"
+4. Set wishlist=true, collected=false
+5. Save to wishlist via collectionStorage
+
+**Invariants**:
+- Cannot add collected Pokemon (throws error)
+- Returns error if Pokemon already collected
+
+### getCollectionSummary() → { collected: number, wishlist: number }
+
+**Description**: Get collection statistics
+
+**Returns**:
+```javascript
+{
+  collected: 42,      // Number of collected Pokemon
+  wishlist: 15        // Number of wishlist items
+}
+```
+
+---
+
+# State Validation
+
+## Invariants (Always True)
+
+1. **No Duplicates**: Each Pokemon index appears at most once in collection
+2. **No Duplicates**: Each Pokemon index appears at most once in wishlist
+3. **Mutual Exclusion**: No Pokemon appears in both collection AND wishlist
+4. **Valid Indices**: All Pokemon indices in range [1, 1025]
+5. **Data Persistence**: Collection and wishlist survive localStorage writes
+
+## Contract Tests (tests/contract/pokemonApi.test.js)
+
+```javascript
+describe('Pokemon API Contract', () => {
+  it('returns Pokemon with required fields', async () => {
+    const pokemon = await getPokemonByIndex(25);
+    expect(pokemon).toHaveProperty('index');
+    expect(pokemon).toHaveProperty('name');
+    expect(pokemon).toHaveProperty('image');
+    expect(pokemon.index).toBe(25);
+  });
+
+  it('returns null for invalid index', async () => {
+    const pokemon = await getPokemonByIndex(99999);
+    expect(pokemon).toBeNull();
+  });
+
+  it('caches results to avoid duplicate API calls', async () => {
+    // Same index called twice
+    const p1 = await getPokemonByIndex(25);
+    const p2 = await getPokemonByIndex(25);
+    expect(apiCallCount).toBe(1); // Called PokeAPI only once
+  });
+});
+```
