@@ -45,7 +45,7 @@ export class Collection {
 
     if (this.contains(pokemon.index)) {
       throw new Error(
-        `Pokemon with index ${pokemon.index} already exists in collection.`
+        `Pokemon with index ${String(pokemon.index)} already exists in collection.`
       )
     }
 
@@ -64,7 +64,7 @@ export class Collection {
 
     if (this.pokemon.length === initialLength) {
       throw new Error(
-        `Pokemon with index ${index} not found in collection.`
+        `Pokemon with index ${String(index)} not found in collection.`
       )
     }
 

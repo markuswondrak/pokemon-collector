@@ -34,7 +34,7 @@ export default function PokemonSearch({
 
     if (index < MIN_POKEMON_INDEX || index > MAX_POKEMON_INDEX) {
       setError(
-        `Pokemon index must be between ${MIN_POKEMON_INDEX} and ${MAX_POKEMON_INDEX}`
+        `Pokemon index must be between ${String(MIN_POKEMON_INDEX)} and ${String(MAX_POKEMON_INDEX)}`
       )
       return
     }

@@ -14,7 +14,7 @@ export class Pokemon {
     // Validate index
     if (!Number.isInteger(index) || index < 1 || index > 1025) {
       throw new Error(
-        `Invalid Pokemon index: ${index}. Must be between 1 and 1025.`
+        `Invalid Pokemon index: ${String(index)}. Must be between 1 and 1025.`
       )
     }
 

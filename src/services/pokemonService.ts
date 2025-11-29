@@ -42,7 +42,7 @@ export function collectPokemon(index: number): Promise<PokemonData> {
 
     const pokemon: PokemonData = {
       index,
-      name: `Pokemon ${index}`,
+      name: `Pokemon ${String(index)}`,
       image: null,
       collected: true,
       wishlist: false
@@ -154,7 +154,7 @@ export function addToWishlist(index: number): Promise<PokemonData> {
 
     const pokemon: PokemonData = {
       index,
-      name: `Pokemon ${index}`,
+      name: `Pokemon ${String(index)}`,
       image: null,
       collected: false,
       wishlist: true

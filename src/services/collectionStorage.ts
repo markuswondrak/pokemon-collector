@@ -193,18 +193,18 @@ const instance = new CollectionStorage()
 
 export { instance as collectionStorage }
 export const saveCollection = (data: StorageData | PokemonData[]): void =>
-  instance.saveCollection(data)
+  { instance.saveCollection(data); }
 export const loadCollection = (): StorageData | null =>
   instance.loadCollection()
 export const getCollection = (): PokemonData[] =>
   instance.getCollection()
 export const saveWishlist = (data: StorageData | PokemonData[]): void =>
-  instance.saveWishlist(data)
+  { instance.saveWishlist(data); }
 export const loadWishlist = (): StorageData | null =>
   instance.loadWishlist()
 export const getWishlist = (): PokemonData[] => instance.getWishlist()
-export const clearCollection = (): void => instance.clearCollection()
-export const clearWishlist = (): void => instance.clearWishlist()
-export const clearAll = (): void => instance.clearAll()
+export const clearCollection = (): void => { instance.clearCollection(); }
+export const clearWishlist = (): void => { instance.clearWishlist(); }
+export const clearAll = (): void => { instance.clearAll(); }
 
 export type { StorageData, PokemonData }

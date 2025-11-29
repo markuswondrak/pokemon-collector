@@ -38,7 +38,7 @@ class PokemonApiService {
       index > MAX_POKEMON_INDEX
     ) {
       throw new Error(
-        `Invalid Pokemon index: ${index}. Must be between ${MIN_POKEMON_INDEX} and ${MAX_POKEMON_INDEX}.`
+        `Invalid Pokemon index: ${String(index)}. Must be between ${String(MIN_POKEMON_INDEX)} and ${String(MAX_POKEMON_INDEX)}.`
       )
     }
   }
@@ -66,7 +66,7 @@ class PokemonApiService {
    * @private
    */
   private _getCacheKey(index: number): string {
-    return `pokemon_${index}`
+    return `pokemon_${String(index)}`
   }
 
   /**
@@ -112,7 +112,7 @@ class PokemonApiService {
     } catch (error: unknown) {
       const err = error as { response?: { status: number }; message: string }
       if (err.response?.status === 404) {
-        throw new Error(`Pokemon with index ${index} not found`)
+        throw new Error(`Pokemon with index ${String(index)} not found`)
       }
       throw new Error(`Failed to fetch Pokemon: ${err.message}`)
     }
@@ -129,7 +129,7 @@ class PokemonApiService {
     }
 
     // Validate all indices first
-    indices.forEach((index) => this._validateIndex(index))
+    indices.forEach((index) => { this._validateIndex(index); })
 
     const results = await Promise.all(
       indices.map((index) => this.fetchPokemon(index))
@@ -231,4 +231,4 @@ export const getPokemonByRange = (
   start: number,
   end: number
 ): Promise<Pokemon[]> => instance.getPokemonByRange(start, end)
-export const clearCache = (): void => instance.clearCache()
+export const clearCache = (): void => { instance.clearCache(); }
