@@ -5,7 +5,7 @@
 ## Prerequisites
 
 - Node.js 18+ (check with `node --version`)
-- npm or yarn (comes with Node.js)
+- pnpm 8+ (install with `npm install -g pnpm`)
 - Git
 
 ## Setup Steps
@@ -20,20 +20,20 @@ cd /home/markus/workspace/pokemon-collector
 # This will be done as part of implementation task T001
 
 # Install dependencies
-npm install
+pnpm install
 
 # Verify Vite is working
-npm run dev  # Should start dev server on http://localhost:5173
+pnpm dev  # Should start dev server on http://localhost:5173
 ```
 
 ### 2. Install Required Dependencies
 
 ```bash
 # Core dependencies (already in package.json)
-npm install  # React 18, Vite, axios
+pnpm install  # React 18, Vite, axios
 
 # Dev dependencies for testing (already in package.json)
-npm install --save-dev vitest @testing-library/react @testing-library/jest-dom
+pnpm add -D vitest @testing-library/react @testing-library/jest-dom
 ```
 
 ### 3. Verify Project Structure
@@ -64,7 +64,7 @@ tests/
 ### 4. Run Development Server
 
 ```bash
-npm run dev
+pnpm dev
 ```
 
 Browser opens to `http://localhost:5173` with hot-reload enabled.
@@ -73,19 +73,19 @@ Browser opens to `http://localhost:5173` with hot-reload enabled.
 
 ```bash
 # Run all tests
-npm run test
+pnpm test
 
 # Run tests in watch mode
-npm run test:watch
+pnpm test:watch
 
 # Run tests with coverage
-npm run test:coverage
+pnpm test:coverage
 ```
 
 ### 6. Build for Production
 
 ```bash
-npm run build
+pnpm build
 ```
 
 Output files in `dist/` directory ready for deployment.
@@ -96,13 +96,13 @@ Output files in `dist/` directory ready for deployment.
 
 ```bash
 # Run linting
-npm run lint
+pnpm lint
 
 # Auto-fix linting issues
-npm run lint:fix
+pnpm lint:fix
 
 # Format code
-npm run format
+pnpm format
 ```
 
 ### Feature Development (TDD)
@@ -110,7 +110,7 @@ npm run format
 1. **Write test first** (test fails - RED)
    ```bash
    # Edit tests/unit/services/pokemonService.test.js
-   npm run test:watch
+   pnpm test:watch
    ```
 
 2. **Implement feature** (test passes - GREEN)
@@ -122,7 +122,7 @@ npm run format
 3. **Refactor** (maintain passing tests - REFACTOR)
    ```bash
    # Improve code quality without breaking tests
-   npm run test:watch  # Ensure tests still pass
+   pnpm test:watch  # Ensure tests still pass
    ```
 
 ## Key Files & Responsibilities
@@ -172,25 +172,25 @@ npm run format
 
 ### Dev server not starting
 ```bash
-# Clear npm cache and reinstall
-rm -rf node_modules package-lock.json
-npm install
-npm run dev
+# Clear pnpm cache and reinstall
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+pnpm dev
 ```
 
 ### Tests failing after changes
 ```bash
 # Ensure all dependencies are installed
-npm install
+pnpm install
 
 # Run tests in watch mode to see detailed errors
-npm run test:watch
+pnpm test:watch
 ```
 
 ### Port 5173 already in use
 ```bash
 # Use different port
-npm run dev -- --port 3000
+pnpm dev -- --port 3000
 ```
 
 ## Next Steps

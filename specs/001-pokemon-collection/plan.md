@@ -12,9 +12,9 @@ Build a React web application using Vite that allows users to organize their Pok
 ## Technical Context
 
 **Language/Version**: JavaScript (ES2020+) with Node.js 18+  
-**Primary Dependencies**: React 18, Vite, axios (for API calls)  
+**Primary Dependencies**: React 18, Vite, axios (for API calls), pnpm (build tool)  
 **Storage**: Browser localStorage (client-side only, no backend)
-**Testing**: Vitest, React Testing Library  
+**Testing**: Vitest, React Testing Library, pnpm for dependency management  
 **Target Platform**: Web browser (Chrome, Firefox, Safari, Edge - modern standards)
 **Project Type**: Single-page web application (frontend only)  
 **Performance Goals**: <1 second initial load, <100ms API response display, 60 fps interactions  
@@ -99,7 +99,8 @@ tests/
 
 index.html                        # Vite entry HTML
 vite.config.js                    # Vite configuration
-package.json                      # Node dependencies
+package.json                      # Package metadata
+pnpm-lock.yaml                    # pnpm dependency lock file
 .eslintrc.json                    # Linting configuration
 .gitignore                        # Git ignore rules
 ```
