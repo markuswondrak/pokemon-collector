@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo, ReactElement } from 'react'
 import { useDebounce } from '../hooks/useDebounce.ts'
 import StickySearchBar from './StickySearchBar.tsx'
-import PokemonSearch from './PokemonSearch.tsx'
 import CollectionList from './CollectionList.tsx'
 import WishlistList from './WishlistList.tsx'
 import AvailableGrid from './AvailableGrid.tsx'
@@ -22,7 +21,6 @@ interface Pokemon {
  * Orchestrates search, display, and collection management
  * 
  * State Management:
- * - currentPokemon: Currently selected Pokemon from legacy search
  * - collection: Array of collected and wishlisted Pokemon
  * - allPokemon: All 1025 Pokemon with lazy-loaded data
  * - searchQuery: Raw search input (filters when >= 3 chars)
@@ -31,11 +29,8 @@ interface Pokemon {
  * - fetchedIndices: Set of Pokemon indices already fetched from API
  */
 export default function App(): ReactElement {
-  const [currentPokemon, setCurrentPokemon] = useState<Pokemon | null>(null)
   const [collection, setCollection] = useState<Pokemon[]>([])
   const [allPokemon, setAllPokemon] = useState<Pokemon[]>([])
-  const [error, setError] = useState<string>('')
-  const [searchIndex, setSearchIndex] = useState<number | undefined>(undefined)
   const [fetchedIndices, setFetchedIndices] = useState<Set<number>>(new Set())
 
   // NEW: Sticky Search Bar state (T013)
@@ -191,93 +186,16 @@ export default function App(): ReactElement {
     }
   }, [fetchedIndices, fetchPokemonBatch])
 
-  const handleSearch = async (index: number | string | undefined): Promise<void> => {
-    if (index === undefined) {
-      setSearchIndex(undefined)
-      setCurrentPokemon(null)
-      setError('')
-      return
-    }
-
-    setError('')
-    setCurrentPokemon(null)
-
-    try {
-      if (typeof index === 'number') {
-        // Index-based search
-        setSearchIndex(index)
-        const pokemon = await pokemonApi.fetchPokemon(index)
-
-        // Check collection for existing status
-        const existing = collection.find(p => p.index === index)
-        const isCollected = existing?.collected ?? false
-        const isWishlisted = existing?.wishlist ?? false
-
-        setCurrentPokemon({
-          ...pokemon,
-          collected: isCollected,
-          wishlist: isWishlisted
-        })
-      } else {
-        // Name-based search
-        const searchQuery = index.toLowerCase().trim()
-        setSearchIndex(undefined)
-
-        // Search for Pokemon by name using the service
-        const results = await pokemonService.searchPokemonByName(searchQuery)
-
-        if (results.length === 0) {
-          setError(`No Pokemon found matching "${searchQuery}"`)
-          return
-        }
-
-        // If only one result, display it; if multiple, display first
-        const pokemon = results[0]
-        const existing = collection.find(p => p.index === pokemon.index)
-        
-        if (pokemon && pokemon.index) {
-          // Fetch full Pokemon data from API
-          try {
-            const fullPokemon = await pokemonApi.fetchPokemon(pokemon.index)
-            setCurrentPokemon({
-              ...fullPokemon,
-              collected: existing?.collected ?? false,
-              wishlist: existing?.wishlist ?? false
-            })
-          } catch {
-            // Use cached data if API fails
-            setCurrentPokemon({
-              ...pokemon,
-              collected: existing?.collected ?? false,
-              wishlist: existing?.wishlist ?? false
-            })
-          }
-        }
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(`Failed to find Pokemon: ${message}`)
-    }
-  }
-
   const handleCollect = async (index: number): Promise<void> => {
     try {
       await pokemonService.collectPokemon(index)
-
-      // Update current Pokemon display
-      if (currentPokemon && currentPokemon.index === index) {
-        setCurrentPokemon({
-          ...currentPokemon,
-          collected: true
-        })
-      }
 
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(`Failed to collect Pokemon: ${message}`)
+      // Silently handle errors - graceful degradation
+      console.error('Failed to collect Pokemon:', err)
     }
   }
 
@@ -285,20 +203,12 @@ export default function App(): ReactElement {
     try {
       await pokemonService.removeFromCollection(index)
 
-      // Update current Pokemon display
-      if (currentPokemon && currentPokemon.index === index) {
-        setCurrentPokemon({
-          ...currentPokemon,
-          collected: false
-        })
-      }
-
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(`Failed to remove Pokemon: ${message}`)
+      // Silently handle errors - graceful degradation
+      console.error('Failed to remove Pokemon:', err)
     }
   }
 
@@ -306,20 +216,12 @@ export default function App(): ReactElement {
     try {
       await pokemonService.addToWishlist(index)
 
-      // Update current Pokemon display
-      if (currentPokemon && currentPokemon.index === index) {
-        setCurrentPokemon({
-          ...currentPokemon,
-          wishlist: true
-        })
-      }
-
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(`Failed to add to wishlist: ${message}`)
+      // Silently handle errors - graceful degradation
+      console.error('Failed to add to wishlist:', err)
     }
   }
 
@@ -327,27 +229,13 @@ export default function App(): ReactElement {
     try {
       await pokemonService.removeFromWishlist(index)
 
-      // Update current Pokemon display
-      if (currentPokemon && currentPokemon.index === index) {
-        setCurrentPokemon({
-          ...currentPokemon,
-          wishlist: false
-        })
-      }
-
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err)
-      setError(`Failed to remove from wishlist: ${message}`)
+      // Silently handle errors - graceful degradation
+      console.error('Failed to remove from wishlist:', err)
     }
-  }
-
-  const handleReset = (): void => {
-    setCurrentPokemon(null)
-    setError('')
-    setSearchIndex(undefined)
   }
 
   // NEW: Sticky Search Bar handlers (T013, T014, T016)
@@ -433,20 +321,6 @@ export default function App(): ReactElement {
           />
         </section>
 
-        {/* Legacy Search Section (for backwards compatibility) */}
-        <section className="search-section" aria-label="Search tools">
-          <PokemonSearch onSearch={handleSearch} onReset={handleReset} />
-          {error && (
-            <div
-              className="error-message"
-              role="alert"
-              aria-live="assertive"
-            >
-              {error}
-            </div>
-          )}
-        </section>
-
         {/* Three Grid Section */}
         <section className="three-grids-section" aria-label="Pokemon grids">
           {/* Collected Grid */}
@@ -479,7 +353,6 @@ export default function App(): ReactElement {
             wishlist={mockWishlist}
             onCollect={handleCollect}
             onAddWishlist={handleAddToWishlist}
-            searchIndex={searchIndex}
           />
         </section>
       </div>

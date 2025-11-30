@@ -209,7 +209,7 @@ describe('AvailableGrid Component', () => {
       />
     )
 
-    const grid = container.querySelector('.available-grid')
-    expect(grid).toHaveClass('available-grid')
+    const grid = container.querySelector('.pokemon-grid')
+    expect(grid).toHaveClass('pokemon-grid')
   })
 })

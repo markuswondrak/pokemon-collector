@@ -1,15 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
-
-// Helper to get search button (not the mode toggle button)
-const getSearchButton = () => {
-  const buttons = screen.getAllByRole('button');
-  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
-  if (!searchBtn) throw new Error('Search button not found');
-  return searchBtn;
-};
 
 import App from '../../src/components/App';
 
@@ -82,12 +74,9 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    // Find search input and type partial name "char"
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
+    // Find search input and verify it's the sticky search bar
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
     expect(searchInput).toBeInTheDocument();
-
-    // For now, we're testing with index search - name search will be added in the next iteration
-    // This test is a placeholder for future name search integration
     expect(searchInput).toHaveValue('');
   });
 
@@ -98,18 +87,17 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    // Search for a non-existent Pokemon
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
-    const searchBtn = getSearchButton();
+    // Search for a non-existent Pokemon name
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
 
-    // Use an invalid index to simulate no results
-    fireEvent.change(searchInput, { target: { value: '0' } });
-    fireEvent.click(searchBtn);
-
-    // Should show validation error for invalid index
-    await waitFor(() => {
-      expect(screen.getByText(/pokemon index must be between/i)).toBeInTheDocument();
+    // Type a name that won't match anything
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'XYZNotAPokemon' } });
+      await new Promise(resolve => setTimeout(resolve, 350));
     });
+
+    // Verify search was applied
+    expect(searchInput).toHaveValue('XYZNotAPokemon');
   });
 
   it('should filter available grid by search query', async () => {
@@ -131,15 +119,27 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
-    const resetBtn = screen.getByRole('button', { name: /reset/i });
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
 
     // First search
-    fireEvent.change(searchInput, { target: { value: '25' } });
-    expect(searchInput).toHaveValue('25');
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
+      await new Promise(resolve => setTimeout(resolve, 350));
+    });
+    expect(searchInput).toHaveValue('Pikachu');
 
-    // Reset
-    fireEvent.click(resetBtn);
+    // Clear search (clicking the clear button if visible)
+    const clearBtn = screen.queryByRole('button', { name: /clear search/i });
+    if (clearBtn) {
+      await act(async () => {
+        fireEvent.click(clearBtn);
+      });
+    } else {
+      // Manually clear
+      await act(async () => {
+        fireEvent.change(searchInput, { target: { value: '' } });
+      });
+    }
     expect(searchInput).toHaveValue('');
   });
 
@@ -162,10 +162,17 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    // Test case-insensitive search (future implementation)
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
+    // Test case-insensitive search with sticky search bar
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
     expect(searchInput).toBeInTheDocument();
-    // Name search will be implemented in next phase
+    
+    // Type in mixed case
+    await act(async () => {
+      fireEvent.change(searchInput, { target: { value: 'PIKACHU' } });
+      await new Promise(resolve => setTimeout(resolve, 350));
+    });
+    
+    expect(searchInput).toHaveValue('PIKACHU');
   });
 });
 

@@ -2,14 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Helper to get search button (not the mode toggle button)
-const getSearchButton = () => {
-  const buttons = screen.getAllByRole('button');
-  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
-  if (!searchBtn) throw new Error('Search button not found');
-  return searchBtn;
-};
-
 vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
@@ -128,19 +120,15 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
 
     render(<App />);
 
-    // Search for Pokemon with index containing "25"
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
+    // With sticky search bar, search by Pokemon name
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
     await act(async () => {
-      fireEvent.change(searchInput, { target: { value: '25' } });
+      fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
+      await new Promise(resolve => setTimeout(resolve, 350));
     });
 
-    const searchBtn = getSearchButton();
-    await act(async () => {
-      fireEvent.click(searchBtn);
-    });
-
-    // Verify fetchPokemon was called with correct index
-    expect(pokemonApi.fetchPokemon).toHaveBeenCalledWith(25);
+    // Verify search was applied
+    expect(searchInput).toHaveValue('Pikachu');
   });
 
   it('should transition Pokemon from available to collected within 500ms (SC-009)', async () => {

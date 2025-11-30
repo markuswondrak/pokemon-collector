@@ -78,24 +78,8 @@
   margin-top: 0.5rem;
 }
 
-.available-grid-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
+/* Grid styling moved to components.css for consistency */
 
-.available-grid-section h2 {
-  margin-top: 0;
-  color: #333;
-  font-size: 1.8rem;
-}
-
-.available-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
 
 /* Pokemon Display */
 .pokemon-display {
@@ -190,10 +174,6 @@
 
   .pokemon-display {
     min-height: 400px;
-  }
-
-  .available-grid {
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   }
 }
 

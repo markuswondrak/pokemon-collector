@@ -61,11 +61,20 @@ export default function AvailableGrid({
 
   // Sort by index ascending
   const sortedPokemon = [...filteredPokemon].sort((a, b) => a.index - b.index)
+  const count = sortedPokemon ? sortedPokemon.length : 0
+  const countText = count === 1 ? '1 pokemon' : `${count} pokemon`
 
   return (
-    <section className="available-grid-section" aria-label="Available Pokemon">
-      <header>
-        <h2 id="available-title">Available Pokemon ({sortedPokemon.length})</h2>
+    <section className="collection-list" aria-label="Available Pokemon">
+      <header className="collection-header">
+        <h2 id="available-title">Available Pokemon</h2>
+        <p
+          className="collection-count"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {countText}
+        </p>
       </header>
 
       {sortedPokemon.length === 0 ? (
@@ -78,7 +87,7 @@ export default function AvailableGrid({
         </div>
       ) : (
         <div
-          className="available-grid"
+          className="pokemon-grid"
           role="region"
           aria-labelledby="available-title"
         >

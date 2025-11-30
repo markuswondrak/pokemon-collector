@@ -2,14 +2,6 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
-// Helper to get search button (not the mode toggle button)
-const getSearchButton = () => {
-  const buttons = screen.getAllByRole('button');
-  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
-  if (!searchBtn) throw new Error('Search button not found');
-  return searchBtn;
-};
-
 vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
@@ -228,9 +220,9 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
     // Try to interact while network request is pending
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
     await act(async () => {
-      fireEvent.change(searchInput, { target: { value: '25' } });
+      fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
     });
 
     // Scroll while request is in flight
@@ -246,11 +238,12 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     // Component renders synchronously with title
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
-    // Rapid search inputs
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
-    for (let i = 1; i <= 10; i++) {
+    // Rapid search inputs with names
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const names = ['Bulbasaur', 'Charmander', 'Squirtle', 'Pikachu'];
+    for (let i = 0; i < names.length; i++) {
       await act(async () => {
-        fireEvent.change(searchInput, { target: { value: String(i) } });
+        fireEvent.change(searchInput, { target: { value: names[i] } });
       });
       fireEvent.scroll(window, { y: i * 50 });
     }
@@ -366,21 +359,17 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     // Component renders synchronously with title
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
-    const searchInput = screen.getByPlaceholderText(/pokemon index/i);
-    const searchBtn = getSearchButton();
+    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
 
-    // Search for high index Pokemon
-    await act(async () => {
-      fireEvent.change(searchInput, { target: { value: '1000' } });
-    });
-
+    // Search for Pokemon with name that exists
     const startTime = Date.now();
     await act(async () => {
-      fireEvent.click(searchBtn);
+      fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
+      await new Promise(resolve => setTimeout(resolve, 350));
     });
     const endTime = Date.now();
 
-    // Search should complete quickly
+    // Search should complete quickly (within 1 second including debounce + render)
     expect(endTime - startTime).toBeLessThan(1000);
   });
 });
