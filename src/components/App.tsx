@@ -1,10 +1,8 @@
 import { useState, useEffect, ReactElement } from 'react'
 import PokemonSearch from './PokemonSearch.tsx'
-import PokemonCard from './PokemonCard.tsx'
 import CollectionList from './CollectionList.tsx'
 import WishlistList from './WishlistList.tsx'
 import AvailableGrid from './AvailableGrid.tsx'
-import LazyLoadingGrid from './LazyLoadingGrid.tsx'
 import * as pokemonApi from '../services/pokemonApi.ts'
 import * as pokemonService from '../services/pokemonService.ts'
 import '../styles/App.css'
@@ -25,9 +23,55 @@ export default function App(): ReactElement {
   const [currentPokemon, setCurrentPokemon] = useState<Pokemon | null>(null)
   const [collection, setCollection] = useState<Pokemon[]>([])
   const [allPokemon, setAllPokemon] = useState<Pokemon[]>([])
-  const [loading, setLoading] = useState<boolean>(false)
   const [error, setError] = useState<string>('')
   const [searchIndex, setSearchIndex] = useState<number | undefined>(undefined)
+  const [fetchedIndices, setFetchedIndices] = useState<Set<number>>(new Set())
+
+  // Fetch a batch of Pokemon from the API
+  const fetchPokemonBatch = async (indices: number[], currentFetched: Set<number>): Promise<void> => {
+    const indicesToFetch = indices.filter((i) => !currentFetched.has(i))
+    
+    if (indicesToFetch.length === 0) return
+
+    try {
+      const fetchedPokemon = await pokemonApi.fetchMultiplePokemon(indicesToFetch)
+      
+      if (!Array.isArray(fetchedPokemon)) {
+        console.error('[App] fetchedPokemon is not an array:', fetchedPokemon)
+        return
+      }
+
+      // Update allPokemon with fetched data
+      const pokemonToUpdate = [...fetchedPokemon]
+      setAllPokemon((prev) => {
+        const updated = [...prev]
+        for (const pokemon of pokemonToUpdate) {
+          const index = pokemon.index - 1 // Convert to 0-based index
+          if (index >= 0 && index < updated.length) {
+            updated[index] = {
+              ...updated[index],
+              name: pokemon.name,
+              image: pokemon.image,
+            }
+          }
+        }
+        return updated
+      })
+
+      // Track which indices have been fetched
+      setFetchedIndices((prev) => {
+        const newSet = new Set(prev)
+        indicesToFetch.forEach((i) => {
+          newSet.add(i)
+        })
+        return newSet
+      })
+
+      console.log('[App] Fetched Pokemon batch:', indicesToFetch.length, 'Pokemon')
+    } catch (err) {
+      console.error('[App] Error fetching Pokemon batch:', err)
+    }
+  }
 
   // Load collection from storage on mount and initialize all Pokemon
   useEffect(() => {
@@ -52,7 +96,64 @@ export default function App(): ReactElement {
       wishlist: wishlistMap.has(i + 1),
     }))
     setAllPokemon(allPokemonList)
+
+    // Fetch initial batch of Pokemon (first 20)
+    const indicesToFetch = Array.from({ length: Math.min(20, 1025) }, (_, i) => i + 1)
+    fetchPokemonBatch(indicesToFetch, new Set())
   }, [])
+
+  // Observe visible Pokemon and fetch them (lazy loading on scroll)
+  useEffect(() => {
+    // Check if IntersectionObserver is available (not in tests)
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      return
+    }
+
+    const observer = new IntersectionObserver((entries: IntersectionObserverEntry[]) => {
+      const indicesToFetch: number[] = []
+      
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const element = entry.target as HTMLElement
+          const indexStr = element.getAttribute('data-pokemon-index')
+          if (indexStr !== null) {
+            const index = parseInt(indexStr, 10)
+            if (!fetchedIndices.has(index)) {
+              indicesToFetch.push(index)
+            }
+          }
+        }
+      })
+
+      if (indicesToFetch.length > 0) {
+        void fetchPokemonBatch(indicesToFetch, fetchedIndices)
+      }
+    }, {
+      root: null,
+      rootMargin: '200px',
+      threshold: 0.01,
+    })
+
+    // Observe only the first batch of visible cards to avoid excessive DOM operations
+    // In a real app, this would use virtual scrolling to only render visible items
+    const allCards = document.querySelectorAll('[data-pokemon-index]')
+    const maxToObserve = Math.min(50, allCards.length)
+    
+    for (let i = 0; i < maxToObserve; i++) {
+      const card = allCards[i] as HTMLElement
+      const indexStr = card.getAttribute('data-pokemon-index')
+      if (indexStr !== null) {
+        const index = parseInt(indexStr, 10)
+        if (!fetchedIndices.has(index)) {
+          observer.observe(card)
+        }
+      }
+    }
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [fetchedIndices, fetchPokemonBatch])
 
   const handleSearch = async (index: number | undefined): Promise<void> => {
     if (index === undefined) {
@@ -62,7 +163,6 @@ export default function App(): ReactElement {
       return
     }
 
-    setLoading(true)
     setError('')
     setCurrentPokemon(null)
     setSearchIndex(index)
@@ -84,8 +184,6 @@ export default function App(): ReactElement {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to find Pokemon: ${message}`)
       console.error('[App] Search error:', err)
-    } finally {
-      setLoading(false)
     }
   }
 

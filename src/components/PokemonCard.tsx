@@ -44,7 +44,7 @@ export default function PokemonCard({
   }
 
   return (
-    <div className="pokemon-card">
+    <div className="pokemon-card" data-pokemon-index={pokemon.index}>
       <div className="pokemon-card-image">
         {pokemon.image ? (
           <img src={pokemon.image} alt={pokemon.name} />
