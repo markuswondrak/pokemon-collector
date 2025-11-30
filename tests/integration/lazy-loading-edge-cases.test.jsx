@@ -2,6 +2,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+// Helper to get search button (not the mode toggle button)
+const getSearchButton = () => {
+  const buttons = screen.getAllByRole('button');
+  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
+  if (!searchBtn) throw new Error('Search button not found');
+  return searchBtn;
+};
+
 vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
@@ -358,7 +366,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
     const searchInput = screen.getByPlaceholderText(/pokemon index/i);
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
 
     // Search for high index Pokemon
     await act(async () => {

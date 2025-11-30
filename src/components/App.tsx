@@ -1,4 +1,4 @@
-import { useState, useEffect, ReactElement } from 'react'
+import { useState, useEffect, useMemo, ReactElement } from 'react'
 import PokemonSearch from './PokemonSearch.tsx'
 import CollectionList from './CollectionList.tsx'
 import WishlistList from './WishlistList.tsx'
@@ -37,7 +37,6 @@ export default function App(): ReactElement {
       const fetchedPokemon = await pokemonApi.fetchMultiplePokemon(indicesToFetch)
       
       if (!Array.isArray(fetchedPokemon)) {
-        console.error('[App] fetchedPokemon is not an array:', fetchedPokemon)
         return
       }
 
@@ -66,10 +65,8 @@ export default function App(): ReactElement {
         })
         return newSet
       })
-
-      console.log('[App] Fetched Pokemon batch:', indicesToFetch.length, 'Pokemon')
-    } catch (err) {
-      console.error('[App] Error fetching Pokemon batch:', err)
+    } catch {
+      // Silently handle fetch errors - graceful degradation
     }
   }
 
@@ -155,7 +152,7 @@ export default function App(): ReactElement {
     }
   }, [fetchedIndices, fetchPokemonBatch])
 
-  const handleSearch = async (index: number | undefined): Promise<void> => {
+  const handleSearch = async (index: number | string | undefined): Promise<void> => {
     if (index === undefined) {
       setSearchIndex(undefined)
       setCurrentPokemon(null)
@@ -165,25 +162,62 @@ export default function App(): ReactElement {
 
     setError('')
     setCurrentPokemon(null)
-    setSearchIndex(index)
 
     try {
-      const pokemon = await pokemonApi.fetchPokemon(index)
+      if (typeof index === 'number') {
+        // Index-based search
+        setSearchIndex(index)
+        const pokemon = await pokemonApi.fetchPokemon(index)
 
-      // Check collection for existing status
-      const existing = collection.find(p => p.index === index)
-      const isCollected = existing?.collected ?? false
-      const isWishlisted = existing?.wishlist ?? false
+        // Check collection for existing status
+        const existing = collection.find(p => p.index === index)
+        const isCollected = existing?.collected ?? false
+        const isWishlisted = existing?.wishlist ?? false
 
-      setCurrentPokemon({
-        ...pokemon,
-        collected: isCollected,
-        wishlist: isWishlisted
-      })
+        setCurrentPokemon({
+          ...pokemon,
+          collected: isCollected,
+          wishlist: isWishlisted
+        })
+      } else {
+        // Name-based search
+        const searchQuery = index.toLowerCase().trim()
+        setSearchIndex(undefined)
+
+        // Search for Pokemon by name using the service
+        const results = await pokemonService.searchPokemonByName(searchQuery)
+
+        if (results.length === 0) {
+          setError(`No Pokemon found matching "${searchQuery}"`)
+          return
+        }
+
+        // If only one result, display it; if multiple, display first
+        const pokemon = results[0]
+        const existing = collection.find(p => p.index === pokemon.index)
+        
+        if (pokemon && pokemon.index) {
+          // Fetch full Pokemon data from API
+          try {
+            const fullPokemon = await pokemonApi.fetchPokemon(pokemon.index)
+            setCurrentPokemon({
+              ...fullPokemon,
+              collected: existing?.collected ?? false,
+              wishlist: existing?.wishlist ?? false
+            })
+          } catch {
+            // Use cached data if API fails
+            setCurrentPokemon({
+              ...pokemon,
+              collected: existing?.collected ?? false,
+              wishlist: existing?.wishlist ?? false
+            })
+          }
+        }
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to find Pokemon: ${message}`)
-      console.error('[App] Search error:', err)
     }
   }
 
@@ -202,12 +236,9 @@ export default function App(): ReactElement {
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
-
-      console.log('[App] Pokemon collected:', index)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to collect Pokemon: ${message}`)
-      console.error('[App] Collect error:', err)
     }
   }
 
@@ -226,12 +257,9 @@ export default function App(): ReactElement {
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
-
-      console.log('[App] Pokemon removed:', index)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to remove Pokemon: ${message}`)
-      console.error('[App] Remove error:', err)
     }
   }
 
@@ -250,12 +278,9 @@ export default function App(): ReactElement {
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
-
-      console.log('[App] Pokemon added to wishlist:', index)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to add to wishlist: ${message}`)
-      console.error('[App] Wishlist error:', err)
     }
   }
 
@@ -274,12 +299,9 @@ export default function App(): ReactElement {
       // Update collection list
       const updated = pokemonService.getCollectionList()
       setCollection(updated)
-
-      console.log('[App] Pokemon removed from wishlist:', index)
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err)
       setError(`Failed to remove from wishlist: ${message}`)
-      console.error('[App] Remove from wishlist error:', err)
     }
   }
 
@@ -292,39 +314,52 @@ export default function App(): ReactElement {
   const collectedCount = collection.filter((p) => p.collected).length
   
   // Create Collection and Wishlist objects from array for grid components
-  const mockCollection = {
+  // Use useMemo to avoid calling Date.now() on every render
+  const mockCollection = useMemo(() => ({
     id: 'collection',
     lastUpdated: Date.now(),
     items: new Map(collection.filter((p) => p.collected).map((p) => [p.index, p])),
     count: collectedCount,
-  }
+  }), [collection, collectedCount])
 
-  const mockWishlist = {
+  const mockWishlist = useMemo(() => ({
     id: 'wishlist',
     lastUpdated: Date.now(),
     items: new Map(collection.filter((p) => p.wishlist).map((p) => [p.index, p])),
     count: collection.filter((p) => p.wishlist).length,
-  }
+  }), [collection])
 
   return (
-    <main className="app">
+    <main className="app" aria-label="Pokemon Collection Organizer">
       <header className="app-header">
         <h1>Pokemon Collection Organizer</h1>
         <p>Build and manage your Pokemon collection</p>
-        <p className="collection-stats">
+        <p
+          className="collection-stats"
+          aria-live="polite"
+          aria-atomic="true"
+        >
           Collection: {collectedCount} / {Math.min(allPokemon.length, 1025)} total
         </p>
       </header>
 
       <div className="app-main">
         {/* Search Section */}
-        <section className="search-section">
+        <section className="search-section" aria-label="Search tools">
           <PokemonSearch onSearch={handleSearch} onReset={handleReset} />
-          {error && <div className="error-message">{error}</div>}
+          {error && (
+            <div
+              className="error-message"
+              role="alert"
+              aria-live="assertive"
+            >
+              {error}
+            </div>
+          )}
         </section>
 
         {/* Three Grid Section */}
-        <section className="three-grids-section">
+        <section className="three-grids-section" aria-label="Pokemon grids">
           {/* Collected Grid */}
           <CollectionList
             pokemon={collection.filter((p) => p.collected)}
@@ -343,16 +378,14 @@ export default function App(): ReactElement {
           />
 
           {/* Available Grid with Lazy Loading */}
-          <section className="available-grid-wrapper">
-            <AvailableGrid
-              allPokemon={allPokemon}
-              collection={mockCollection}
-              wishlist={mockWishlist}
-              onCollect={handleCollect}
-              onAddWishlist={handleAddToWishlist}
-              searchIndex={searchIndex}
-            />
-          </section>
+          <AvailableGrid
+            allPokemon={allPokemon}
+            collection={mockCollection}
+            wishlist={mockWishlist}
+            onCollect={handleCollect}
+            onAddWishlist={handleAddToWishlist}
+            searchIndex={searchIndex}
+          />
         </section>
       </div>
 

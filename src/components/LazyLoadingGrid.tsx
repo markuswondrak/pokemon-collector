@@ -119,7 +119,7 @@ export default function LazyLoadingGrid({
       {items.map((item, index) => (
         <div
           key={index}
-          ref={(el) => handleItemRef(index, el)}
+          ref={(el) => { handleItemRef(index, el); }}
           data-item-index={index}
           className="lazy-loading-item"
         >

@@ -63,7 +63,6 @@ export function collectPokemon(index: number): Promise<PokemonData> {
     }
 
     saveCollection(updatedCollection)
-    console.log(`[pokemonService] Collected Pokemon ${String(index)}`)
 
     return {
       ...pokemon,
@@ -99,9 +98,6 @@ export function removeFromCollection(index: number): Promise<boolean> {
     }
 
     saveCollection(updated)
-    console.log(
-      `[pokemonService] Removed Pokemon ${String(index)} from collection`
-    )
 
     return true
   })
@@ -175,9 +171,6 @@ export function addToWishlist(index: number): Promise<PokemonData> {
     }
 
     saveCollection(updatedCollection)
-    console.log(
-      `[pokemonService] Added Pokemon ${String(index)} to wishlist`
-    )
 
     return {
       ...pokemon,
@@ -221,10 +214,81 @@ export function removeFromWishlist(index: number): Promise<boolean> {
     }
 
     saveCollection(updated)
-    console.log(
-      `[pokemonService] Removed Pokemon ${String(index)} from wishlist`
-    )
 
     return true
   })
 }
+
+/**
+ * Search Pokemon by name (case-insensitive, partial matching)
+ * @param query - Name query string (case-insensitive partial match)
+ * @returns Promise<PokemonData[]> - Array of matching Pokemon
+ */
+export function searchPokemonByName(query: string): Promise<PokemonData[]> {
+  return Promise.resolve().then(() => {
+    if (!query || !query.trim()) {
+      return []
+    }
+
+    const normalizedQuery = query.toLowerCase().trim()
+    
+    // Get all Pokemon we know about from collection storage
+    const collection = getStoredCollection()
+    const collectionMap = new Map<number, PokemonData>()
+    
+    for (const pokemon of collection) {
+      collectionMap.set(pokemon.index, pokemon)
+    }
+
+    // Create a list of all Pokemon (1-1025) with known data
+    const allPokemon: PokemonData[] = []
+    for (let i = MIN_POKEMON_INDEX; i <= MAX_POKEMON_INDEX; i++) {
+      const pokemon = collectionMap.get(i) || {
+        index: i,
+        name: `Pokemon ${String(i)}`,
+        image: null,
+        collected: false,
+        wishlist: false,
+      }
+      allPokemon.push(pokemon)
+    }
+
+    // Filter by name match (case-insensitive partial match)
+    const results = allPokemon.filter((pokemon) => {
+      const normalizedName = pokemon.name.toLowerCase()
+      return normalizedName.includes(normalizedQuery)
+    })
+
+    return results
+  })
+}
+
+/**
+ * Search Pokemon by name or index
+ * @param query - String that could be a name or index
+ * @returns Promise<PokemonData[]> - Array of matching Pokemon
+ */
+export function searchPokemon(query: string): Promise<PokemonData[]> {
+  return Promise.resolve().then(async () => {
+    if (!query || !query.trim()) {
+      return []
+    }
+
+    const trimmedQuery = query.trim()
+    
+    // Try to parse as index first
+    const asIndex = parseInt(trimmedQuery, 10)
+    if (!isNaN(asIndex) && asIndex >= MIN_POKEMON_INDEX && asIndex <= MAX_POKEMON_INDEX) {
+      // Could be an index, try that first
+      const collection = getStoredCollection()
+      const collected = collection.filter((p: PokemonData) => p.index === asIndex)
+      if (collected.length > 0) {
+        return collected
+      }
+    }
+
+    // Otherwise, search by name
+    return searchPokemonByName(trimmedQuery)
+  })
+}
+

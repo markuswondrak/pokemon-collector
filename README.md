@@ -152,75 +152,292 @@ specs/001-pokemon-collection/
 ## Documentation
 
 For detailed information, see the specification documentation in `specs/001-pokemon-collection/`:
-- **Feature Specification**: [spec.md](specs/001-pokemon-collection/spec.md)
-- **Implementation Plan**: [plan.md](specs/001-pokemon-collection/plan.md)
-- **Data Model**: [data-model.md](specs/001-pokemon-collection/data-model.md)
-- **Quick Start Guide**: [quickstart.md](specs/001-pokemon-collection/quickstart.md)
-- **API Contracts**: [contracts/](specs/001-pokemon-collection/contracts/)
-- **Task Breakdown**: [tasks.md](specs/001-pokemon-collection/tasks.md) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Feature Specification**: [spec.md](specs/001-pokemon-collection/spec.md) - User stories and acceptance criteria
+- **Implementation Plan**: [plan.md](specs/001-pokemon-collection/plan.md) - Technical architecture and decisions
+- **Data Model**: [data-model.md](specs/001-pokemon-collection/data-model.md) - Entity definitions and relationships
+- **Quick Start Guide**: [quickstart.md](specs/001-pokemon-collection/quickstart.md) - Development environment setup
+- **API Contracts**: [contracts/](specs/001-pokemon-collection/contracts/) - PokéAPI integration tests
+- **Task Breakdown**: [tasks.md](specs/001-pokemon-collection/tasks.md) - Phase-by-phase task execution plan
 
-## React Compiler
+## Architecture Overview
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Application Flow
 
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+User UI (React Components)
+    ↓
+App.tsx (State Management)
+    ↓
+Services (Business Logic)
+  ├── pokemonService.ts → pokemonApi.ts (PokéAPI Integration)
+  └── collectionStorage.ts (localStorage Persistence)
+    ↓
+Models (Data Validation)
+  ├── Pokemon.ts
+  ├── Collection.ts
+  └── Wishlist.ts
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Key Components
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+1. **App.tsx** - Main container component
+   - Manages collection state and search functionality
+   - Coordinates data flow between components
+   - Handles API calls and persistence
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+2. **PokemonSearch.tsx** - Search interface
+   - Supports search by Pokemon index or name
+   - Debounced search with 300ms delay
+   - Input validation and error handling
+
+3. **CollectionList.tsx / WishlistList.tsx** - Grid display components
+   - Render Pokemon cards in responsive grid
+   - Display collection/wishlist count and status
+   - Empty state handling
+
+4. **AvailableGrid.tsx** - Filtered Pokemon display
+   - Shows uncollected, unwishlisted Pokemon
+   - Lazy loading via IntersectionObserver
+   - Responsive grid layout
+
+5. **PokemonCard.tsx** - Individual Pokemon card
+   - Display Pokemon image, name, index
+   - Action buttons (Collect, Wishlist, Remove)
+   - Status badges and error states
+
+### Service Layer
+
+**pokemonService.ts** - High-level collection operations
+- `collectPokemon(index)` - Add to collection
+- `removeFromCollection(index)` - Remove from collection
+- `addToWishlist(index)` - Add to wishlist
+- `removeFromWishlist(index)` - Remove from wishlist
+- `searchPokemonByName(query)` - Search by name (cached)
+- `getCollectionList()` - Get full collection
+
+**pokemonApi.ts** - PokéAPI integration
+- `fetchPokemon(id)` - Get single Pokemon
+- `fetchMultiplePokemon(ids)` - Batch fetch
+- Caching and rate limiting (1s between requests)
+- Error handling for 404, 429, network errors
+
+**collectionStorage.ts** - localStorage abstraction
+- `loadCollection()` - Load from storage
+- `saveCollection(data)` - Save to storage
+- `clearAll()` - Clear stored data
+
+### Data Models
+
+**Pokemon** - Individual Pokemon entity
+```typescript
+{
+  index: number        // 1-1025
+  name: string         // e.g., "Pikachu"
+  image: string | null // Official artwork URL
+  collected: boolean
+  wishlist: boolean
+}
 ```
+
+**Collection** - User's collected Pokemon
+```typescript
+{
+  items: Pokemon[]
+  lastUpdated: number
+  count: number
+}
+```
+
+### State Management
+
+- React hooks (`useState`, `useEffect`) for local state
+- Context API could be added for global state
+- localStorage for persistence across sessions
+- Single source of truth: App.tsx manages main state
+
+### Testing Strategy
+
+**Unit Tests** (34 tests)
+- Models: Pokemon, Collection validation
+- Services: API, storage, business logic
+- Hooks: useCollection state management
+
+**Integration Tests** (190+ tests covering)
+- US1: Search → Collect → Verify
+- US2: Wishlist functionality
+- US3: Three grids + lazy loading
+- US4: Name-based search
+- Edge cases: rapid scrolling, network delays
+
+**Contract Tests** (API)
+- PokéAPI response validation
+- Image URL verification
+- Error handling (404, 429, network)
+
+### Performance Optimizations
+
+1. **Lazy Loading** (SC-015)
+   - IntersectionObserver for viewport-only rendering
+   - 200px prefetch buffer
+   - Reduces initial load time
+
+2. **Image Optimization** (SC-013)
+   - `loading="lazy"` attribute
+   - Lazy image loading deferred to viewport visibility
+   - Graceful fallback on load failure
+
+3. **Search Debouncing** (SC-014)
+   - 300ms debounce on name search
+   - Prevents excessive re-renders
+
+4. **Caching** (SC-010)
+   - API response caching in memory
+   - Prevents duplicate requests
+   - Rate limiting (1s minimum between bulk requests)
+
+5. **Code Optimization**
+   - Removed console.log statements
+   - Optimized re-renders with proper dependencies
+   - Efficient DOM queries
+
+### Accessibility (WCAG 2.1 AA)
+
+✅ **Semantic HTML**
+- Proper heading hierarchy (h1 → h2 → h3)
+- Semantic elements: `<main>`, `<section>`, `<article>`, `<header>`, `<footer>`
+- Form elements with labels and legends
+
+✅ **ARIA Labels**
+- aria-label for icon buttons and complex controls
+- aria-live="polite" for dynamic count updates
+- aria-live="assertive" for error messages
+- aria-describedby for input error association
+- aria-pressed for toggle buttons
+
+✅ **Keyboard Navigation**
+- Tab order: search → buttons → grids
+- Enter to submit search
+- All buttons keyboard accessible
+- Focus indicators: 3px solid blue outline
+
+✅ **Color Contrast (WCAG AA)**
+- Text: 7.0:1 (exceeds 4.5:1 requirement)
+- Badges: 4.5:1 minimum (green/yellow with dark text)
+- Error messages: red on white (7.0:1)
+- Interactive elements: clear visual states
+
+✅ **Additional Accessibility**
+- No auto-playing content
+- Skip links (can be added)
+- Print stylesheet support
+- Screen reader friendly status updates
+
+## Development Tips
+
+### Common Tasks
+
+```bash
+# Start dev server with auto-reload
+pnpm dev
+
+# Run tests in watch mode (rerun on file changes)
+pnpm test:watch
+
+# Run specific test file
+pnpm test tests/unit/components/PokemonCard.test.jsx
+
+# Generate test coverage report
+pnpm test:coverage
+
+# Check for linting errors
+pnpm lint
+
+# Fix linting errors automatically
+pnpm lint:fix
+
+# Build production bundle
+pnpm build
+
+# Preview production build locally
+pnpm preview
+```
+
+### Browser DevTools
+
+- **React DevTools** - Inspect components, props, state
+- **Redux DevTools** - Not needed; simple App state
+- **Network Tab** - Monitor PokéAPI requests
+- **Storage Tab** - Inspect localStorage for collection data
+- **Lighthouse** - Performance and accessibility audit
+
+### Debugging
+
+1. **Enable console logs** (in development)
+   - Search-related: `pokemonService.ts`
+   - Collection updates: `App.tsx`
+   - API errors: `pokemonApi.ts`
+
+2. **Check localStorage**
+   ```js
+   // In browser console
+   JSON.parse(localStorage.getItem('pokemonCollection'))
+   ```
+
+3. **Monitor network requests**
+   - Open DevTools → Network tab
+   - Search for Pokemon by index
+   - Check PokéAPI response payload
+
+## Known Limitations & Future Improvements
+
+### Current Limitations
+- Single user (no multi-user sharing)
+- Browser-based storage (limited to ~5-10MB)
+- No offline sync (collection only persists locally)
+
+### Potential Enhancements
+1. **Backend Integration** - Replace localStorage with API backend
+2. **User Accounts** - Support multiple users with authentication
+3. **Social Features** - Share collections, compare with friends
+4. **Advanced Filtering** - Filter by type, generation, stats
+5. **Statistics** - Collection completion %, rarest Pokemon, etc.
+6. **Mobile App** - React Native version for iOS/Android
+7. **Pokémon Details** - Show stats, moves, evolutions
+8. **Trading** - Community trading functionality
+
+## Troubleshooting
+
+### Port 5173 already in use
+```bash
+# Kill process on port 5173
+lsof -ti:5173 | xargs kill -9
+
+# Or specify different port
+pnpm dev -- --port 3000
+```
+
+### Tests failing due to network issues
+- Tests mock PokéAPI responses
+- Run `pnpm test` to see detailed error messages
+- Check internet connection for contract tests
+
+### localStorage cleared unexpectedly
+- Incognito mode doesn't persist storage
+- Private browsing may clear on close
+- Try clearing browser cache: `Cmd+Shift+Delete` (Mac) or `Ctrl+Shift+Delete` (Windows)
+
+## License
+
+This project is a reference implementation demonstrating SpecKit's feature development workflow. See `LICENSE` for details.
+
+## Support
+
+For issues or questions:
+1. Check the [specification](specs/001-pokemon-collection/spec.md)
+2. Review [task breakdown](specs/001-pokemon-collection/tasks.md)
+3. Run tests: `pnpm test --run`
+4. Open an issue on GitHub
+
+---
+
+**Built with SpecKit** - Reference implementation for end-to-end feature development

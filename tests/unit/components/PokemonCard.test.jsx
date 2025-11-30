@@ -40,7 +40,7 @@ describe('PokemonCard Component', () => {
       />
     );
 
-    const img = screen.getByAltText('Pikachu');
+    const img = screen.getByAltText('Pikachu sprite');
     expect(img).toBeInTheDocument();
     expect(img.src).toBe('https://example.com/pikachu.png');
   });

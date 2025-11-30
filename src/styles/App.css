@@ -25,6 +25,7 @@
   margin: 0;
   color: #666;
   font-size: 1.1rem;
+  font-weight: 500;
 }
 
 .app-main {
@@ -47,6 +48,46 @@
   height: fit-content;
   position: sticky;
   top: 2rem;
+}
+
+/* Error Message (WCAG 2.1 AA: Alert role with high contrast) */
+.error-message {
+  background: #fee;
+  border: 2px solid #e74c3c;
+  color: #c33;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-top: 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Three Grids Section */
+.three-grids-section {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.available-grid-section {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.available-grid-section h2 {
+  margin-top: 0;
+  color: #333;
+  font-size: 1.8rem;
+}
+
+.available-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
 }
 
 /* Pokemon Display */
@@ -75,15 +116,6 @@
   font-size: 1.1rem;
 }
 
-.error-message {
-  background: #fee;
-  color: #c33;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 1rem;
-  border-left: 4px solid #c33;
-}
-
 /* Collection Section */
 .collection-section {
   grid-column: 1 / -1;
@@ -93,6 +125,16 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Collection Stats (Live Region for Announcements) */
+.collection-stats {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #ddd;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #666;
+}
+
 /* Footer */
 .app-footer {
   background: rgba(0, 0, 0, 0.7);
@@ -100,6 +142,7 @@
   text-align: center;
   padding: 1.5rem;
   margin-top: auto;
+  border-top: 3px solid #667eea;
 }
 
 .app-footer p {
@@ -140,5 +183,26 @@
 
   .pokemon-display {
     min-height: 400px;
+  }
+
+  .available-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+/* Print Styles for Accessibility */
+@media print {
+  .search-section,
+  .pokemon-card-actions .btn {
+    display: none;
+  }
+
+  .app {
+    background: white;
+  }
+
+  .app-header {
+    background: white;
+    border-bottom: 1px solid #ddd;
   }
 }

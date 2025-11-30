@@ -43,13 +43,34 @@ export default function PokemonCard({
     }
   }
 
+  const ariaLabel = `${pokemon.name} Pokemon #${pokemon.index}`
+  const statusText = [
+    pokemon.collected && 'Collected',
+    pokemon.wishlist && 'Wishlisted'
+  ].filter(Boolean).join(', ')
+
   return (
-    <div className="pokemon-card" data-pokemon-index={pokemon.index}>
+    <article
+      className="pokemon-card"
+      data-pokemon-index={pokemon.index}
+      aria-label={ariaLabel}
+      role="region"
+    >
       <div className="pokemon-card-image">
         {pokemon.image ? (
-          <img src={pokemon.image} alt={pokemon.name} />
+          <img
+            src={pokemon.image}
+            alt={`${pokemon.name} sprite`}
+            loading="lazy"
+          />
         ) : (
-          <div className="pokemon-image-placeholder">No Image</div>
+          <div
+            className="pokemon-image-placeholder"
+            role="status"
+            aria-label="Image not available"
+          >
+            No Image
+          </div>
         )}
       </div>
 
@@ -57,12 +78,24 @@ export default function PokemonCard({
         <h3 className="pokemon-name">{pokemon.name}</h3>
         <p className="pokemon-index">#{pokemon.index}</p>
 
-        {pokemon.collected && (
-          <div className="pokemon-badge collected-badge">✓ Collected</div>
-        )}
+        {statusText && (
+          <div
+            className="pokemon-status"
+            role="status"
+            aria-label={`Status: ${statusText}`}
+          >
+            {pokemon.collected && (
+              <span className="pokemon-badge collected-badge" aria-label="Collected">
+                ✓ Collected
+              </span>
+            )}
 
-        {pokemon.wishlist && (
-          <div className="pokemon-badge wishlist-badge">♡ Wishlist</div>
+            {pokemon.wishlist && (
+              <span className="pokemon-badge wishlist-badge" aria-label="Wishlisted">
+                ♡ Wishlist
+              </span>
+            )}
+          </div>
         )}
       </div>
 
@@ -71,7 +104,7 @@ export default function PokemonCard({
           <button
             className="btn btn-collect"
             onClick={handleCollect}
-            title="Add to collection"
+            aria-label={`Add ${pokemon.name} to collection`}
           >
             Collect
           </button>
@@ -79,7 +112,7 @@ export default function PokemonCard({
           <button
             className="btn btn-remove"
             onClick={handleRemove}
-            title="Remove from collection"
+            aria-label={`Remove ${pokemon.name} from collection`}
           >
             Remove
           </button>
@@ -89,15 +122,18 @@ export default function PokemonCard({
           className="btn btn-wishlist"
           onClick={handleAddToWishlist}
           disabled={pokemon.collected}
-          title={
+          aria-label={
             pokemon.collected
-              ? 'Cannot add collected Pokemon to wishlist'
-              : 'Add to wishlist'
+              ? `Cannot add ${pokemon.name} to wishlist (already collected)`
+              : pokemon.wishlist
+                ? `Remove ${pokemon.name} from wishlist`
+                : `Add ${pokemon.name} to wishlist`
           }
+          aria-pressed={pokemon.wishlist}
         >
           {pokemon.wishlist ? '♡ In Wishlist' : '♡ Wishlist'}
         </button>
       </div>
-    </div>
+    </article>
   )
 }

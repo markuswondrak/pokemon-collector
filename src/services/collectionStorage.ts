@@ -32,7 +32,7 @@ class CollectionStorage {
    * @throws Error if data is invalid
    */
   saveCollection(data: StorageData | PokemonData[]): void {
-    if (!data) {
+    if (data === null || data === undefined) {
       throw new Error('Collection data cannot be null or undefined.')
     }
 
@@ -86,7 +86,7 @@ class CollectionStorage {
    * @throws Error if data is invalid
    */
   saveWishlist(data: StorageData | PokemonData[]): void {
-    if (!data) {
+    if (data === null || data === undefined) {
       throw new Error('Wishlist data cannot be null or undefined.')
     }
 
@@ -138,7 +138,7 @@ class CollectionStorage {
    */
   getCollection(): PokemonData[] {
     const stored = this.loadCollection()
-    return (stored && stored.pokemon) || []
+    return stored?.pokemon ?? []
   }
 
   /**
@@ -147,7 +147,7 @@ class CollectionStorage {
    */
   getWishlist(): PokemonData[] {
     const stored = this.loadWishlist()
-    return (stored && stored.pokemon) || []
+    return stored?.pokemon ?? []
   }
 
   /**

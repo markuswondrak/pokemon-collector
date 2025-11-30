@@ -1,6 +1,14 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
+
+// Helper to get search button (not the mode toggle button)
+const getSearchButton = () => {
+  const buttons = screen.getAllByRole('button');
+  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
+  if (!searchBtn) throw new Error('Search button not found');
+  return searchBtn;
+};
 
 vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/collectionStorage', () => ({
@@ -63,7 +71,7 @@ describe('US2 Integration: Add to Wishlist Workflow', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -107,7 +115,7 @@ describe('US2 Integration: Add to Wishlist Workflow', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });

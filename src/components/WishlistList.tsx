@@ -30,18 +30,32 @@ export default function WishlistList({
   const countText = count === 1 ? '1 pokemon' : `${count} pokemon`
 
   return (
-    <div className="collection-list">
-      <div className="collection-header">
-        <h2>{title}</h2>
-        <p className="collection-count">{countText}</p>
-      </div>
+    <section className="collection-list" aria-label={title}>
+      <header className="collection-header">
+        <h2 id="wishlist-title">{title}</h2>
+        <p
+          className="collection-count"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          {countText}
+        </p>
+      </header>
 
       {count === 0 ? (
-        <div className="empty-state">
+        <div
+          className="empty-state"
+          role="status"
+          aria-label={`No pokemon in ${title.toLowerCase()} yet`}
+        >
           <p>No pokemon in collection yet</p>
         </div>
       ) : (
-        <div className="pokemon-grid">
+        <div
+          className="pokemon-grid"
+          role="region"
+          aria-labelledby="wishlist-title"
+        >
           {pokemon.map((poke: Pokemon) => (
             <PokemonCard
               key={poke.index}
@@ -53,6 +67,6 @@ export default function WishlistList({
           ))}
         </div>
       )}
-    </div>
+    </section>
   )
 }

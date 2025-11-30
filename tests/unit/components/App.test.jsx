@@ -96,7 +96,8 @@ describe('App Component - User Story 1', () => {
     render(<App />);
 
     // Verify search button is rendered
-    const searchButton = screen.getByRole('button', { name: /search/i });
+    const buttons = screen.getAllByRole('button');
+    const searchButton = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
     expect(searchButton).toBeInTheDocument();
   });
 });

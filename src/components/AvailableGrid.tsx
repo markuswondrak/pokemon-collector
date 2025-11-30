@@ -63,22 +63,32 @@ export default function AvailableGrid({
   const sortedPokemon = [...filteredPokemon].sort((a, b) => a.index - b.index)
 
   return (
-    <section className="available-grid-section">
-      <h2>Available Pokemon ({sortedPokemon.length})</h2>
+    <section className="available-grid-section" aria-label="Available Pokemon">
+      <header>
+        <h2 id="available-title">Available Pokemon ({sortedPokemon.length})</h2>
+      </header>
 
       {sortedPokemon.length === 0 ? (
-        <div className="empty-state">
+        <div
+          className="empty-state"
+          role="status"
+          aria-label="No available Pokemon"
+        >
           <p>No available Pokemon. All Pokemon are either collected or wishlisted!</p>
         </div>
       ) : (
-        <div className="available-grid">
+        <div
+          className="available-grid"
+          role="region"
+          aria-labelledby="available-title"
+        >
           {sortedPokemon.map((pokemon) => (
             <PokemonCard
               key={pokemon.index}
               pokemon={pokemon}
-              onCollect={() => onCollect(pokemon.index)}
+              onCollect={() => { onCollect(pokemon.index); }}
               onRemove={() => {}} // Not used in available grid
-              onAddToWishlist={() => onAddWishlist(pokemon.index)}
+              onAddToWishlist={() => { onAddWishlist(pokemon.index); }}
             />
           ))}
         </div>

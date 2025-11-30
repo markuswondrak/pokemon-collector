@@ -2,6 +2,14 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
+// Helper to get search button (not the mode toggle button)
+const getSearchButton = () => {
+  const buttons = screen.getAllByRole('button');
+  const searchBtn = buttons.find(btn => btn.textContent === 'Search' && btn.className.includes('btn-primary'));
+  if (!searchBtn) throw new Error('Search button not found');
+  return searchBtn;
+};
+
 vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
@@ -64,7 +72,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     });
 
     // Step 2: User clicks search button
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -96,7 +104,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -114,7 +122,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -132,7 +140,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    let searchBtn = screen.getByRole('button', { name: /search/i });
+    let searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -159,7 +167,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       fireEvent.change(searchInput, { target: { value: '26' } });
     });
 
-    searchBtn = screen.getByRole('button', { name: /search/i });
+    searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });
@@ -195,7 +203,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
       fireEvent.change(searchInput, { target: { value: '25' } });
     });
 
-    const searchBtn = screen.getByRole('button', { name: /search/i });
+    const searchBtn = getSearchButton();
     await act(async () => {
       fireEvent.click(searchBtn);
     });

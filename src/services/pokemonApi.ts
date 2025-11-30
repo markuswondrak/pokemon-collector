@@ -8,6 +8,19 @@ import {
 } from '../utils/constants'
 import { Pokemon } from '../models/Pokemon'
 
+interface PokemonApiResponse {
+  id: number
+  name: string
+  sprites: {
+    front_default: string | null
+    other?: {
+      'official-artwork'?: {
+        front_default: string | null
+      }
+    }
+  }
+}
+
 interface CacheEntry {
   data: Pokemon
   timestamp: number
@@ -92,14 +105,20 @@ class PokemonApiService {
     await this._applyRateLimit()
 
     try {
-      const response = await axios.get(`${POKEMON_ENDPOINT}/${index}`)
+      const response = await axios.get<PokemonApiResponse>(
+        `${POKEMON_ENDPOINT}/${String(index)}`
+      )
       const data = response.data
+
+      const imageUrl =
+        data.sprites.other?.['official-artwork']?.front_default ??
+        data.sprites.front_default ??
+        ''
 
       const pokemon = new Pokemon(
         data.id,
         data.name.charAt(0).toUpperCase() + data.name.slice(1),
-        data.sprites.other['official-artwork'].front_default ||
-          data.sprites.front_default
+        imageUrl || 'https://via.placeholder.com/96'
       )
 
       // Cache result
@@ -197,7 +216,7 @@ class PokemonApiService {
       start > end
     ) {
       throw new Error(
-        `Invalid range: ${start}-${end}. Must be valid integers with start <= end.`
+        `Invalid range: ${String(start)}-${String(end)}. Must be valid integers with start <= end.`
       )
     }
 
