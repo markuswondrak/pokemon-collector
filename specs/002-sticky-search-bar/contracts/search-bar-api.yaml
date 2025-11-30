@@ -1,0 +1,554 @@
+openapi: 3.0.0
+info:
+  title: Pokemon Collector - Sticky Search Bar API Contracts
+  description: Component API specifications and test scenarios for the sticky search bar feature (002-sticky-search-bar)
+  version: 1.0.0
+  contact:
+    name: Pokemon Collector Team
+
+tags:
+  - name: Components
+    description: UI component API contracts
+  - name: Hooks
+    description: Custom React hook contracts
+  - name: Test Scenarios
+    description: Acceptance and integration test specifications
+
+paths:
+  /components/StickySearchBar:
+    post:
+      tags:
+        - Components
+      summary: Sticky Search Bar Component
+      description: |
+        A sticky-positioned search input bar that filters Pokemon by name with debounced keystroke search.
+        Stays at top of viewport when user scrolls past header.
+      parameters:
+        - in: query
+          name: value
+          required: true
+          schema:
+            type: string
+          description: Current search input text (controlled component)
+          example: "pika"
+        - in: query
+          name: onChange
+          required: true
+          schema:
+            type: string
+          description: Callback when user types; receives new input value
+        - in: query
+          name: onClear
+          required: true
+          schema:
+            type: string
+          description: Callback when user clears search (Escape key or clear button)
+        - in: query
+          name: placeholder
+          required: false
+          schema:
+            type: string
+            default: "Search Pokemon by name..."
+          description: Input placeholder text
+        - in: query
+          name: minChars
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            default: 3
+          description: Minimum characters before filtering activates
+        - in: query
+          name: debounceMs
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 1000
+            default: 300
+          description: Debounce delay in milliseconds
+        - in: query
+          name: ariaLabel
+          required: false
+          schema:
+            type: string
+            default: "Search Pokemon by name"
+          description: Accessibility label for screen readers
+        - in: query
+          name: ariaDescribedBy
+          required: false
+          schema:
+            type: string
+          description: ID of element describing the search input (for accessibility)
+      responses:
+        "200":
+          description: Component rendered successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  html:
+                    type: string
+                    description: Rendered HTML structure
+                  css:
+                    type: object
+                    properties:
+                      position:
+                        type: string
+                        enum: ["static", "sticky"]
+                        description: CSS position property (sticky when header out of view)
+                      top:
+                        type: string
+                        default: "0"
+                      zIndex:
+                        type: integer
+                        default: 10
+                      backgroundColor:
+                        type: string
+                        default: "white"
+                      boxShadow:
+                        type: string
+                        description: Drop shadow when sticky
+                  state:
+                    type: object
+                    properties:
+                      isSticky:
+                        type: boolean
+                        description: Whether search bar is in sticky position
+                      hasFocus:
+                        type: boolean
+                        description: Whether input has keyboard focus
+                      showClearButton:
+                        type: boolean
+                        description: True if value.length > 0
+
+  /hooks/useDebounce:
+    post:
+      tags:
+        - Hooks
+      summary: useDebounce Custom Hook
+      description: |
+        Debounces a value after specified delay. Returns debounced value and loading state.
+        Cleans up timer on unmount to prevent memory leaks.
+      parameters:
+        - in: query
+          name: value
+          required: true
+          schema:
+            type: object
+          description: The value to debounce (any type)
+        - in: query
+          name: delay
+          required: false
+          schema:
+            type: integer
+            minimum: 100
+            maximum: 5000
+            default: 300
+          description: Debounce delay in milliseconds
+      responses:
+        "200":
+          description: Hook initialized successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  debouncedValue:
+                    type: object
+                    description: Debounced value (updates after delay)
+                  isDebouncing:
+                    type: boolean
+                    description: True if value changed but delay not yet elapsed
+                  callCount:
+                    type: integer
+                    description: Number of times hook processed updates (for testing)
+
+  /integration/search-flow:
+    post:
+      tags:
+        - Test Scenarios
+      summary: Search Flow Integration Test
+      description: User types, debounce triggers, results filter grids
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userInput:
+                  type: string
+                  example: "pika"
+                expectedResults:
+                  type: array
+                  items:
+                    type: string
+                  example: ["pikachu", "pikipek", "pika"]
+      responses:
+        "200":
+          description: Search flow test passed
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  testCases:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        input:
+                          type: string
+                        expectedOutput:
+                          type: array
+                        actualOutput:
+                          type: array
+                        passed:
+                          type: boolean
+
+x-test-scenarios:
+  unit-tests:
+    - name: StickySearchBar - renders with default props
+      given: Component mounted with required props
+      when: Component renders
+      then: Input element displays with default placeholder
+      acceptance: |
+        - Input has placeholder: "Search Pokemon by name..."
+        - Input value matches controlled prop
+        - Clear button not visible (value empty)
+      test-file: tests/unit/components/StickySearchBar.test.jsx
+
+    - name: StickySearchBar - onChange callback fires on keystroke
+      given: Component mounted with onChange callback
+      when: User types "pika" in input
+      then: onChange called 4 times (one per keystroke)
+      acceptance: |
+        - onChange called with correct value each time
+        - Value updates controlled prop immediately
+        - No filtering yet (< 3 chars)
+      test-file: tests/unit/components/StickySearchBar.test.jsx
+
+    - name: StickySearchBar - shows clear button when input has text
+      given: Component with value="pikachu"
+      when: Component renders
+      then: Clear button (×) is visible
+      acceptance: |
+        - Clear button element present
+        - Clear button click triggers onClear callback
+        - Input value clears after onClear
+      test-file: tests/unit/components/StickySearchBar.test.jsx
+
+    - name: StickySearchBar - sticky positioning CSS applied
+      given: Component mounted
+      when: Component renders
+      then: CSS position property is "sticky"
+      acceptance: |
+        - CSS position: sticky
+        - CSS top: 0
+        - CSS z-index: >= 10
+        - Background white (no transparency)
+        - Box shadow for depth (when sticky)
+      test-file: tests/unit/components/StickySearchBar.test.jsx
+
+    - name: useDebounce - debounces value after delay
+      given: useDebounce hook with delay=300
+      when: Value changes to "pika"
+      then: debouncedValue remains old value until 300ms passes
+      acceptance: |
+        - Immediately: debouncedValue unchanged, isDebouncing=true
+        - After 300ms: debouncedValue updates to "pika", isDebouncing=false
+      test-file: tests/unit/hooks/useDebounce.test.js
+
+    - name: useDebounce - resets timer on rapid changes
+      given: useDebounce hook with value changing rapidly
+      when: User types "p", "i", "k", "a" in 4 keystrokes (80ms apart)
+      then: Debounce timer resets on each keystroke
+      acceptance: |
+        - Each keystroke within 300ms resets timer
+        - debouncedValue only updates after 300ms silence
+        - Total wait time: 300ms from last keystroke
+      test-file: tests/unit/hooks/useDebounce.test.js
+
+    - name: useDebounce - cleans up on unmount
+      given: useDebounce hook mounted and unmounted
+      when: Component unmounts before debounce completes
+      then: Timer is cleared; no memory leak
+      acceptance: |
+        - setTimeout/clearTimeout called correctly
+        - No pending timers after unmount
+        - No state updates after unmount
+      test-file: tests/unit/hooks/useDebounce.test.js
+
+  integration-tests:
+    - name: Search triggers when 3+ characters typed
+      given: App with search bar + pokemon grids
+      when: User types "pika" in search (4 chars)
+      then: After 300ms debounce, grids filter to matching Pokemon
+      acceptance: |
+        - Available grid shows: Pikachu, Pikipek, etc.
+        - Collected grid shows: Only collected Pikachu (if owned)
+        - Wishlisted grid shows: Only wishlisted Pikachu (if wishlisted)
+        - Empty grids show "No Pokemon found" for unmatched categories
+      test-file: tests/integration/search.us4.test.jsx
+
+    - name: Search does NOT trigger with 1-2 characters
+      given: App with search bar + pokemon grids
+      when: User types "pi" (2 chars)
+      then: Grids remain unfiltered (show all Pokemon)
+      acceptance: |
+        - All three grids show all Pokemon
+        - No search results processed
+        - Placeholder text visible: "Keep typing..."
+      test-file: tests/integration/search.us4.test.jsx
+
+    - name: Clear button clears search and resets grids
+      given: User has searched for "pika" (results filtering)
+      when: User clicks clear button or presses Escape
+      then: Search input clears; grids show all Pokemon again
+      acceptance: |
+        - Input value: ""
+        - All grids show all Pokemon (unfiltered)
+        - Clear button disappears (no text in input)
+      test-file: tests/integration/search.us4.test.jsx
+
+    - name: Search results with 0 matches
+      given: User searches for "zzzzz" (non-existent Pokemon)
+      when: After 300ms debounce settles
+      then: All three grids show empty state
+      acceptance: |
+        - Available grid: "No Pokemon found matching 'zzzzz'"
+        - Collected grid: "No Pokemon found matching 'zzzzz'"
+        - Wishlisted grid: "No Pokemon found matching 'zzzzz'"
+      test-file: tests/integration/search.us4.test.jsx
+
+    - name: Search bar stays sticky when scrolling down grids
+      given: User has searched + results displayed + scroll position > header
+      when: User scrolls grid content up (page scrolls down)
+      then: Search bar remains visible at top; grids scroll under it
+      acceptance: |
+        - Search bar position: sticky (top: 0)
+        - Search bar z-index: 10 (above grids)
+        - 8px gap maintained between search bar and grid content
+        - No layout shift (CLS = 0)
+      test-file: tests/integration/sticky-scroll.test.jsx
+
+    - name: Search bar unsticks when scrolling back to header
+      given: User scrolled down; search bar is sticky
+      when: User scrolls grid content down (page scrolls up) back to header
+      then: Search bar transitions back to static position
+      acceptance: |
+        - Header becomes visible again
+        - Search bar position: static (not sticky)
+        - Layout remains stable (no jank)
+      test-file: tests/integration/sticky-scroll.test.jsx
+
+    - name: Rapid search queries handled correctly
+      given: User searches for different Pokemon in quick succession
+      when: User types "pika", clears, types "char", clears, types "bulb"
+      then: Each search filters correctly; no missed updates
+      acceptance: |
+        - Each search query processed correctly
+        - No stale results displayed
+        - Grids always show current search results
+        - Performance: each query result within 350ms
+      test-file: tests/integration/search.us4.test.jsx
+
+  accessibility-tests:
+    - name: Search input has proper ARIA labels
+      given: StickySearchBar rendered with all props
+      when: Accessibility audit run (axe, WAVE)
+      then: No accessibility violations
+      acceptance: |
+        - aria-label: "Search Pokemon by name" (or custom)
+        - aria-describedby: (if minChars instruction provided)
+        - Input role: "textbox" or "searchbox"
+        - Label associated with input
+      test-file: tests/integration/a11y-search.test.jsx
+
+    - name: Keyboard navigation: Tab into search input
+      given: User presses Tab to navigate
+      when: Tab reaches search input
+      then: Input receives focus; focus indicator visible
+      acceptance: |
+        - :focus-visible pseudo-class applied
+        - Focus ring visible (at least 2px)
+        - Contrast ratio >= 3:1
+      test-file: tests/integration/a11y-search.test.jsx
+
+    - name: Keyboard navigation: Escape clears search
+      given: Search input focused with text
+      when: User presses Escape key
+      then: Search input clears; focus remains in input
+      acceptance: |
+        - Input value becomes ""
+        - onClear callback triggered
+        - Focus stays in input (user can type new search)
+      test-file: tests/integration/a11y-search.test.jsx
+
+    - name: Keyboard navigation: Tab to clear button
+      given: Search input has text + clear button visible
+      when: User presses Tab from input
+      then: Clear button receives focus
+      acceptance: |
+        - Clear button has tabindex >= 0
+        - Focus indicator visible
+        - Enter/Space activates clear button
+      test-file: tests/integration/a11y-search.test.jsx
+
+    - name: Screen reader announces search results
+      given: Search results update (user types + debounce settles)
+      when: Screen reader reads page
+      then: Results announced (e.g., "3 Pokemon found")
+      acceptance: |
+        - aria-live: "polite" on results container
+        - Announcement: "{count} Pokemon found matching '{query}'"
+        - Empty results: "No Pokemon found matching '{query}'"
+      test-file: tests/integration/a11y-search.test.jsx
+
+  performance-tests:
+    - name: Search completes within 350ms (debounce + render)
+      given: App loaded with all Pokemon
+      when: User types "pika" and waits for debounce + filter + render
+      then: Results visible on screen within 350ms
+      acceptance: |
+        - Time measurement: keystroke → debounce (300ms) + filter + render (50ms)
+        - Measured with performance.now() or performance observer
+        - No janky rendering (60fps maintained during search)
+      test-file: tests/integration/search-performance.test.jsx
+
+    - name: Sticky scroll at 60 FPS with no jank
+      given: User scrolling down grid (search sticky)
+      when: Measuring frame rate during scroll
+      then: 60 FPS maintained; no dropped frames
+      acceptance: |
+        - Frame rate: >= 55 FPS (allows 5 FPS variance)
+        - Scroll performs smoothly (no stuttering)
+        - Measured with requestAnimationFrame or DevTools
+      test-file: tests/integration/sticky-scroll-performance.test.jsx
+
+    - name: No memory leaks in debounce cleanup
+      given: Component mounted/unmounted multiple times
+      when: Running heap snapshot analysis
+      then: No accumulated timers or listeners
+      acceptance: |
+        - Memory stable after mount/unmount cycles
+        - No pending setTimeout calls
+        - useDebounce cleanup runs on unmount
+      test-file: tests/integration/memory-leaks.test.jsx
+
+  edge-case-tests:
+    - name: Special characters in search (e.g., "nidoran♂")
+      given: User searches for Pokemon with special characters
+      when: Search query includes accents/symbols
+      then: pokemonService handles matching correctly
+      acceptance: |
+        - Query passed to searchPokemonByName as-is
+        - Results match special character Pokemon
+        - No encoding errors or mojibake
+      test-file: tests/integration/search-special-chars.test.jsx
+
+    - name: Mobile viewport 320px width
+      given: App on mobile device (320px width)
+      when: Search bar rendered
+      then: Search bar spans full width; no horizontal scroll
+      acceptance: |
+        - Search bar width: 100%
+        - Padding/margin: responsive (padding-left: 1rem, padding-right: 1rem)
+        - max-width: none (or very high)
+        - No horizontal overflow
+        - Input field readable and tappable (min 44px height)
+      test-file: tests/integration/mobile-responsive.test.jsx
+
+    - name: Empty search field shows all Pokemon
+      given: User has searched + then cleared input
+      when: Search input value is ""
+      then: All Pokemon displayed (unfiltered)
+      acceptance: |
+        - searchResults reset to null
+        - isSearchActive = false
+        - All grids show all Pokemon
+      test-file: tests/integration/search.us4.test.jsx
+
+    - name: Undo/Redo with browser back button
+      given: User searched, then hit browser back button
+      when: Browser navigation event
+      then: Search state preserved or cleared per UX spec
+      acceptance: |
+        - If URL routing used: search param in URL (e.g., ?search=pika)
+        - Browser back button restores previous state
+        - OR search state not persisted (acceptable if documented)
+      test-file: tests/integration/browser-history.test.jsx
+
+    - name: Window resize during sticky scroll
+      given: User scrolled + search bar sticky; then window resized
+      when: Window resize event triggered
+      then: Search bar repositions correctly
+      acceptance: |
+        - Sticky position recalculates
+        - No layout shift
+        - Grid content adjusts to new width
+      test-file: tests/integration/responsive-resize.test.jsx
+
+  contract-validation:
+    - name: Component prop types validation
+      given: StickySearchBar component loaded
+      when: Props passed to component
+      then: Type validation passes (TypeScript strict mode)
+      acceptance: |
+        - value: string
+        - onChange: (string) => void
+        - onClear: () => void
+        - optional props have defaults
+        - No prop type errors in TS compiler
+      test-file: tests/contract/component-props.test.js
+
+    - name: Hook return type validation
+      given: useDebounce hook called
+      when: Hook returns values
+      then: Return type matches contract
+      acceptance: |
+        - debouncedValue: typeof value
+        - isDebouncing: boolean
+        - No missing properties
+        - No unexpected properties
+      test-file: tests/contract/hook-return.test.js
+
+    - name: Callback signatures
+      given: Component callbacks invoked
+      when: onChange or onClear called
+      then: Callback signatures match contract
+      acceptance: |
+        - onChange called with single string argument
+        - onClear called with no arguments
+        - No argument type mismatches
+      test-file: tests/contract/callbacks.test.js
+
+---
+
+## Implementation Notes
+
+### Sticky Positioning Implementation
+- Use CSS `position: sticky; top: 0;` (no JavaScript scroll listeners)
+- Fallback: Intersection Observer to detect header visibility
+- Z-index: 10 (above grids, below modals if any)
+
+### Debounce Implementation
+- Use setTimeout internally
+- Clear timeout on unmount (useEffect cleanup)
+- Reset timer on every value change
+- Track `isDebouncing` state separately
+
+### Search Integration
+- Reuse existing `pokemonService.searchPokemonByName(query)`
+- Filter three grids independently (same search, different data sources)
+- Minimum 3 characters before filtering activates
+
+### Performance Optimization
+- Debounce prevents excessive filter calls (max 1 per 300ms)
+- Sticky positioning uses CSS (no JavaScript animation)
+- Consider useMemo for grid filtering if performance degrades
+
