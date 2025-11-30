@@ -131,21 +131,19 @@ export default function App(): ReactElement {
       threshold: 0.01,
     })
 
-    // Observe only the first batch of visible cards to avoid excessive DOM operations
-    // In a real app, this would use virtual scrolling to only render visible items
+    // Observe all visible cards to enable lazy loading across all Pokemon
     const allCards = document.querySelectorAll('[data-pokemon-index]')
-    const maxToObserve = Math.min(50, allCards.length)
     
-    for (let i = 0; i < maxToObserve; i++) {
-      const card = allCards[i] as HTMLElement
-      const indexStr = card.getAttribute('data-pokemon-index')
+    allCards.forEach((card) => {
+      const element = card as HTMLElement
+      const indexStr = element.getAttribute('data-pokemon-index')
       if (indexStr !== null) {
         const index = parseInt(indexStr, 10)
         if (!fetchedIndices.has(index)) {
-          observer.observe(card)
+          observer.observe(element)
         }
       }
-    }
+    })
 
     return () => {
       observer.disconnect()
@@ -362,7 +360,10 @@ export default function App(): ReactElement {
         <section className="three-grids-section" aria-label="Pokemon grids">
           {/* Collected Grid */}
           <CollectionList
-            pokemon={collection.filter((p) => p.collected)}
+            pokemon={collection.filter((p) => p.collected).map((p) => {
+              const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
+              return { ...p, image: fullPokemon?.image || p.image }
+            })}
             title="My Collection"
             onCollect={handleCollect}
             onRemove={handleRemove}
@@ -371,7 +372,10 @@ export default function App(): ReactElement {
 
           {/* Wishlist Grid */}
           <WishlistList
-            pokemon={collection.filter((p) => p.wishlist)}
+            pokemon={collection.filter((p) => p.wishlist).map((p) => {
+              const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
+              return { ...p, image: fullPokemon?.image || p.image }
+            })}
             title="My Wishlist"
             onRemoveWishlist={handleRemoveFromWishlist}
             onCollect={handleCollect}

@@ -23,13 +23,13 @@
   background: white;
   border: 2px solid #e0e0e0;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 0.75rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-width: 200px;
-  max-width: 250px;
+  min-width: 130px;
+  max-width: 150px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -46,22 +46,22 @@
 }
 
 .pokemon-card-image {
-  width: 150px;
-  height: 150px;
+  width: 75px;
+  height: 75px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: #f5f5f5;
   border-radius: 8px;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
   overflow: hidden;
+  flex-shrink: 0;
 }
 
 .pokemon-card-image img {
-  width: 100%;
-  height: 100%;
+  width: 75px;
+  height: 75px;
   object-fit: contain;
-  padding: 0.5rem;
 }
 
 .pokemon-image-placeholder {
@@ -73,20 +73,21 @@
 .pokemon-card-content {
   flex: 1;
   width: 100%;
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .pokemon-name {
-  margin: 0 0 0.5rem;
-  font-size: 1.3rem;
+  margin: 0 0 0.25rem;
+  font-size: 0.9rem;
   color: #333;
   font-weight: 600;
+  word-break: break-word;
 }
 
 .pokemon-index {
-  margin: 0 0 1rem;
+  margin: 0 0 0.5rem;
   color: #666;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -125,17 +126,17 @@
 
 /* ===== Button Styles (WCAG 2.1 AA: 4.5:1 Color Contrast) ===== */
 .btn {
-  padding: 0.6rem 1.2rem;
+  padding: 0.4rem 0.6rem;
   border: none;
   border-radius: 6px;
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   flex: 1;
-  min-width: 100px;
-  /* Ensure minimum touch target: 48x48px (WCAG 2.1 AA) */
-  min-height: 44px;
+  min-width: auto;
+  /* Ensure minimum touch target: 44x44px (WCAG 2.1 AA) */
+  min-height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -235,6 +236,10 @@
 /* ===== Collection List Component ===== */
 .collection-list {
   width: 100%;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .collection-header {
@@ -258,7 +263,7 @@
 
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 1.5rem;
 }
 
@@ -388,7 +393,7 @@
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
   .pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   }
 }
 
