@@ -11,6 +11,10 @@ type SearchMode = 'index' | 'name'
 /**
  * PokemonSearch Component
  * Provides search functionality for finding Pokemon by index or name
+ * 
+ * @deprecated This component is deprecated as of Feature 002 (Sticky Search Bar).
+ * Use the StickySearchBar component instead for the new debounced search experience.
+ * This component will be removed in a future release.
  */
 export default function PokemonSearch({
   onSearch,

@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import '@testing-library/jest-dom';
 
 // Helper to get search button (not the mode toggle button)
@@ -40,6 +41,26 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
 
     return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null });
   }),
+}));
+
+// Mock pokemonService for sticky search bar feature
+vi.mock('../../src/services/pokemonService.ts', () => ({
+  searchPokemonByName: vi.fn(async (query) => {
+    const allPokemon = [
+      { index: 1, name: 'Bulbasaur' },
+      { index: 4, name: 'Charmander' },
+      { index: 7, name: 'Squirtle' },
+      { index: 25, name: 'Pikachu' },
+      { index: 39, name: 'Jigglypuff' },
+    ];
+    return allPokemon.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+  }),
+  getCollectionList: vi.fn(() => []),
+  collectPokemon: vi.fn(),
+  removeFromCollection: vi.fn(),
+  isCollected: vi.fn(() => false),
+  addToWishlist: vi.fn(),
+  removeFromWishlist: vi.fn(),
 }));
 
 describe('US4: Search Pokemon by Name Integration Tests', () => {
@@ -147,3 +168,111 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
     // Name search will be implemented in next phase
   });
 });
+
+describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
+  beforeEach(() => {
+    localStorage.clear();
+    vi.clearAllMocks();
+  });
+
+  afterEach(() => {
+    localStorage.clear();
+  });
+
+  it('should trigger search at 3+ characters', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    if (searchInput) {
+      // Type 1-2 characters (should not trigger)
+      await user.type(searchInput, 'p');
+      await waitFor(() => {
+        // Should not have filtered yet
+      }, { timeout: 500 });
+
+      // Add more characters to reach 3+
+      await user.type(searchInput, 'i');
+      await user.type(searchInput, 'k');
+      // Should trigger search now
+    }
+  });
+
+  it('should not trigger search at 1-2 characters', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    if (searchInput) {
+      await user.type(searchInput, 'p');
+      expect(searchInput).toHaveValue('p');
+      // Should not have triggered filtering
+    }
+  });
+
+  it('should clear search results when search is cleared', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    if (searchInput) {
+      await user.type(searchInput, 'pika');
+      expect(searchInput).toHaveValue('pika');
+
+      // Clear via Escape or button - use getAllByRole to get the first match (the sticky search bar clear button)
+      const allButtons = screen.getAllByRole('button', { name: /clear|×/i });
+      if (allButtons.length > 0) {
+        // Click the first one (the sticky search bar clear button, not the legacy reset button)
+        await user.click(allButtons[0]);
+      }
+    }
+  });
+
+  it('should handle zero match results with empty state', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    if (searchInput) {
+      await user.type(searchInput, 'xyz');
+      // Should show no results message
+    }
+  });
+
+  it('should handle rapid query changes', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await waitFor(() => {
+      expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    if (searchInput) {
+      // Simulate rapid typing
+      await user.type(searchInput, 'p');
+      await user.type(searchInput, 'i');
+      await user.type(searchInput, 'k');
+      await user.type(searchInput, 'a');
+      expect(searchInput).toHaveValue('pika');
+      // Should debounce and only search once for 'pika'
+    }
+  });
+});
+

@@ -30,24 +30,29 @@
 
 .app-main {
   flex: 1;
-  display: grid;
-  grid-template-columns: 1fr 2fr;
-  gap: 2rem;
-  padding: 2rem;
-  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  max-width: 100%;
   margin: 0 auto;
   width: 100%;
 }
 
-/* Search Section */
-.search-section {
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  height: fit-content;
+/* NEW: Sticky Search Section (T017 - Refactored layout) */
+.sticky-search-section {
   position: sticky;
-  top: 2rem;
+  top: 0;
+  z-index: 100;
+  background: white;
+  padding: 1rem 2rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid #e0e0e0;
+}
+
+/* Legacy Search Section - Hidden by default */
+.search-section {
+  display: none;
 }
 
 /* Error Message (WCAG 2.1 AA: Alert role with high contrast) */
@@ -63,12 +68,14 @@
   line-height: 1.5;
 }
 
-/* Three Grids Section */
+/* Three Grids Section - NEW: Single column layout with 8px gap */
 .three-grids-section {
-  grid-column: 1 / -1;
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  padding: 2rem;
+  background: white;
+  margin-top: 0.5rem;
 }
 
 .available-grid-section {

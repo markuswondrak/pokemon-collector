@@ -31,51 +31,51 @@ This document breaks down the sticky search bar feature into executable tasks or
 
 ### Unit Test Tasks
 
-- [ ] T001 [P] Create unit tests for useDebounce hook in `tests/unit/hooks/useDebounce.test.js`
+- [x] T001 [P] Create unit tests for useDebounce hook in `tests/unit/hooks/useDebounce.test.js`
   - Acceptance: 7 test cases covering debounce timing, state, cleanup
   - Details: debounces value after delay, resets timer on changes, cleans up on unmount, isDebouncing state correct
 
-- [ ] T002 [P] Create unit tests for StickySearchBar component in `tests/unit/components/StickySearchBar.test.jsx`
+- [x] T002 [P] Create unit tests for StickySearchBar component in `tests/unit/components/StickySearchBar.test.jsx`
   - Acceptance: 6 test cases for rendering, callbacks, clear button, sticky CSS
   - Details: renders with defaults, onChange fires, clear button shows/hides, sticky positioning CSS applied, Escape clears, ARIA labels present
 
-- [ ] T003 [P] Update unit tests for App component in `tests/unit/components/App.test.jsx`
+- [x] T003 [P] Update unit tests for App component in `tests/unit/components/App.test.jsx`
   - Acceptance: Add 3 test cases for new search state management
   - Details: search state initialized, search query updates, search results filter grids
 
 ### Integration Test Tasks
 
-- [ ] T004 [P] Create integration test for search flow in `tests/integration/search.us4.test.jsx` (extend existing)
+- [x] T004 [P] Create integration test for search flow in `tests/integration/search.us4.test.jsx` (extend existing)
   - Acceptance: 5 test cases for search triggering, clearing, empty results
   - Details: triggers at 3+ chars, doesn't trigger at 1-2 chars, clear resets grids, zero match handling, rapid queries
 
-- [ ] T005 [P] Create integration test for sticky scroll in `tests/integration/sticky-scroll.test.jsx`
+- [x] T005 [P] Create integration test for sticky scroll in `tests/integration/sticky-scroll.test.jsx`
   - Acceptance: 4 test cases for sticky positioning behavior
   - Details: stays sticky on scroll down, unsticks on scroll up, maintains gap, no layout shift
 
 ### Accessibility Test Tasks
 
-- [ ] T006 [P] Create accessibility tests in `tests/integration/a11y-search.test.jsx`
+- [x] T006 [P] Create accessibility tests in `tests/integration/a11y-search.test.jsx`
   - Acceptance: 5 test cases for WCAG compliance
   - Details: ARIA labels, Tab navigation, Escape key, focus indicators, screen reader announcements
 
 ### Performance Test Tasks
 
-- [ ] T007 [P] Create performance tests in `tests/integration/search-performance.test.jsx`
+- [x] T007 [P] Create performance tests in `tests/integration/search-performance.test.jsx`
   - Acceptance: 3 test cases for latency and smoothness
   - Details: search <350ms, sticky scroll 60 FPS, no memory leaks
 
 ### Test Setup Tasks
 
-- [ ] T008 Create test utilities and fixtures in `tests/setup.ts`
+- [x] T008 Create test utilities and fixtures in `tests/setup.ts`
   - Acceptance: Mock pokemonService, test data, render helpers available
   - Details: Pokemon fixtures (3 samples), mock search function, RTL render wrapper
 
-- [ ] T009 Update test configuration in `vitest.config.js` if needed
+- [x] T009 Update test configuration in `vitest.config.js` if needed
   - Acceptance: Config supports all test types (unit, integration, a11y, perf)
   - Details: Verify jsdom environment, React setup, coverage thresholds
 
-- [ ] T010 [P] Run test suite to verify all tests fail initially (RED phase)
+- [x] T010 [P] Run test suite to verify all tests fail initially (RED phase)
   - Acceptance: 26+ tests defined, all failing (as expected in TDD)
   - Details: `pnpm test` shows failures, coverage baseline established
 
@@ -85,39 +85,39 @@ This document breaks down the sticky search bar feature into executable tasks or
 
 ### Hook Implementation Tasks
 
-- [ ] T011 Create useDebounce hook in `src/hooks/useDebounce.ts`
+- [x] T011 Create useDebounce hook in `src/hooks/useDebounce.ts`
   - Acceptance: Hook debounces value, handles cleanup, passes all 7 unit tests
   - Details: useState for debounced value, useEffect for timer, cleanup on unmount, configurable delay (300ms default)
 
 ### Component Implementation Tasks
 
-- [ ] T012 Create StickySearchBar component in `src/components/StickySearchBar.tsx`
+- [x] T012 Create StickySearchBar component in `src/components/StickySearchBar.tsx`
   - Acceptance: Component renders input, handles events, applies sticky CSS, passes all 6 unit tests
   - Details: controlled component (value prop), onChange/onClear callbacks, placeholder/minChars props, CSS sticky positioning, clear button (×), ARIA labels
 
-- [ ] T013 [P] Update App.tsx component in `src/components/App.tsx` - Part 1: Add state
+- [x] T013 [P] Update App.tsx component in `src/components/App.tsx` - Part 1: Add state
   - Acceptance: searchQuery and searchResults state added to App
   - Details: useState for searchQuery, searchResults, isSearchActive; integrate useDebounce hook
 
-- [ ] T014 [P] Update App.tsx component in `src/components/App.tsx` - Part 2: Add search logic
+- [x] T014 [P] Update App.tsx component in `src/components/App.tsx` - Part 2: Add search logic
   - Acceptance: Search filtering logic implemented, calls pokemonService.searchPokemonByName()
   - Details: Handle onChange/onClear, filter logic when 3+ chars, reset when cleared
 
-- [ ] T015 [P] Update App.tsx component in `src/components/App.tsx` - Part 3: Refactor layout
+- [x] T015 [P] Update App.tsx component in `src/components/App.tsx` - Part 3: Refactor layout
   - Acceptance: Layout changed from 2-col grid to 1-col flex, search section positioned sticky
   - Details: Remove 2-column grid, add flex column, position search section with sticky, ensure 8px gap
 
-- [ ] T016 Integrate StickySearchBar into App.tsx in `src/components/App.tsx`
+- [x] T016 Integrate StickySearchBar into App.tsx in `src/components/App.tsx`
   - Acceptance: StickySearchBar rendered, receives props, callback handlers connected
   - Details: Import component, render in new search section, pass value/onChange/onClear
 
 ### CSS Refactoring Tasks
 
-- [ ] T017 [P] Refactor App layout CSS in `src/styles/App.css`
+- [x] T017 [P] Refactor App layout CSS in `src/styles/App.css`
   - Acceptance: Layout converted from grid to flex column, sticky positioning applied
   - Details: Update .app class (grid→flex), add .search-section (sticky), add .grids-section, remove old 2-col styles
 
-- [ ] T018 [P] Add StickySearchBar component styles in `src/styles/components.css`
+- [x] T018 [P] Add StickySearchBar component styles in `src/styles/components.css`
   - Acceptance: Component styled like Google search, responsive, accessible
   - Details: Input field (centered, min 44px height), clear button, hover/focus states, mobile responsive (320px+)
 

@@ -1,4 +1,6 @@
 import { useState, useEffect, useMemo, ReactElement } from 'react'
+import { useDebounce } from '../hooks/useDebounce.ts'
+import StickySearchBar from './StickySearchBar.tsx'
 import PokemonSearch from './PokemonSearch.tsx'
 import CollectionList from './CollectionList.tsx'
 import WishlistList from './WishlistList.tsx'
@@ -18,6 +20,15 @@ interface Pokemon {
 /**
  * Main App Component
  * Orchestrates search, display, and collection management
+ * 
+ * State Management:
+ * - currentPokemon: Currently selected Pokemon from legacy search
+ * - collection: Array of collected and wishlisted Pokemon
+ * - allPokemon: All 1025 Pokemon with lazy-loaded data
+ * - searchQuery: Raw search input (filters when >= 3 chars)
+ * - debouncedSearchQuery: Debounced version for API calls (300ms delay)
+ * - searchResults: Filtered Pokemon matching debounced query
+ * - fetchedIndices: Set of Pokemon indices already fetched from API
  */
 export default function App(): ReactElement {
   const [currentPokemon, setCurrentPokemon] = useState<Pokemon | null>(null)
@@ -26,6 +37,12 @@ export default function App(): ReactElement {
   const [error, setError] = useState<string>('')
   const [searchIndex, setSearchIndex] = useState<number | undefined>(undefined)
   const [fetchedIndices, setFetchedIndices] = useState<Set<number>>(new Set())
+
+  // NEW: Sticky Search Bar state (T013)
+  const [searchQuery, setSearchQuery] = useState<string>('')
+  const { debouncedValue: debouncedSearchQuery } = useDebounce(searchQuery, { delay: 300 })
+  const [searchResults, setSearchResults] = useState<Pokemon[] | null>(null)
+  const isSearchActive = searchQuery.length >= 3
 
   // Fetch a batch of Pokemon from the API
   const fetchPokemonBatch = async (indices: number[], currentFetched: Set<number>): Promise<void> => {
@@ -98,6 +115,30 @@ export default function App(): ReactElement {
     const indicesToFetch = Array.from({ length: Math.min(20, 1025) }, (_, i) => i + 1)
     fetchPokemonBatch(indicesToFetch, new Set())
   }, [])
+
+  // NEW: Handle debounced name search (T014)
+  useEffect(() => {
+    if (!isSearchActive || !debouncedSearchQuery) {
+      setSearchResults(null)
+      return
+    }
+
+    const performSearch = async () => {
+      try {
+        const results = await pokemonService.searchPokemonByName(debouncedSearchQuery)
+        // Filter to get only Pokemon that exist in allPokemon
+        const filtered = results.filter((result) =>
+          allPokemon.some((p) => p.index === result.index)
+        )
+        setSearchResults(filtered)
+      } catch (err) {
+        console.error('Search error:', err)
+        setSearchResults([])
+      }
+    }
+
+    void performSearch()
+  }, [debouncedSearchQuery, allPokemon, isSearchActive])
 
   // Observe visible Pokemon and fetch them (lazy loading on scroll)
   useEffect(() => {
@@ -309,23 +350,62 @@ export default function App(): ReactElement {
     setSearchIndex(undefined)
   }
 
+  // NEW: Sticky Search Bar handlers (T013, T014, T016)
+  const handleSearchChange = (query: string): void => {
+    setSearchQuery(query)
+  }
+
+  const handleSearchClear = (): void => {
+    setSearchQuery('')
+    setSearchResults(null)
+  }
+
   const collectedCount = collection.filter((p) => p.collected).length
   
+  // T024: Memoized filter functions to prevent unnecessary recalculations
+  const filteredCollection = useMemo(() => {
+    const collected = collection.filter((p) => p.collected)
+    if (!isSearchActive || !searchResults) {
+      return collected
+    }
+    const searchIndexSet = new Set(searchResults.map((p) => p.index))
+    return collected.filter((p) => searchIndexSet.has(p.index))
+  }, [collection, isSearchActive, searchResults])
+
+  const filteredWishlist = useMemo(() => {
+    const wishlist = collection.filter((p) => p.wishlist)
+    if (!isSearchActive || !searchResults) {
+      return wishlist
+    }
+    const searchIndexSet = new Set(searchResults.map((p) => p.index))
+    return wishlist.filter((p) => searchIndexSet.has(p.index))
+  }, [collection, isSearchActive, searchResults])
+
+  const filteredAllPokemon = useMemo(() => {
+    if (!isSearchActive || !searchResults) {
+      return allPokemon
+    }
+    return searchResults.map((result) => {
+      const fullPokemon = allPokemon.find((p) => p.index === result.index)
+      return fullPokemon || result
+    })
+  }, [allPokemon, isSearchActive, searchResults])
+
   // Create Collection and Wishlist objects from array for grid components
   // Use useMemo to avoid calling Date.now() on every render
   const mockCollection = useMemo(() => ({
     id: 'collection',
     lastUpdated: Date.now(),
-    items: new Map(collection.filter((p) => p.collected).map((p) => [p.index, p])),
+    items: new Map(filteredCollection.map((p: Pokemon) => [p.index, p])),
     count: collectedCount,
-  }), [collection, collectedCount])
+  }), [filteredCollection, collectedCount])
 
   const mockWishlist = useMemo(() => ({
     id: 'wishlist',
     lastUpdated: Date.now(),
-    items: new Map(collection.filter((p) => p.wishlist).map((p) => [p.index, p])),
-    count: collection.filter((p) => p.wishlist).length,
-  }), [collection])
+    items: new Map(filteredWishlist.map((p: Pokemon) => [p.index, p])),
+    count: filteredWishlist.length,
+  }), [filteredWishlist])
 
   return (
     <main className="app" aria-label="Pokemon Collection Organizer">
@@ -342,7 +422,18 @@ export default function App(): ReactElement {
       </header>
 
       <div className="app-main">
-        {/* Search Section */}
+        {/* NEW: Sticky Search Bar Section (T015, T016) */}
+        <section className="sticky-search-section" aria-label="Sticky search bar">
+          <StickySearchBar
+            value={searchQuery}
+            onChange={handleSearchChange}
+            onClear={handleSearchClear}
+            placeholder="Search Pokemon by name..."
+            minChars={3}
+          />
+        </section>
+
+        {/* Legacy Search Section (for backwards compatibility) */}
         <section className="search-section" aria-label="Search tools">
           <PokemonSearch onSearch={handleSearch} onReset={handleReset} />
           {error && (
@@ -360,7 +451,7 @@ export default function App(): ReactElement {
         <section className="three-grids-section" aria-label="Pokemon grids">
           {/* Collected Grid */}
           <CollectionList
-            pokemon={collection.filter((p) => p.collected).map((p) => {
+            pokemon={filteredCollection.map((p) => {
               const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
               return { ...p, image: fullPokemon?.image || p.image }
             })}
@@ -372,7 +463,7 @@ export default function App(): ReactElement {
 
           {/* Wishlist Grid */}
           <WishlistList
-            pokemon={collection.filter((p) => p.wishlist).map((p) => {
+            pokemon={filteredWishlist.map((p) => {
               const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
               return { ...p, image: fullPokemon?.image || p.image }
             })}
@@ -383,7 +474,7 @@ export default function App(): ReactElement {
 
           {/* Available Grid with Lazy Loading */}
           <AvailableGrid
-            allPokemon={allPokemon}
+            allPokemon={filteredAllPokemon}
             collection={mockCollection}
             wishlist={mockWishlist}
             onCollect={handleCollect}
