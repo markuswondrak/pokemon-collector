@@ -1,0 +1,539 @@
+openapi: 3.0.0
+info:
+  title: Component Library Integration - Component API Contracts
+  description: |
+    Chakra UI component API contracts for Pokemon Collector application.
+    Defines required component props, event handlers, and styling through theme configuration.
+  version: 1.0.0
+  x-spec-file: specs/003-component-library/spec.md
+
+servers:
+  - url: internal
+    description: Component library contract specification (no external API)
+
+paths:
+  /components/Button:
+    post:
+      summary: Button Component Contract
+      description: |
+        Chakra UI Button component with Pokemon Collector-specific variants.
+        Variants: primary (teal, 7:1 contrast), secondary (gray), destructive (red).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ButtonProps'
+      responses:
+        '200':
+          description: Rendered Button component
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  element:
+                    type: string
+                    example: '<button class="chakra-button" ...>Text</button>'
+                  role:
+                    type: string
+                    enum: [button]
+                  a11y:
+                    type: object
+                    description: Accessibility features
+                    properties:
+                      ariaLabel:
+                        type: string
+                      ariaPressed:
+                        type: boolean
+                      ariaDisabled:
+                        type: boolean
+
+  /components/Input:
+    post:
+      summary: Input Component Contract
+      description: |
+        Chakra UI Input component for search queries and form fields.
+        Supports accessibility features, validation states, and disabled states.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InputProps'
+      responses:
+        '200':
+          description: Rendered Input component
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  element:
+                    type: string
+                    example: '<input class="chakra-input" />'
+                  role:
+                    type: string
+                    enum: [textbox]
+                  a11y:
+                    type: object
+                    properties:
+                      ariaLabel:
+                        type: string
+                      ariaInvalid:
+                        type: boolean
+                      ariaDescribedBy:
+                        type: string
+
+  /components/Card:
+    post:
+      summary: Card Component Contract
+      description: |
+        Chakra UI Card component for Pokemon display.
+        Includes CardHeader, CardBody, CardFooter subcomponents.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardProps'
+      responses:
+        '200':
+          description: Rendered Card component
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  element:
+                    type: string
+                    example: '<div role="article" class="chakra-card">...</div>'
+                  role:
+                    type: string
+                    enum: [article, region]
+                  layout:
+                    type: object
+                    description: Card layout structure
+                    properties:
+                      padding:
+                        type: string
+                        example: '1rem (16px)'
+                      borderRadius:
+                        type: string
+                        example: '0.5rem (8px)'
+                      shadow:
+                        type: string
+                        example: '0 2px 8px rgba(0,0,0,0.1)'
+
+  /components/Grid:
+    post:
+      summary: Grid Component Contract
+      description: |
+        Chakra UI Grid component for responsive Pokemon grid layouts.
+        Supports auto-fit/auto-fill column adaptation across viewports.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GridProps'
+      responses:
+        '200':
+          description: Rendered Grid component
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  element:
+                    type: string
+                    example: '<div style="display: grid; grid-template-columns: repeat(auto-fill, ...)">...</div>'
+                  responsive:
+                    type: object
+                    properties:
+                      mobile:
+                        type: string
+                        description: '320px viewport'
+                        example: '1 column'
+                      tablet:
+                        type: string
+                        description: '600px viewport'
+                        example: '2 columns'
+                      desktop:
+                        type: string
+                        description: '1024px+ viewport'
+                        example: '3+ columns'
+
+  /components/Badge:
+    post:
+      summary: Badge Component Contract
+      description: |
+        Chakra UI Badge component for Pokemon index and status indicators.
+        Supports solid, subtle, and outline variants.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BadgeProps'
+      responses:
+        '200':
+          description: Rendered Badge component
+
+  /theme/extendTheme:
+    post:
+      summary: Theme Configuration Contract
+      description: |
+        Chakra UI extendTheme() configuration defining all design tokens.
+        Single source of truth for colors, spacing, typography, shadows.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ThemeConfig'
+      responses:
+        '200':
+          description: Theme object applied to ChakraProvider
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ThemeConfig'
+
+components:
+  schemas:
+    ButtonProps:
+      type: object
+      description: Props for Chakra UI Button component
+      properties:
+        variant:
+          type: string
+          enum: [primary, secondary, destructive, ghost]
+          default: primary
+          description: Button style variant
+        size:
+          type: string
+          enum: [sm, md, lg]
+          default: md
+          description: Button size (height and padding)
+        onClick:
+          type: function
+          description: Click event handler
+        isDisabled:
+          type: boolean
+          default: false
+          description: Disable button and prevent interaction
+        isLoading:
+          type: boolean
+          default: false
+          description: Show loading state (spinner + disable)
+        children:
+          type: string
+          description: Button text content
+        ariaLabel:
+          type: string
+          description: Accessibility label (required if icon-only)
+      required:
+        - children
+      example:
+        variant: primary
+        size: md
+        onClick: handleCollect
+        isDisabled: false
+        children: Collect Pokemon
+
+    InputProps:
+      type: object
+      description: Props for Chakra UI Input component
+      properties:
+        placeholder:
+          type: string
+          description: Input placeholder text
+        value:
+          type: string
+          description: Current input value
+        onChange:
+          type: function
+          description: Change event handler
+        onFocus:
+          type: function
+          description: Focus event handler
+        onBlur:
+          type: function
+          description: Blur event handler
+        ariaLabel:
+          type: string
+          description: Accessibility label for screen readers
+        isInvalid:
+          type: boolean
+          default: false
+          description: Show error state (red border)
+        isDisabled:
+          type: boolean
+          default: false
+          description: Disable input
+        size:
+          type: string
+          enum: [sm, md, lg]
+          default: md
+        variant:
+          type: string
+          enum: [outline, flushed, filled]
+          default: outline
+      required:
+        - placeholder
+        - ariaLabel
+      example:
+        placeholder: Search Pokemon by name...
+        ariaLabel: Search for Pokemon
+        value: ''
+        onChange: handleSearch
+        variant: outline
+        size: md
+
+    CardProps:
+      type: object
+      description: Props for Chakra UI Card component
+      properties:
+        children:
+          type: array
+          items:
+            type: object
+          description: Card subcomponents (CardHeader, CardBody, CardFooter)
+        variant:
+          type: string
+          enum: [elevated, outline, filled]
+          default: elevated
+        size:
+          type: string
+          enum: [sm, md, lg]
+          default: md
+        role:
+          type: string
+          enum: [article, region]
+          default: article
+      example:
+        variant: elevated
+        size: md
+        children:
+          - type: CardHeader
+            content: Pokemon Name
+          - type: CardBody
+            content: Image, stats, actions
+          - type: CardFooter
+            content: Actions
+
+    GridProps:
+      type: object
+      description: Props for Chakra UI Grid component
+      properties:
+        templateColumns:
+          type: string
+          description: CSS grid-template-columns value
+          example: repeat(auto-fill, minmax(200px, 1fr))
+        gap:
+          type: string
+          description: Gap between grid items (spacing scale)
+          enum: ['4px', '8px', '12px', '16px', '24px', '32px']
+          example: '16px'
+        w:
+          type: string
+          enum: [full, auto]
+          default: full
+          description: Grid width
+        p:
+          type: string
+          description: Grid padding (spacing scale)
+        children:
+          type: array
+          items:
+            type: object
+          description: Grid items (GridItem components)
+      example:
+        templateColumns: repeat(auto-fill, minmax(200px, 1fr))
+        gap: '16px'
+        w: full
+        p: '24px'
+
+    BadgeProps:
+      type: object
+      description: Props for Chakra UI Badge component
+      properties:
+        variant:
+          type: string
+          enum: [solid, subtle, outline]
+          default: solid
+        size:
+          type: string
+          enum: [sm, md, lg]
+          default: md
+        colorScheme:
+          type: string
+          description: Color scheme for badge
+          enum: [blue, green, red, orange, pokemon.teal, pokemon.gold]
+        children:
+          type: string
+          description: Badge text content
+      example:
+        variant: solid
+        colorScheme: pokemon.teal
+        children: '#6'
+
+    ThemeConfig:
+      type: object
+      description: |
+        Chakra UI extendTheme() configuration.
+        Defines all design tokens for the Pokemon Collector application.
+      properties:
+        colors:
+          type: object
+          description: Color palette (Chakra base + Pokemon brand)
+          properties:
+            gray:
+              type: object
+              description: Chakra gray scale
+            pokemon:
+              type: object
+              properties:
+                teal:
+                  type: string
+                  format: hex-color
+                  example: '#1ba098'
+                gold:
+                  type: string
+                  format: hex-color
+                  example: '#ffd700'
+        space:
+          type: object
+          description: Spacing scale (4px base unit)
+          properties:
+            '0':
+              type: string
+              example: '0'
+            '1':
+              type: string
+              example: '4px'
+            '2':
+              type: string
+              example: '8px'
+            '3':
+              type: string
+              example: '12px'
+            '4':
+              type: string
+              example: '16px'
+            '6':
+              type: string
+              example: '24px'
+            '8':
+              type: string
+              example: '32px'
+        fonts:
+          type: object
+          description: Font families
+          properties:
+            body:
+              type: string
+              example: '"Open Sans", system-ui, sans-serif'
+            heading:
+              type: string
+              example: '"Open Sans", system-ui, sans-serif'
+            mono:
+              type: string
+              example: '"Fira Code", monospace'
+        fontSizes:
+          type: object
+          description: Font size scale
+          properties:
+            xs:
+              type: string
+              example: '12px'
+            sm:
+              type: string
+              example: '14px'
+            md:
+              type: string
+              example: '16px'
+            lg:
+              type: string
+              example: '20px'
+            xl:
+              type: string
+              example: '24px'
+        radii:
+          type: object
+          description: Border radius tokens
+          properties:
+            sm:
+              type: string
+              example: '4px'
+            base:
+              type: string
+              example: '8px'
+            md:
+              type: string
+              example: '12px'
+        shadows:
+          type: object
+          description: Elevation shadow system
+          properties:
+            sm:
+              type: string
+              example: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+            base:
+              type: string
+              example: '0 2px 8px 0 rgba(0, 0, 0, 0.1)'
+            md:
+              type: string
+              example: '0 4px 12px 0 rgba(0, 0, 0, 0.15)'
+            lg:
+              type: string
+              example: '0 8px 24px 0 rgba(0, 0, 0, 0.2)'
+            xl:
+              type: string
+              example: '0 16px 32px 0 rgba(0, 0, 0, 0.25)'
+        components:
+          type: object
+          description: Component-level customizations (variants, sizes, defaults)
+          properties:
+            Button:
+              type: object
+              description: Button component variants and styling
+            Input:
+              type: object
+              description: Input component variants and styling
+            Card:
+              type: object
+              description: Card component styling
+            Grid:
+              type: object
+              description: Grid component styling
+      required:
+        - colors
+        - space
+        - fonts
+        - fontSizes
+        - radii
+        - shadows
+        - components
+
+x-constraints:
+  design-tokens:
+    - Spacing must follow 8px base unit scale
+    - All colors must meet WCAG AAA (7:1) text contrast minimum
+    - Border radius minimum 4px (8px preferred)
+    - Font sizes from predefined scale only
+    - Component shadows use elevation system (5 levels)
+
+  no-css-overrides:
+    - No CSS files for component styling
+    - All styling via theme.ts extendTheme() configuration
+    - Use Chakra component variants instead of custom CSS classes
+    - CSS modules/BEM not allowed for Chakra components
+
+  accessibility:
+    - All interactive elements use semantic HTML
+    - Chakra components auto-handle ARIA labels and roles
+    - Manual ARIA attrs only when needed (aria-pressed, aria-expanded, etc.)
+    - Keyboard navigation full support (Tab, Enter, Escape, Arrow keys)
+    - Color contrast validated via axe-core automated testing
+
+  breaking-change-policy:
+    - No breaking changes to existing Pokemon data model
+    - Services (pokemonApi, pokemonService, collectionStorage) unchanged
+    - Component prop APIs backward-compatible across migration phases
+    - Event handlers (onClick, onChange) remain identical
