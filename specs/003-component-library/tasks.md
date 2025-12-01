@@ -52,16 +52,16 @@ Establish shared UI patterns, Button component foundation, responsive utilities,
 
 ### Tasks
 
-- [ ] T008 Create Button component wrapper `src/components/ButtonBase.tsx` that extends Chakra Button with Pokemon-specific variants: `primary` (teal background, white text, 7:1 contrast), `secondary` (gray), `destructive` (red), with sizes: `sm` (8px-12px padding), `md` (12px-16px padding), `lg` (16px-24px padding)
-- [ ] T009 [P] Create Container wrapper `src/components/Container.tsx` using Chakra Box with max-width 1440px, responsive padding (8px-16px mobile, 16px-24px desktop), and proper spacing
-- [ ] T010 [P] Create Stack utilities `src/components/Stack.tsx` exporting VStack and HStack from Chakra with Pokemon-specific spacing defaults (gap: 16px base, responsive scaling)
-- [ ] T011 [P] Create Card wrapper `src/components/CardBase.tsx` using Chakra Card with consistent shadow (0 2px 8px rgba), border-radius (8px), and padding (16px)
-- [ ] T012 Create unit tests for Button variants at `tests/unit/components/ButtonBase.test.jsx` validating: primary variant has teal color, all variants render without custom CSS, sizes apply correct padding
-- [ ] T013 [P] Create unit tests for Container at `tests/unit/components/Container.test.jsx` validating responsive padding and max-width constraints
-- [ ] T014 [P] Create contract validation tests at `tests/contract/component-contracts.test.js` ensuring Button, Input, Card, Grid match OpenAPI specs from `specs/003-component-library/contracts/component-contracts.yaml`
-- [ ] T015 Verify Phase 1: Run `pnpm test --run` and confirm 0 test failures, all button/container/card tests passing; verify no custom CSS in component files
+- [x] T008 Create Button component wrapper `src/components/ButtonBase.tsx` that extends Chakra Button with Pokemon-specific variants: `primary` (teal background, white text, 7:1 contrast), `secondary` (gray), `destructive` (red), with sizes: `sm` (8px-12px padding), `md` (12px-16px padding), `lg` (16px-24px padding)
+- [x] T009 [P] Create Container wrapper `src/components/Container.tsx` using Chakra Box with max-width 1440px, responsive padding (8px-16px mobile, 16px-24px desktop), and proper spacing
+- [x] T010 [P] Create Stack utilities `src/components/Stack.tsx` exporting VStack and HStack from Chakra with Pokemon-specific spacing defaults (gap: 16px base, responsive scaling)
+- [x] T011 [P] Create Card wrapper `src/components/CardBase.tsx` using Chakra Card with consistent shadow (0 2px 8px rgba), border-radius (8px), and padding (16px)
+- [x] T012 Create unit tests for Button variants at `tests/unit/components/ButtonBase.test.jsx` validating: primary variant has teal color, all variants render without custom CSS, sizes apply correct padding
+- [x] T013 [P] Create unit tests for Container at `tests/unit/components/Container.test.jsx` validating responsive padding and max-width constraints
+- [x] T014 [P] Create contract validation tests at `tests/contract/component-contracts.test.js` ensuring Button, Input, Card, Grid match OpenAPI specs from `specs/003-component-library/contracts/component-contracts.yaml`
+- [x] T015 Verify Phase 1: Run `pnpm test --run` and confirm 0 test failures, all button/container/card tests passing; verify no custom CSS in component files
 
-**Validation Gate**: All foundational tests pass, component contracts validated, no custom CSS in wrapper components.
+**Validation Gate**: ✅ PASS - All Phase 1 tests pass (288 tests total, 0 failures), foundational components created, contract tests validated, no custom CSS in wrapper components.
 
 ---
 

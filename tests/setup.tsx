@@ -1,7 +1,6 @@
 import '@testing-library/jest-dom'
 import { configure, screen, render as rtlRender, RenderOptions } from '@testing-library/react'
-import { ChakraProvider } from '@chakra-ui/react'
-import theme from '../src/styles/theme'
+import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { ReactElement } from 'react'
 
 // Set global timeout for waitFor commands to 1 second
@@ -19,7 +18,7 @@ configure({ asyncUtilTimeout: 1000 })
  * @returns Render result with ChakraProvider wrapper
  */
 function Wrapper({ children }: { children: ReactElement }) {
-  return <ChakraProvider theme={theme}>{children}</ChakraProvider>
+  return <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
 }
 
 export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
