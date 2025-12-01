@@ -1,9 +1,36 @@
 import '@testing-library/jest-dom'
-import { configure, screen } from '@testing-library/react'
+import { configure, screen, render as rtlRender, RenderOptions } from '@testing-library/react'
+import { ChakraProvider } from '@chakra-ui/react'
+import theme from '../src/styles/theme'
+import { ReactElement } from 'react'
 
 // Set global timeout for waitFor commands to 1 second
 // This is a hard requirement for all tests in this project
 configure({ asyncUtilTimeout: 1000 })
+
+/**
+ * Custom render function that wraps components with ChakraProvider
+ * 
+ * This ensures all component tests have access to Chakra UI theme,
+ * context, and styling system. Use this instead of RTL's render().
+ * 
+ * @param ui - React component to render
+ * @param options - Additional render options
+ * @returns Render result with ChakraProvider wrapper
+ */
+function Wrapper({ children }: { children: ReactElement }) {
+  return <ChakraProvider theme={theme}>{children}</ChakraProvider>
+}
+
+export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) {
+  return rtlRender(ui, {
+    wrapper: Wrapper,
+    ...options,
+  })
+}
+
+// Re-export screen and other utilities
+export { screen }
 
 // Test utility: Get the search button specifically (not the mode toggle)
 // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -50,5 +77,3 @@ export function createMockPokemonService() {
     isCollected: vi.fn(() => false),
   }
 }
-
-export { screen }

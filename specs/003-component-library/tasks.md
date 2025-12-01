@@ -31,15 +31,15 @@ Install Chakra UI, create theme configuration, set up ChakraProvider, establish 
 
 ### Tasks
 
-- [ ] T001 Install Chakra UI and peer dependencies (`pnpm add @chakra-ui/react @emotion/react @emotion/styled framer-motion`)
-- [ ] T002 Create Chakra theme configuration file at `src/styles/theme.ts` with colors (Chakra base + Pokemon teal #1ba098, gold #ffd700), spacing (8px scale: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px), typography (Open Sans, font sizes 12px-40px), radii (4px-full), and shadows (sm-xl)
-- [ ] T003 Update `src/main.tsx` to wrap `<App />` with ChakraProvider and apply custom theme from `src/styles/theme.ts`
-- [ ] T004 [P] Update `tsconfig.json` to include Chakra UI type definitions and ensure @emotion/react module resolution
-- [ ] T005 [P] Create test utility file `tests/setup.ts` with `render` function wrapper that includes ChakraProvider for all component tests
-- [ ] T006 [P] Update `vitest.config.js` to configure jsdom environment and Chakra UI initialization
-- [ ] T007 Verify setup: Run `pnpm test --run` to confirm all existing tests still pass with ChakraProvider wrapper; run `pnpm build` and record baseline bundle size
+- [x] T001 Install Chakra UI and peer dependencies (`pnpm add @chakra-ui/react @emotion/react @emotion/styled framer-motion`)
+- [x] T002 Create Chakra theme configuration file at `src/styles/theme.ts` with colors (Chakra base + Pokemon teal #1ba098, gold #ffd700), spacing (8px scale: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px), typography (Open Sans, font sizes 12px-40px), radii (4px-full), and shadows (sm-xl)
+- [x] T003 Update `src/main.tsx` to wrap `<App />` with ChakraProvider and apply custom theme from `src/styles/theme.ts`
+- [x] T004 [P] Update `tsconfig.json` to include Chakra UI type definitions and ensure @emotion/react module resolution
+- [x] T005 [P] Create test utility file `tests/setup.tsx` with `render` function wrapper that includes ChakraProvider for all component tests
+- [x] T006 [P] Update `vitest.config.js` to configure jsdom environment and Chakra UI initialization
+- [x] T007 Verify setup: Run `pnpm test --run` to confirm all existing tests still pass with ChakraProvider wrapper; run `pnpm build` and record baseline bundle size
 
-**Validation Gate**: All tests pass (0 failures), bundle size recorded, no console errors related to Chakra initialization.
+**Validation Gate**: ✅ PASS - All tests pass (240 tests, 22 suites), baseline bundle size: 170.38 kB (gzip), no console errors related to Chakra initialization.
 
 ---
 
