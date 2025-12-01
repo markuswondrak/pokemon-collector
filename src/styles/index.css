@@ -69,3 +69,9 @@ img[src*="png"] {
   object-fit: contain;
   background-color: rgba(245, 245, 245, 0.5);
 }
+
+/* Override for Pokemon card images - must be exactly 75px x 75px per spec (FR-017, SC-014) */
+.pokemon-card-image img {
+  width: 75px !important;
+  height: 75px !important;
+}

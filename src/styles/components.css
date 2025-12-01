@@ -111,8 +111,7 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  min-width: 130px;
-  max-width: 150px;
+  width: 140px;
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
@@ -142,8 +141,8 @@
 }
 
 .pokemon-card-image img {
-  width: 100%;
-  height: 100%;
+  width: 75px;
+  height: 75px;
   object-fit: contain;
   max-width: 75px;
   max-height: 75px;
@@ -349,7 +348,7 @@
 
 .pokemon-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 1.5rem;
   width: 100%;
 }
@@ -480,14 +479,13 @@
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
   .pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   }
 }
 
 @media (max-width: 768px) {
   .pokemon-card {
-    min-width: 130px;
-    max-width: 150px;
+    width: 140px;
   }
 
   .pokemon-card-image {
@@ -496,7 +494,7 @@
   }
 
   .pokemon-grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1rem;
   }
 

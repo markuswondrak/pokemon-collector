@@ -59,7 +59,7 @@ Development processes MUST be streamlined to maximize speed without sacrificing 
 - **Code Review**: All PRs require peer review verifying code quality, testing, and principle compliance
 - **Performance**: Critical code paths MUST have performance baselines; regressions trigger investigation
 - **Documentation**: Public APIs MUST be documented; complex logic MUST include rationale comments
-- **Test Execution**: All test commands MUST use the `--run` flag for one-time execution in automated workflows and CI/CD pipelines; watch mode only when explicitly requested
+- **Test Execution**: All test commands MUST use the `--run` flag (e.g., `pnpm test --run`) for one-time execution in automated workflows, CI/CD pipelines, and implementation tasks; watch mode only when explicitly requested by the user
 
 ## Governance
 
