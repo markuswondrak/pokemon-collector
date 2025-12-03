@@ -8,10 +8,11 @@ A React web application that allows users to organize their Pokemon collection b
 
 - 🎯 **Collection Management**: Mark Pokemon as collected or add them to a wishlist
 - 🔍 **Pokemon API Integration**: Fetch Pokemon data from the public PokéAPI
+- 🎨 **Modern UI**: Built with Chakra UI for a consistent, accessible, and responsive design
 - 💾 **Persistent Storage**: Collection state saved in browser localStorage
 - ⚡ **Fast Development**: Built with Vite for <1s build times and instant HMR
 - ✅ **Fully Tested**: Unit tests, integration tests, and API contract tests
-- 🎨 **Minimal Dependencies**: React 18 + Vite core with clean architecture
+- 🧩 **Minimal Dependencies**: React 18 + Vite core with clean architecture
 
 ## Getting Started Locally
 
@@ -90,10 +91,9 @@ src/
 ├── services/           # Business logic and API integration
 │   ├── pokemonApi.js   # PokéAPI client
 │   └── collectionStorage.js
-├── styles/             # CSS stylesheets
-│   ├── App.css
-│   ├── components.css
-│   └── index.css
+├── styles/             # Styling configuration
+│   ├── index.css       # Global styles and resets
+│   └── theme.ts        # Chakra UI theme configuration
 ├── utils/              # Utility functions and constants
 │   └── constants.ts
 └── main.tsx            # React application entry point

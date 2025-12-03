@@ -3,44 +3,42 @@
 ║                       SYNC IMPACT REPORT                                  ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
-VERSION CHANGE: 1.2.0 → 1.3.0 (test file isolation requirement)
-RATIONALE: MINOR version bump - added test execution discipline guideline for
-  single-file test isolation during implementation verification. Improves test
-  clarity, execution speed, and error diagnostics. Maintains existing worker
-  thread configuration from v1.2.0. No backward-incompatible changes to core
-  principles or governance.
+VERSION CHANGE: 1.3.0 → 1.4.0 (component library integration)
+RATIONALE: MINOR version bump - integrated Chakra UI as the standard component library.
+  Enforced usage of library components and theme configuration over custom CSS.
+  Updates technology stack and development standards to reflect new styling paradigm.
 
 SECTIONS MODIFIED:
-  • Development Standards - Added test file isolation requirement and exception
+  • Project Setup & Architecture - Added Chakra UI to tech stack
+  • Development Standards - Added styling constraints
 
 SECTIONS ADDED:
-  • None
+  • Styling & Design System (under Project Setup & Architecture)
 
 SECTIONS UNCHANGED:
   • Core Principles (I-IV remain stable)
   • Governance (amendment procedure maintained)
-  • Project Setup & Architecture (no changes)
   • Build & Development Tools (no changes)
   • Baseline Features (no changes)
 
 PRINCIPLES PRESERVED:
   ✅ Test worker configuration (4 threads during implementation) - retained from v1.2.0
   ✅ Testing standards (TDD, 80% coverage) - unchanged
+  ✅ UX Consistency - reinforced by component library
 
 TEMPLATES REVIEWED FOR CONSISTENCY:
   ✅ .specify/templates/plan-template.md - No changes needed
   ✅ .specify/templates/spec-template.md - No changes needed
-  ✅ .specify/templates/tasks-template.md - No changes needed (references to test files remain generic)
+  ✅ .specify/templates/tasks-template.md - No changes needed
 
 RUNTIME CHANGES:
-  • Test execution discipline: run single test files during implementation
-  • Exception: Use full project test run only for comprehensive error checking
-  • Improves feedback loop speed and isolates test failures to specific features
+  • Styling workflow: use Chakra UI components and theme.ts instead of CSS files
+  • Custom CSS is now prohibited for component styling
+  • New dependencies: @chakra-ui/react, @emotion/react, framer-motion
 
 FOLLOW-UP ITEMS:
   • Configure pre-commit hooks for linting enforcement
-  • Set up CI/CD pipeline for automated testing (with single-file validation + full run gate)
-  • Create component library documentation
+  • Set up CI/CD pipeline for automated testing
   • Establish performance baselines for lazy loading
 
 -->
@@ -64,6 +62,7 @@ Development processes MUST be streamlined to maximize speed without sacrificing 
 ## Development Standards
 
 - **Linting & Formatting**: All code MUST pass linter checks; auto-formatting is enforced pre-commit
+- **Styling**: All UI components MUST use Chakra UI components and the `theme.ts` configuration. Custom CSS files and inline styles are PROHIBITED for component styling.
 - **Code Review**: All PRs require peer review verifying code quality, testing, and principle compliance
 - **Performance**: Critical code paths MUST have performance baselines; regressions trigger investigation
 - **Documentation**: Public APIs MUST be documented; complex logic MUST include rationale comments
@@ -81,7 +80,7 @@ This constitution supersedes all other development practices and guidelines. All
 
 All PRs MUST include a constitution compliance checklist. Code reviews MUST explicitly verify principle adherence. Violations MUST be resolved before merge. Metrics MUST be tracked quarterly to ensure principles are sustained.
 
-**Version**: 1.3.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
+**Version**: 1.4.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
 
 ## Project Setup & Architecture
 
@@ -89,10 +88,20 @@ All PRs MUST include a constitution compliance checklist. Code reviews MUST expl
 
 - **Language**: TypeScript 5.9+ (strict mode enabled)
 - **UI Framework**: React 19 with React DOM 19
+- **Component Library**: Chakra UI v2.8+ (@emotion/react)
 - **Build Tool**: Vite 7+ (source maps enabled, terser minification)
 - **Runtime Environment**: Node.js 18+ with pnpm package manager (v8+)
 - **Data Source**: PokéAPI (pokeapi.co) with official artwork images
 - **State Persistence**: Browser localStorage (abstraction interface supports future cloud migration)
+
+### Styling & Design System
+
+- **Framework**: Chakra UI (default theme + custom extensions)
+- **Theme Configuration**: `src/styles/theme.ts` (single source of truth)
+- **Spacing Scale**: 8px base (4px, 8px, 16px, 24px, 32px, 48px, 64px)
+- **Typography**: Open Sans (Google Fonts)
+- **Colors**: Chakra default palette + Pokemon Teal (#1ba098) & Gold (#ffd700)
+- **Icons**: Chakra UI Icons or React Icons
 
 ### Core Components
 
@@ -104,6 +113,7 @@ All PRs MUST include a constitution compliance checklist. Code reviews MUST expl
 - **AvailableGrid.tsx**: Grid display of remaining uncollected/unwishlisted Pokemon
 - **PokemonCard.tsx**: Individual Pokemon card with image, name, index, and action buttons
 - **LazyLoadingGrid.tsx**: Lazy-loading container for efficient rendering of large datasets
+- **Design System Wrappers**: `ButtonBase`, `CardBase`, `Container`, `Stack` (Chakra UI abstractions)
 
 #### Custom Hooks
 - **useDebounce**: Debouncing utility for search queries (300ms default)
@@ -123,9 +133,9 @@ All PRs MUST include a constitution compliance checklist. Code reviews MUST expl
 The application uses a single-column vertical layout:
 - **Header** → **Sticky Search Bar** → **Three Grids** (Collected, Wishlisted, Available)
 - **Responsive Design**: Full-width on mobile (320px+) with centered containers on desktop
-- **CSS Grid**: Auto-fit/auto-fill for responsive column counts without hardcoded breakpoints
+- **Grid System**: Chakra UI `SimpleGrid` with auto-fit/auto-fill for responsive column counts
 - **Accessibility**: WCAG 2.1 AA compliance with 4.5:1 color contrast, 44px minimum touch targets
-- **Design Aesthetic**: Minimalist, Google-like search interface with clean borders and subtle shadows
+- **Design Aesthetic**: Modern, consistent interface using Chakra UI theme tokens and components
 
 ### Pokemon Dataset
 
