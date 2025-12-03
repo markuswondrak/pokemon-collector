@@ -1,4 +1,5 @@
 import { ReactElement } from 'react'
+import { Box, Heading, Text, Grid, VStack } from '@chakra-ui/react'
 import PokemonCard from './PokemonCard'
 
 interface Pokemon {
@@ -34,8 +35,9 @@ interface AvailableGridProps {
 
 /**
  * AvailableGrid Component
- * Displays Pokemon that are not collected and not wishlisted
- * Supports filtering by index and lazy loading
+ * Displays Pokemon that are not collected and not wishlisted.
+ * Uses Chakra Grid with responsive columns (1 col mobile, 2 col tablet, 3+ col desktop)
+ * and consistent gap spacing (16px base).
  */
 export default function AvailableGrid({
   allPokemon,
@@ -65,31 +67,52 @@ export default function AvailableGrid({
   const countText = count === 1 ? '1 pokemon' : `${count} pokemon`
 
   return (
-    <section className="collection-list" aria-label="Available Pokemon">
-      <header className="collection-header">
-        <h2 id="available-title">Available Pokemon</h2>
-        <p
-          className="collection-count"
+    <VStack
+      as="section"
+      aria-label="Available Pokemon"
+      w="100%"
+      align="stretch"
+      gap={6}
+    >
+      <Box>
+        <Heading as="h2" id="available-title" size="lg" mb={2}>
+          Available Pokemon
+        </Heading>
+        <Text
           aria-live="polite"
           aria-atomic="true"
+          color="gray.600"
+          fontSize="md"
+          fontWeight="500"
         >
           {countText}
-        </p>
-      </header>
+        </Text>
+      </Box>
 
       {sortedPokemon.length === 0 ? (
-        <div
-          className="empty-state"
+        <Box
           role="status"
           aria-label="No available Pokemon"
+          textAlign="center"
+          py={12}
+          px={6}
+          bg="gray.50"
+          borderRadius="md"
+          borderWidth="2px"
+          borderStyle="dashed"
+          borderColor="gray.300"
         >
-          <p>No available Pokemon. All Pokemon are either collected or wishlisted!</p>
-        </div>
+          <Text color="gray.600" fontSize="lg">
+            No available Pokemon. All Pokemon are either collected or wishlisted!
+          </Text>
+        </Box>
       ) : (
-        <div
-          className="pokemon-grid"
+        <Grid
           role="region"
           aria-labelledby="available-title"
+          gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}
+          gap={6}
+          w="100%"
         >
           {sortedPokemon.map((pokemon) => (
             <PokemonCard
@@ -100,8 +123,8 @@ export default function AvailableGrid({
               onAddToWishlist={() => { onAddWishlist(pokemon.index); }}
             />
           ))}
-        </div>
+        </Grid>
       )}
-    </section>
+    </VStack>
   )
 }

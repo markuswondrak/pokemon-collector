@@ -16,6 +16,9 @@ export default defineConfig({
     deps: {
       inline: ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
     },
+
+    // Mock CSS imports for tests
+    css: false,
     
     coverage: {
       provider: 'v8',
@@ -28,3 +31,4 @@ export default defineConfig({
     }
   }
 })
+

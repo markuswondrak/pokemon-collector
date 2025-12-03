@@ -102,111 +102,7 @@
 }
 
 /* ===== Pokemon Card Component ===== */
-.pokemon-card {
-  background: white;
-  border: 2px solid #e0e0e0;
-  border-radius: 12px;
-  padding: 0.75rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  width: 140px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.pokemon-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  transform: translateY(-4px);
-  border-color: #667eea;
-}
-
-.pokemon-card:focus-within {
-  border-color: #667eea;
-  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-}
-
-.pokemon-card-image {
-  width: 75px;
-  height: 75px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f5f5f5;
-  border-radius: 8px;
-  margin-bottom: 0.5rem;
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.pokemon-card-image img {
-  width: 75px;
-  height: 75px;
-  object-fit: contain;
-  max-width: 75px;
-  max-height: 75px;
-}
-
-.pokemon-image-placeholder {
-  color: #666;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.pokemon-card-content {
-  flex: 1;
-  width: 100%;
-  margin-bottom: 0.5rem;
-}
-
-.pokemon-name {
-  margin: 0 0 0.25rem;
-  font-size: 0.9rem;
-  color: #333;
-  font-weight: 600;
-  word-break: break-word;
-}
-
-.pokemon-index {
-  margin: 0 0 0.5rem;
-  color: #666;
-  font-size: 0.8rem;
-  font-weight: 500;
-}
-
-.pokemon-status {
-  margin: 0.5rem 0;
-}
-
-.pokemon-badge {
-  display: inline-block;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin: 0.25rem;
-}
-
-.collected-badge {
-  background: #d4edda;
-  color: #155724;
-  border: 1px solid #c3e6cb;
-}
-
-.wishlist-badge {
-  background: #fff3cd;
-  color: #856404;
-  border: 1px solid #ffeaa7;
-}
-
-.pokemon-card-actions {
-  display: flex;
-  gap: 0.5rem;
-  width: 100%;
-  flex-wrap: wrap;
-  justify-content: center;
-}
+/* MIGRATED TO CHAKRA UI - See PokemonCard.tsx for Card.Root implementation */
 
 /* ===== Button Styles (WCAG 2.1 AA: 4.5:1 Color Contrast) ===== */
 .btn {
@@ -318,54 +214,7 @@
 }
 
 /* ===== Collection List Component ===== */
-.collection-list {
-  width: 100%;
-  background: white;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  box-sizing: border-box;
-}
-
-.collection-header {
-  margin-bottom: 1.5rem;
-  border-bottom: 2px solid #667eea;
-  padding-bottom: 1rem;
-}
-
-.collection-header h2 {
-  margin: 0 0 0.5rem;
-  color: #333;
-  font-size: 1.8rem;
-}
-
-.collection-count {
-  margin: 0;
-  color: #666;
-  font-size: 0.95rem;
-  font-weight: 500;
-}
-
-.pokemon-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1.5rem;
-  width: 100%;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 3rem 1rem;
-  color: #666;
-  background: #f9f9f9;
-  border-radius: 8px;
-  border: 2px dashed #ddd;
-}
-
-.empty-state p {
-  font-size: 1.1rem;
-  margin: 0;
-}
+/* MIGRATED TO CHAKRA UI - See AvailableGrid.tsx and LazyLoadingGrid.tsx for Grid implementation */
 
 /* ===== Search Component (WCAG 2.1 AA Compliance) ===== */
 .pokemon-search {
@@ -478,36 +327,13 @@
 
 /* ===== Responsive Design ===== */
 @media (max-width: 1024px) {
-  .pokemon-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
+  /* Grid layouts now handled by Chakra UI responsive columns */
 }
 
 @media (max-width: 768px) {
-  .pokemon-card {
-    width: 140px;
-  }
-
-  .pokemon-card-image {
-    width: 75px;
-    height: 75px;
-  }
-
-  .pokemon-grid {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-
-  .btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.85rem;
-    min-height: 44px;
-  }
-
-  .collection-header h2 {
-    font-size: 1.5rem;
-  }
+  /* Card and grid responsive styles now handled by Chakra UI */
 }
+
 
 /* ===== Keyboard Navigation Skip Link ===== */
 .skip-link {

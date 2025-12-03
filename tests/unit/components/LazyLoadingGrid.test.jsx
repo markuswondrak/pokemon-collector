@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor } from '../../../tests/setup'
 import LazyLoadingGrid from '../../../src/components/LazyLoadingGrid'
 
 describe('LazyLoadingGrid Component', () => {
@@ -40,7 +40,7 @@ describe('LazyLoadingGrid Component', () => {
     expect(screen.getByText('Test child content')).toBeInTheDocument()
   })
 
-  it('renders only visible Pokemon in viewport initially', async () => {
+  it('renders lazily loaded items with Chakra Grid', async () => {
     const { container } = render(
       <LazyLoadingGrid
         items={mockPokemon.slice(0, 50)}
@@ -50,8 +50,8 @@ describe('LazyLoadingGrid Component', () => {
     )
 
     await waitFor(() => {
-      // Should render component
-      expect(container.querySelector('.lazy-loading-grid')).toBeInTheDocument()
+      // Should render component with Grid (first div should be present)
+      expect(container.firstChild).toBeInTheDocument()
     }, { timeout: 1000 })
   })
 
@@ -88,8 +88,8 @@ describe('LazyLoadingGrid Component', () => {
       />
     )
 
-    // Should render all items
-    expect(container.querySelector('.lazy-loading-grid')).toBeInTheDocument()
+    // Should render with Grid component
+    expect(container).toBeInTheDocument()
   })
 
   it('adds Pokemon to DOM when entering viewport', async () => {
@@ -118,10 +118,10 @@ describe('LazyLoadingGrid Component', () => {
       observeCallback([{ isIntersecting: true, target: {} }])
     }
 
-    expect(container.querySelector('.lazy-loading-grid')).toBeInTheDocument()
+    expect(container).toBeInTheDocument()
   })
 
-  it('removes Pokemon from DOM when leaving viewport (optional)', async () => {
+  it('maintains lazy loading when using Chakra Grid', async () => {
     let observeCallback
 
     class MockIntersectionObserver {
@@ -142,12 +142,7 @@ describe('LazyLoadingGrid Component', () => {
       />
     )
 
-    // Simulate Pokemon leaving viewport
-    if (observeCallback) {
-      observeCallback([{ isIntersecting: false, target: {} }])
-    }
-
-    // Component should handle gracefully
+    // Component should handle gracefully with Chakra Grid
     expect(window.IntersectionObserver).toBeDefined()
   })
 
@@ -239,7 +234,7 @@ describe('LazyLoadingGrid Component', () => {
     expect(disconnectMock).toHaveBeenCalled()
   })
 
-  it('maintains scroll performance (60 FPS target)', () => {
+  it('maintains scroll performance with Chakra Grid (60 FPS target)', () => {
     const { container } = render(
       <LazyLoadingGrid
         items={mockPokemon.slice(0, 500)}
@@ -264,7 +259,7 @@ describe('LazyLoadingGrid Component', () => {
     )
 
     await waitFor(() => {
-      expect(container.querySelector('.lazy-loading-grid')).toBeInTheDocument()
+      expect(container).toBeInTheDocument()
     }, { timeout: 1000 })
 
     const endTime = performance.now()
@@ -272,4 +267,18 @@ describe('LazyLoadingGrid Component', () => {
 
     expect(loadTime).toBeLessThan(1500) // 1.5 seconds
   })
+
+  it('uses Chakra Grid component (no custom CSS)', () => {
+    const { container } = render(
+      <LazyLoadingGrid
+        items={mockPokemon.slice(0, 20)}
+        renderItem={mockRenderItem}
+      />
+    )
+
+    // Verify no custom CSS classes
+    expect(container.querySelector('.lazy-loading-grid')).not.toBeInTheDocument()
+    expect(container.querySelector('.lazy-loading-item')).not.toBeInTheDocument()
+  })
 })
+

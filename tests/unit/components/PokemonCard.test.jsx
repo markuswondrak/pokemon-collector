@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '../../../tests/setup';
 import '@testing-library/jest-dom';
 import PokemonCard from '../../../src/components/PokemonCard';
 
@@ -121,7 +121,7 @@ describe('PokemonCard Component', () => {
     expect(screen.getByText('✓ Collected')).toBeInTheDocument();
   });
 
-  it('should have proper CSS classes for styling', () => {
+  it('should use Chakra Card component (no custom CSS)', () => {
     const { container } = render(
       <PokemonCard
         pokemon={mockPokemon}
@@ -131,7 +131,10 @@ describe('PokemonCard Component', () => {
       />
     );
 
-    expect(container.querySelector('.pokemon-card')).toBeInTheDocument();
+    // Verify no custom CSS classes used (e.g., pokemon-card class)
+    expect(container.querySelector('.pokemon-card')).not.toBeInTheDocument();
+    // Chakra Card should render as a proper semantic element
+    expect(container.querySelector('article')).toBeInTheDocument();
   });
 
   it('should render proper button structure', () => {
@@ -145,7 +148,7 @@ describe('PokemonCard Component', () => {
     );
 
     const buttons = screen.getAllByRole('button');
-    expect(buttons.length).toBeGreaterThan(0);
+    expect(buttons.length).toBeGreaterThanOrEqual(2);
   });
 
   it('should handle missing image gracefully', () => {
@@ -160,6 +163,7 @@ describe('PokemonCard Component', () => {
     );
 
     expect(screen.getByText('Pikachu')).toBeInTheDocument();
+    expect(screen.getByText('No Image')).toBeInTheDocument();
   });
 
   it('should disable Add to Wishlist button when Pokemon is collected', () => {
@@ -173,9 +177,39 @@ describe('PokemonCard Component', () => {
       />
     );
 
-    const wishlistBtn = screen.queryByRole('button', { name: /wishlist/i });
-    if (wishlistBtn) {
-      expect(wishlistBtn).toBeDisabled();
-    }
+    const wishlistBtn = screen.getByRole('button', { name: /wishlist/i });
+    expect(wishlistBtn).toBeDisabled();
+  });
+
+  it('should display wishlist badge when Pokemon is wishlisted', () => {
+    const wishlistedPokemon = { ...mockPokemon, wishlist: true };
+    render(
+      <PokemonCard
+        pokemon={wishlistedPokemon}
+        onCollect={mockOnCollect}
+        onAddToWishlist={mockOnAddToWishlist}
+        onRemove={mockOnRemove}
+      />
+    );
+
+    expect(screen.getByText('♡ Wishlist')).toBeInTheDocument();
+  });
+
+  it('should use Chakra Badge component for status indicators', () => {
+    const collectedPokemon = { ...mockPokemon, collected: true };
+    const { container } = render(
+      <PokemonCard
+        pokemon={collectedPokemon}
+        onCollect={mockOnCollect}
+        onAddToWishlist={mockOnAddToWishlist}
+        onRemove={mockOnRemove}
+      />
+    );
+
+    const badge = screen.getByText('✓ Collected');
+    expect(badge).toBeInTheDocument();
+    // Chakra Badge renders as an inline element within a container
+    expect(badge.textContent).toBe('✓ Collected');
   });
 });
+

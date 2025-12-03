@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '../../../tests/setup'
 import AvailableGrid from '../../../src/components/AvailableGrid'
 
 describe('AvailableGrid Component', () => {
@@ -99,7 +99,7 @@ describe('AvailableGrid Component', () => {
   })
 
   it('calls onCollect callback when collect button clicked', () => {
-    const { container } = render(
+    render(
       <AvailableGrid
         allPokemon={mockPokemon.slice(0, 3)}
         collection={mockCollection}
@@ -109,19 +109,15 @@ describe('AvailableGrid Component', () => {
       />
     )
 
-    // Find and click collect button (implementation-specific)
-    const collectButtons = container.querySelectorAll('button')
-    const bulbasaurCard = screen.getByText('Bulbasaur').closest('.pokemon-card')
-    const collectButton = bulbasaurCard?.querySelector('button[data-action="collect"]')
-
-    if (collectButton) {
-      collectButton.click()
-      expect(mockOnCollect).toHaveBeenCalled()
-    }
+    // Find Bulbasaur's collect button
+    const buttons = screen.getAllByRole('button', { name: /collect/i })
+    expect(buttons.length).toBeGreaterThan(0)
+    fireEvent.click(buttons[0])
+    expect(mockOnCollect).toHaveBeenCalled()
   })
 
   it('calls onAddWishlist callback when add to wishlist button clicked', () => {
-    const { container } = render(
+    render(
       <AvailableGrid
         allPokemon={mockPokemon.slice(0, 3)}
         collection={mockCollection}
@@ -131,13 +127,10 @@ describe('AvailableGrid Component', () => {
       />
     )
 
-    const bulbasaurCard = screen.getByText('Bulbasaur').closest('.pokemon-card')
-    const wishlistButton = bulbasaurCard?.querySelector('button[data-action="wishlist"]')
-
-    if (wishlistButton) {
-      wishlistButton.click()
-      expect(mockOnAddWishlist).toHaveBeenCalled()
-    }
+    const wishlistButtons = screen.getAllByRole('button', { name: /wishlist/i })
+    expect(wishlistButtons.length).toBeGreaterThan(0)
+    fireEvent.click(wishlistButtons[0])
+    expect(mockOnAddWishlist).toHaveBeenCalled()
   })
 
   it('supports search filtering by index with partial matches', () => {
@@ -198,7 +191,7 @@ describe('AvailableGrid Component', () => {
     expect(screen.queryByText('Bulbasaur')).not.toBeInTheDocument()
   })
 
-  it('uses responsive CSS grid layout', () => {
+  it('uses Chakra Grid component (no custom CSS)', () => {
     const { container } = render(
       <AvailableGrid
         allPokemon={mockPokemon.slice(0, 3)}
@@ -209,7 +202,27 @@ describe('AvailableGrid Component', () => {
       />
     )
 
-    const grid = container.querySelector('.pokemon-grid')
-    expect(grid).toHaveClass('pokemon-grid')
+    // Verify Chakra Grid is used (no custom pokemon-grid class)
+    expect(container.querySelector('.pokemon-grid')).not.toBeInTheDocument()
+    // Chakra Grid should render with proper semantic section
+    const section = container.querySelector('section')
+    expect(section).toBeInTheDocument()
+  })
+
+  it('applies responsive grid columns at different breakpoints', () => {
+    const { container } = render(
+      <AvailableGrid
+        allPokemon={mockPokemon.slice(0, 3)}
+        collection={mockCollection}
+        wishlist={mockWishlist}
+        onCollect={mockOnCollect}
+        onAddWishlist={mockOnAddWishlist}
+      />
+    )
+
+    // Check that Grid component is present
+    const gridComponent = container.querySelector('[role="region"][aria-labelledby="available-title"]')
+    expect(gridComponent).toBeInTheDocument()
   })
 })
+

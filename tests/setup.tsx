@@ -1,7 +1,8 @@
 import '@testing-library/jest-dom'
-import { configure, screen, render as rtlRender, RenderOptions } from '@testing-library/react'
+import { configure, screen, render as rtlRender, RenderOptions, fireEvent, waitFor } from '@testing-library/react'
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { ReactElement } from 'react'
+import { vi } from 'vitest'
 
 // Set global timeout for waitFor commands to 1 second
 // This is a hard requirement for all tests in this project
@@ -28,8 +29,8 @@ export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'
   })
 }
 
-// Re-export screen and other utilities
-export { screen }
+// Re-export testing library utilities
+export { screen, fireEvent, waitFor }
 
 // Test utility: Get the search button specifically (not the mode toggle)
 // eslint-disable-next-line @typescript-eslint/no-namespace

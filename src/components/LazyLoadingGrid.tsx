@@ -1,4 +1,5 @@
 import { ReactElement, useEffect, useRef, useState, useCallback } from 'react'
+import { Grid } from '@chakra-ui/react'
 
 interface LazyLoadingGridProps {
   items: any[]
@@ -10,7 +11,7 @@ interface LazyLoadingGridProps {
 /**
  * LazyLoadingGrid Component
  * Implements Intersection Observer-based lazy loading for efficient rendering
- * of large lists, with fallback to full rendering if observer unavailable
+ * of large lists using Chakra Grid, with fallback to full rendering if observer unavailable
  */
 export default function LazyLoadingGrid({
   items,
@@ -110,22 +111,25 @@ export default function LazyLoadingGrid({
 
   // If no custom render function, render children
   if (!renderItem) {
-    return <div className="lazy-loading-grid">{children}</div>
+    return <Grid>{children}</Grid>
   }
 
-  // Render lazily loaded items
+  // Render lazily loaded items using Chakra Grid
   return (
-    <div className="lazy-loading-grid">
+    <Grid
+      gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}
+      gap={6}
+      w="100%"
+    >
       {items.map((item, index) => (
         <div
           key={index}
           ref={(el) => { handleItemRef(index, el); }}
           data-item-index={index}
-          className="lazy-loading-item"
         >
           {visibleIndices.has(index) ? renderItem(item, index) : null}
         </div>
       ))}
-    </div>
+    </Grid>
   )
 }

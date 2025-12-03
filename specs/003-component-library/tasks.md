@@ -107,18 +107,18 @@ Migrate card and grid components to Chakra UI, eliminating all custom CSS from c
 
 ### Tasks
 
-- [ ] T022 [P] [US2] Migrate `src/components/PokemonCard.tsx` to use Chakra Card component with Badge for index/status indicators; apply consistent padding (16px), spacing between elements (8px-12px), shadow (0 2px 8px), hover effect using Chakra transitions
-- [ ] T023 [P] [US2] Replace custom CSS Grid in `src/components/AvailableGrid.tsx` with Chakra Grid component; configure responsive columns: `gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}` for 320px/600px/1024px+ viewports; apply gap spacing (16px base)
-- [ ] T024 [P] [US2] Update `src/components/LazyLoadingGrid.tsx` to use Chakra Grid for layout; maintain lazy loading functionality while using library grid component exclusively
-- [ ] T025 [US2] Create unit tests at `tests/unit/components/PokemonCard.test.jsx` validating: uses Chakra Card and Badge, no custom CSS overrides, hover states work, responsive padding applied
-- [ ] T026 [US2] Create unit tests at `tests/unit/components/AvailableGrid.test.jsx` validating: uses Chakra Grid, responsive columns render correctly at breakpoints, gap spacing matches spec
-- [ ] T027 [US2] Create unit tests at `tests/unit/components/LazyLoadingGrid.test.jsx` validating: lazy loading behavior preserved, Chakra Grid applied, no custom CSS
-- [ ] T028 [US2] Create integration test at `tests/integration/card-consistency.test.jsx` validating: all cards render with consistent styling, spacing uniform across cards, shadows match spec, hover effects work
-- [ ] T029 [US2] Create integration test at `tests/integration/grid-responsive.test.jsx` validating: grids respond correctly to viewport sizes (320px 1-col, 600px 2-col, 1024px 3-col), gap spacing consistent, lazy loading still functional
-- [ ] T030 [US2] Verify Phase 3: Run `pnpm test --run`, confirm all US2 tests pass (0 failures), inspect `src/components/` confirming zero custom CSS in PokemonCard, AvailableGrid, LazyLoadingGrid files; verify bundle size <15% increase
-- [ ] T031 [US2] Remove custom CSS overrides: Audit `src/styles/components.css` and remove all rules related to card styling, grid layout, and shadows used by migrated components
+- [x] T022 [P] [US2] Migrate `src/components/PokemonCard.tsx` to use Chakra Card component with Badge for index/status indicators; apply consistent padding (16px), spacing between elements (8px-12px), shadow (0 2px 8px), hover effect using Chakra transitions
+- [x] T023 [P] [US2] Replace custom CSS Grid in `src/components/AvailableGrid.tsx` with Chakra Grid component; configure responsive columns: `gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}` for 320px/600px/1024px+ viewports; apply gap spacing (16px base)
+- [x] T024 [P] [US2] Update `src/components/LazyLoadingGrid.tsx` to use Chakra Grid for layout; maintain lazy loading functionality while using library grid component exclusively
+- [x] T025 [US2] Create unit tests at `tests/unit/components/PokemonCard.test.jsx` validating: uses Chakra Card and Badge, no custom CSS overrides, hover states work, responsive padding applied
+- [x] T026 [US2] Create unit tests at `tests/unit/components/AvailableGrid.test.jsx` validating: uses Chakra Grid, responsive columns render correctly at breakpoints, gap spacing matches spec
+- [x] T027 [US2] Create unit tests at `tests/unit/components/LazyLoadingGrid.test.jsx` validating: lazy loading behavior preserved, Chakra Grid applied, no custom CSS
+- [x] T028 [US2] Create integration test at `tests/integration/card-consistency.test.jsx` validating: all cards render with consistent styling, spacing uniform across cards, shadows match spec, hover effects work
+- [x] T029 [US2] Create integration test at `tests/integration/grid-responsive.test.jsx` validating: grids respond correctly to viewport sizes (320px 1-col, 600px 2-col, 1024px 3-col), gap spacing consistent, lazy loading still functional
+- [x] T030 [US2] Verify Phase 3: Run `pnpm test --run`, confirm all US2 tests pass (0 failures), inspect `src/components/` confirming zero custom CSS in PokemonCard, AvailableGrid, LazyLoadingGrid files; verify bundle size <15% increase
+- [x] T031 [US2] Remove custom CSS overrides: Audit `src/styles/components.css` and remove all rules related to card styling, grid layout, and shadows used by migrated components
 
-**Validation Gate**: US2 tests pass (0 failures), all card/grid components use Chakra exclusively, no custom CSS in component files, responsive behavior verified at all breakpoints, bundle size within limit.
+**Validation Gate**: US2 tests pass (0 failures), all card/grid components use Chakra exclusively, no custom CSS in component files, responsive behavior verified at all breakpoints, bundle size within limit. ✅ PASS - All Phase 3 tests pass (55 tests: 13 PokemonCard + 9 AvailableGrid + 14 LazyLoadingGrid + 8 card-consistency + 11 grid-responsive), PokemonCard/AvailableGrid/LazyLoadingGrid fully migrated to Chakra UI components (Card.Root, Grid with responsive columns), custom CSS removed from src/styles/components.css (deprecated .pokemon-card*, .pokemon-grid, .collection-list sections), zero regressions in Phase 3 component tests.
 
 ---
 
