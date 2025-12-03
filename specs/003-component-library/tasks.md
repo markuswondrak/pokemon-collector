@@ -194,8 +194,8 @@ Remove custom CSS files, verify no regressions, optimize bundle size, finalize d
 - [x] T049 [P] Update `src/styles/index.css` to contain only global resets and animations (if needed); remove all component styling rules
 - [x] T050 [P] Create CSS removal validation: search codebase (`grep -r "import.*\.css" src/components/`) confirming no CSS imports in component files; only `index.css` should be imported in `main.tsx`
 - [x] T051 Run full regression test suite: `pnpm test --run` confirming all tests pass (0 failures), including unit, integration, contract tests
-- [ ] T052 [P] Run visual regression testing: compare screenshots of all components (cards, grids, buttons, search bar) against baseline screenshots to confirm no unintended visual changes
-- [ ] T053 Optimize bundle: Analyze bundle with `pnpm build && npm install -g @vite/inspect && vite-inspect` confirming Chakra UI components are efficiently bundled, no duplicate dependencies
+- [x] T052 [P] Run visual regression testing: compare screenshots of all components (cards, grids, buttons, search bar) against baseline screenshots to confirm no unintended visual changes
+- [x] T053 Optimize bundle: Analyze bundle with `pnpm build && npm install -g @vite/inspect && vite-inspect` confirming Chakra UI components are efficiently bundled, no duplicate dependencies
 - [x] T054 Update project documentation: Add section to `README.md` explaining Chakra UI integration, design token usage, component patterns, and maintenance procedures
 - [x] T055 Create feature completion summary: Document all design metrics (spacing scale, typography, colors, contrast) with validation evidence in `specs/003-component-library/COMPLETION_REPORT.md`
 
