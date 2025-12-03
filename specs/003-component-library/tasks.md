@@ -99,11 +99,11 @@ Migrate card and grid components to Chakra UI, eliminating all custom CSS from c
 **Dependencies**: Phase 0, Phase 1, Phase 2 (US1) complete
 
 **Independent Test Criteria**:
-- [ ] PokemonCard, LazyLoadingGrid, AvailableGrid use 100% Chakra UI components (zero custom CSS)
-- [ ] All grid layouts use Chakra Grid component with responsive column configuration (1 col mobile, 2 col tablet, 3+ col desktop)
-- [ ] Card styling consistent: shadows, border-radius, padding use Chakra defaults with theme customization
-- [ ] All card interaction states (hover, active) use Chakra styling only
-- [ ] All tests pass (0 failures); bundle size maintained within 15% increase
+- [x] PokemonCard, LazyLoadingGrid, AvailableGrid use 100% Chakra UI components (zero custom CSS)
+- [x] All grid layouts use Chakra Grid component with responsive column configuration (1 col mobile, 2 col tablet, 3+ col desktop)
+- [x] Card styling consistent: shadows, border-radius, padding use Chakra defaults with theme customization
+- [x] All card interaction states (hover, active) use Chakra styling only
+- [x] All tests pass (0 failures); bundle size maintained within 15% increase
 
 ### Tasks
 
