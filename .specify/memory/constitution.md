@@ -3,14 +3,15 @@
 ║                       SYNC IMPACT REPORT                                  ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
-VERSION CHANGE: 1.1.0 → 1.2.0 (test worker configuration requirement)
-RATIONALE: MINOR version bump - added new test execution guideline for worker
-  thread management during implementation/feature development. Clarifies testing
-  behavior for stable, reproducible test results. No backward-incompatible
-  changes to core principles or governance.
+VERSION CHANGE: 1.2.0 → 1.3.0 (test file isolation requirement)
+RATIONALE: MINOR version bump - added test execution discipline guideline for
+  single-file test isolation during implementation verification. Improves test
+  clarity, execution speed, and error diagnostics. Maintains existing worker
+  thread configuration from v1.2.0. No backward-incompatible changes to core
+  principles or governance.
 
 SECTIONS MODIFIED:
-  • Development Standards - Added test worker configuration requirement
+  • Development Standards - Added test file isolation requirement and exception
 
 SECTIONS ADDED:
   • None
@@ -22,23 +23,23 @@ SECTIONS UNCHANGED:
   • Build & Development Tools (no changes)
   • Baseline Features (no changes)
 
-CONFIGURATION UPDATED:
-  ✅ vitest.config.js - Added threads: true, maxThreads: 4, minThreads: 1
-  ✅ specs/003-component-library/tasks.md - Updated testing gate documentation
+PRINCIPLES PRESERVED:
+  ✅ Test worker configuration (4 threads during implementation) - retained from v1.2.0
+  ✅ Testing standards (TDD, 80% coverage) - unchanged
 
 TEMPLATES REVIEWED FOR CONSISTENCY:
   ✅ .specify/templates/plan-template.md - No changes needed
   ✅ .specify/templates/spec-template.md - No changes needed
-  ✅ .specify/templates/tasks-template.md - No changes needed (references to pnpm test remain generic)
+  ✅ .specify/templates/tasks-template.md - No changes needed (references to test files remain generic)
 
 RUNTIME CHANGES:
-  • Test execution now defaults to 4 worker threads per constitutional requirement
-  • Prevents resource contention in implementation contexts (local dev, CI with limited resources)
-  • CI/CD pipelines may override maxThreads based on infrastructure capacity
+  • Test execution discipline: run single test files during implementation
+  • Exception: Use full project test run only for comprehensive error checking
+  • Improves feedback loop speed and isolates test failures to specific features
 
-FOLLOW-UP ITEMS (from v1.1.0):
+FOLLOW-UP ITEMS:
   • Configure pre-commit hooks for linting enforcement
-  • Set up CI/CD pipeline for automated testing (with appropriate worker config)
+  • Set up CI/CD pipeline for automated testing (with single-file validation + full run gate)
   • Create component library documentation
   • Establish performance baselines for lazy loading
 
@@ -67,6 +68,7 @@ Development processes MUST be streamlined to maximize speed without sacrificing 
 - **Performance**: Critical code paths MUST have performance baselines; regressions trigger investigation
 - **Documentation**: Public APIs MUST be documented; complex logic MUST include rationale comments
 - **Test Execution**: All test commands MUST use the `--run` flag (e.g., `pnpm test --run`) for one-time execution in automated workflows, CI/CD pipelines, and implementation tasks; watch mode only when explicitly requested by the user
+- **Test File Isolation**: During implementation, tests MUST be executed as single test files (e.g., `pnpm test tests/unit/components/Button.test.jsx --run`) to verify implementation success in isolation. **Exception**: Full project test runs (e.g., `pnpm test --run` without file argument) are used only when checking for errors across the entire codebase or validating integration between multiple features
 - **Test Worker Configuration**: During implementation and feature development, test execution MUST limit workers to 4 (`vitest --run --threads --maxThreads=4`) to prevent resource contention and ensure stable, reproducible test results; CI/CD pipelines may configure worker counts based on infrastructure capacity
 
 ## Governance
@@ -79,7 +81,7 @@ This constitution supersedes all other development practices and guidelines. All
 
 All PRs MUST include a constitution compliance checklist. Code reviews MUST explicitly verify principle adherence. Violations MUST be resolved before merge. Metrics MUST be tracked quarterly to ensure principles are sustained.
 
-**Version**: 1.2.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
+**Version**: 1.3.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
 
 ## Project Setup & Architecture
 
@@ -262,5 +264,5 @@ pnpm test:coverage # Generates code coverage reports
 - **Search Performance**: Results update within 350ms (300ms debounce + 50ms render)
 - **Responsive Breakpoints**: 320px (mobile) through desktop with fluid scaling
 
-**Version**: 1.2.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
+**Version**: 1.3.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
 ```

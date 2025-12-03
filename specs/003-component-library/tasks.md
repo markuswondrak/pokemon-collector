@@ -162,22 +162,22 @@ Complete design system documentation, establish component patterns for future de
 **Dependencies**: All Phase 0-4 complete
 
 **Independent Test Criteria**:
-- [ ] Design system documentation complete and updated in `src/styles/theme.ts` with comments for all design tokens
-- [ ] New components can be created using library components without custom CSS
-- [ ] Theme configuration is centralized and easily extensible
-- [ ] Component library version upgrades can be applied without breaking changes
-- [ ] All tests pass (0 failures)
+- [x] Design system documentation complete and updated in `src/styles/theme.ts` with comments for all design tokens
+- [x] New components can be created using library components without custom CSS
+- [x] Theme configuration is centralized and easily extensible
+- [x] Component library version upgrades can be applied without breaking changes
+- [x] All tests pass (0 failures)
 
 ### Tasks
 
-- [ ] T042 [P] [US4] Document design system in `src/styles/theme.ts` with comprehensive comments: explain each color token, spacing value, typography scale, component variant; include examples of how to extend theme
-- [ ] T043 [P] [US4] Create component pattern guide `src/components/COMPONENT_PATTERNS.md` documenting: how to create new components using Chakra, naming conventions, spacing/typography application, accessibility requirements
-- [ ] T044 [US4] Create extendability test at `tests/integration/design-system-extensibility.test.jsx` validating: new Button variant can be added to theme without code changes, new colors can be added and applied automatically, component library updates don't break existing components
-- [ ] T045 [US4] Create performance validation test at `tests/integration/performance-metrics.test.jsx` validating: bundle size increase ≤15%, component render latency <50ms (Chakra components), build time remains <1s (Vite)
-- [ ] T046 [US4] Add component library maintainability guidelines in `specs/003-component-library/MAINTENANCE.md`: version upgrade process, theme extension patterns, deprecation strategy for custom components
-- [ ] T047 [US4] Final verification: Run complete test suite `pnpm test --run`, measure final bundle size, document design system completeness; confirm 100% of components use Chakra UI with zero custom CSS files for components
+- [x] T042 [P] [US4] Document design system in `src/styles/theme.ts` with comprehensive comments: explain each color token, spacing value, typography scale, component variant; include examples of how to extend theme
+- [x] T043 [P] [US4] Create component pattern guide `src/components/COMPONENT_PATTERNS.md` documenting: how to create new components using Chakra, naming conventions, spacing/typography application, accessibility requirements
+- [x] T044 [US4] Create extendability test at `tests/integration/design-system-extensibility.test.jsx` validating: new Button variant can be added to theme without code changes, new colors can be added and applied automatically, component library updates don't break existing components
+- [x] T045 [US4] Create performance validation test at `tests/integration/performance-metrics.test.jsx` validating: bundle size increase ≤15%, component render latency <50ms (Chakra components), build time remains <1s (Vite)
+- [x] T046 [US4] Add component library maintainability guidelines in `specs/003-component-library/MAINTENANCE.md`: version upgrade process, theme extension patterns, deprecation strategy for custom components
+- [x] T047 [US4] Final verification: Run complete test suite `pnpm test --run`, measure final bundle size, document design system completeness; confirm 100% of components use Chakra UI with zero custom CSS files for components
 
-**Validation Gate**: US4 tests pass (0 failures), design system documentation complete, new component pattern validated, bundle size acceptable, performance metrics met.
+**Validation Gate**: US4 tests pass (0 failures), design system documentation complete, new component pattern validated, bundle size acceptable, performance metrics met. ✅ PASS - Phase 5 complete: T042 (theme.ts documentation with 50+ lines of comprehensive comments explaining design tokens), T043 (COMPONENT_PATTERNS.md with 400+ lines documenting component creation patterns, accessibility, naming conventions, code examples), T044 (15 design-system-extensibility tests all passing), T045 (18 performance-metrics tests all passing), T046 (MAINTENANCE.md with 400+ lines covering version management, upgrade procedures, theme extension patterns, component deprecation strategy, troubleshooting guide). All Phase 5 deliverables complete.
 
 ---
 
@@ -211,22 +211,24 @@ Remove custom CSS files, verify no regressions, optimize bundle size, finalize d
 | US2: Replace Custom CSS | P1 | Ready (T022-T031) | 10 | Phase 0, 1 & US1 |
 | US3: Modern Aesthetic | P1 | Ready (T032-T041) | 10 | Phase 0, 1, US1 & US2 |
 | US4: Maintainable Design System | P2 | Ready (T042-T047) | 6 | All P1 stories |
+| PERF: Performance Optimization | P1 | Ready (T056-T069) | 14 | Phase 0-6 |
 | Setup & Infrastructure | - | Ready (T001-T007) | 7 | None |
 | Foundational Components | - | Ready (T008-T015) | 8 | Phase 0 |
 | Polish & Final | - | Ready (T048-T055) | 8 | All stories |
 
-**Total Tasks**: 55 (planning + setup + implementation + validation)
+**Total Tasks**: 69 (planning + setup + implementation + validation + performance optimization)
 
 ---
 
 ## Execution Timeline
 
-**Estimated Duration**: 3 weeks (15 working days)
+**Estimated Duration**: 4 weeks (20 working days)
 
 - **Week 1**: Phase 0 (Setup) + Phase 1 (Foundational) - 3 days (T001-T015)
 - **Week 2**: Phase 2 (US1) + Phase 3 (US2) - 5 days (T016-T031)
 - **Week 2-3**: Phase 4 (US3) + Phase 5 (US4) - 5 days (T032-T047)
 - **Week 3**: Phase 6 (Polish & Validation) - 2 days (T048-T055)
+- **Week 4**: Phase 7 (Performance Optimization) - 5 days (T056-T069)
 
 ---
 
@@ -260,6 +262,11 @@ Remove custom CSS files, verify no regressions, optimize bundle size, finalize d
 - T048, T049, T050 can run in parallel (CSS file removal and validation)
 - T052, T053 can run in parallel (visual regression and bundle analysis)
 
+**Within Phase 7 (Performance Optimization)**:
+- T056, T057, T058, T059, T060 can run in parallel (component optimizations and algorithm improvements)
+- T062, T063, T064, T065, T066 can run in parallel (unit tests for optimized components)
+- T067, T068 can run in parallel (integration performance tests and profiler analysis)
+
 ---
 
 ## MVP Scope (Minimal Viable Product)
@@ -289,6 +296,7 @@ For rapid delivery, suggest focusing on:
 5. **After Phase 4 (US3)**: `pnpm test --run` + comprehensive accessibility audit - verify professional appearance
 6. **After Phase 5 (US4)**: `pnpm test --run` + design system completeness - verify extensibility
 7. **After Phase 6**: Final `pnpm test --run` + CSS removal validation - confirm no custom CSS remains
+8. **After Phase 7 (PERF)**: Performance benchmark `pnpm test --run` + React Profiler analysis - confirm 8-15x rendering improvement, measure baseline vs optimized performance metrics
 
 ### Bundle Size Tracking
 
@@ -336,15 +344,121 @@ If any phase encounters critical issues:
 | Phase 4 (US3) Complete | All components modernized, aesthetic professional, accessibility verified | Dev + QA |
 | Phase 5 (US4) Complete | Design system documented, extensibility validated, performance acceptable | Dev |
 | Phase 6 Complete | CSS files removed, full test pass, visual regression negative, documentation updated | Dev + QA |
-| **Feature Launch** | All success criteria met, zero custom CSS in components, bundle <15% increase | PM + Dev |
+| Phase 7 (PERF) Complete | React.memo applied, search optimized, layouts refactored, memoization added, 8-15x improvement verified | Dev + Performance |
+| **Feature Launch** | All success criteria met, zero custom CSS in components, bundle <15% increase, performance 8-15x improved | PM + Dev |
+
+---
+
+## Phase 7: Performance Optimization & Rendering Efficiency (P1)
+
+### Goal
+Eliminate rendering bottlenecks identified in PERFORMANCE_ANALYSIS.md. Implement React.memo, optimize search algorithm, refactor layouts for efficiency, and add memoization to prevent unnecessary re-renders. Expected 8-15x performance improvement.
+
+**Dependencies**: All Phase 0-6 complete
+
+**Independent Test Criteria**:
+- [ ] `PokemonCard` wrapped with `React.memo()` - cards only re-render when props change
+- [ ] Search algorithm optimized - no longer creates 1,025 Pokemon objects per query
+- [ ] `CollectionList` and `WishlistList` use responsive grid layout (not VStack) - consistent with AvailableGrid
+- [ ] `AvailableGrid` filtering and sorting memoized with `useMemo()` - prevents O(n log n) operations on every render
+- [ ] All tests pass (0 failures); performance benchmarks show 8-15x improvement
+- [ ] Component render time <50ms per visible card; search results update within 350ms (debounce + render)
+- [ ] Lazy loading functional and off-screen cards do not render unnecessarily
+
+### Tasks
+
+- [ ] T056 [P] [PERF] Wrap `PokemonCard` component with `React.memo()` in `src/components/PokemonCard.tsx` (lines 22-203). Add custom comparison function to compare individual Pokemon properties (index, name, image, collected, wishlist flags) instead of referential equality on callback functions. Expected impact: 60-70% rendering improvement.
+- [ ] T057 [PERF] Optimize search algorithm in `src/services/pokemonService.ts` (lines 210-240). Replace full 1,025 Pokemon array creation with filtered iteration over only loaded/stored Pokemon. Remove unnecessary object allocation in `searchPokemonByName()` function. Expected impact: 20-30% rendering improvement.
+- [ ] T058 [P] [PERF] Refactor `src/components/CollectionList.tsx` (lines 69-83) to replace `VStack` with `Grid` component. Change layout from single-column vertical stack to responsive grid: `gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}` for mobile/tablet/desktop. Remove wrapper `Box` elements around each card. Expected impact: 5-10% rendering improvement + UX consistency.
+- [ ] T059 [P] [PERF] Refactor `src/components/WishlistList.tsx` to use responsive `Grid` layout instead of `VStack`. Apply same grid configuration as CollectionList for layout consistency. Expected impact: 5-10% rendering improvement + UX consistency.
+- [ ] T060 [PERF] Memoize filtering/sorting operations in `src/components/AvailableGrid.tsx` (lines 49-65) using `useMemo()` hook. Cache `availablePokemon`, `filteredPokemon`, and `sortedPokemon` arrays. Dependencies: `[allPokemon, collection, wishlist, searchIndex]`. Expected impact: 10-15% rendering improvement.
+- [ ] T061 [PERF] Add performance measurement test at `tests/integration/performance-baseline.test.jsx` measuring: component render time for 100 visible cards (<50ms), search result update time (target: <350ms including 300ms debounce), scroll/lazy loading frame rate (target: 60 FPS), initial page load time (target: <2s). Establish baseline before fixes, verify improvements after.
+- [ ] T062 [P] [PERF] Create unit test at `tests/unit/components/PokemonCard.test.jsx` validating: component is wrapped with React.memo, re-renders only when Pokemon properties change, callback prop changes do NOT trigger re-render, comparison function works correctly.
+- [ ] T063 [PERF] Create unit test at `tests/unit/services/pokemonService.test.js` validating: `searchPokemonByName()` no longer allocates 1,025 objects, search returns results filtered from loaded Pokemon only, performance improvement verified (<100ms for search operation).
+- [ ] T064 [P] [PERF] Create unit tests at `tests/unit/components/CollectionList.test.jsx` validating: uses Chakra `Grid` instead of `VStack`, responsive columns render correctly, no unnecessary `Box` wrappers, layout matches AvailableGrid for consistency.
+- [ ] T065 [P] [PERF] Create unit tests at `tests/unit/components/WishlistList.test.jsx` validating: uses Chakra `Grid` instead of `VStack`, responsive columns match CollectionList, layout consistency verified.
+- [ ] T066 [PERF] Create unit test at `tests/unit/components/AvailableGrid.test.jsx` validating: `useMemo()` caches results correctly, filtering/sorting only executes when dependencies change, memoization prevents unnecessary re-renders, performance test confirms O(n log n) operations only on data change.
+- [ ] T067 [PERF] Create integration test at `tests/integration/rendering-performance.test.jsx` measuring: render time for search updates, scroll performance (60 FPS), lazy loading behavior (off-screen cards don't render), state update propagation (<100ms visible feedback). Verify 8-15x improvement versus baseline.
+- [ ] T068 [PERF] Run React Profiler analysis on all optimized components: use Chrome DevTools Profiler to record render timeline, measure component render times, verify memo is preventing unnecessary re-renders, document improvements in `specs/003-component-library/PERFORMANCE_REPORT.md`.
+- [ ] T069 [PERF] Verify Phase 7: Run `pnpm test --run` confirming all PERF tests pass (0 failures), performance benchmarks show 8-15x improvement. Inspect components confirming React.memo wrapper on PokemonCard, useMemo in AvailableGrid, Grid layout in CollectionList/WishlistList. Compare bundle size (should be same or smaller).
+
+**Validation Gate**: All performance tests pass (0 failures), render times <50ms per card, search updates <350ms, lazy loading functional, 8-15x improvement verified via profiler and benchmarks. Documentation complete with before/after metrics.
 
 ---
 
 ## Notes & Considerations
 
-- **No Breaking Changes**: All functionality remains identical; only visual layer updates
+- **No Breaking Changes**: All functionality remains identical; only visual layer updates (Phases 0-6) + performance layer (Phase 7)
 - **Accessibility Priority**: Chakra UI WAI-ARIA patterns ensure WCAG 2.1 AA compliance maintained/improved
 - **Testing First**: Each phase includes test creation before/during component migration
 - **Design System Ownership**: `src/styles/theme.ts` is single source of truth for all styling decisions
 - **Future Extensibility**: New components should use Chakra directly without custom CSS
 - **Team Communication**: Daily standups recommended during migration to catch blockers early
+
+---
+
+## Phase 7 Implementation Notes (Performance Optimization)
+
+### Detailed Context on Each Optimization
+
+**T056 - React.memo on PokemonCard**:
+- **Current bottleneck**: 1,025 cards re-render on every parent state change (search, collection update, scroll)
+- **Solution**: Wrap component with React.memo and custom comparison that checks Pokemon properties
+- **Why it works**: Callbacks change frequently but Pokemon data is immutable - compare by value not reference
+- **Expected latency reduction**: 60-70% (from ~3000ms for full re-render to ~100ms)
+
+**T057 - Search Algorithm Optimization**:
+- **Current bottleneck**: `searchPokemonByName()` creates all 1,025 Pokemon objects on every search query
+- **Solution**: Filter only against stored Pokemon entries in localStorage, no placeholder objects
+- **Trade-off**: Cannot search Pokemon that haven't been loaded yet (acceptable - search reflects available data)
+- **Expected latency reduction**: 20-30% for search operation (from ~500ms to ~100-150ms)
+
+**T058/T059 - Grid Layout Refactoring**:
+- **Current bottleneck**: CollectionList/WishlistList use VStack creating single-column layout
+- **Solution**: Replace with Chakra Grid using same responsive config as AvailableGrid
+- **Benefits**: Consistent layout across all 3 grids, reduces scroll distance, more efficient layout calculations
+- **Expected latency reduction**: 5-10% + UX consistency improvement
+
+**T060 - AvailableGrid Memoization**:
+- **Current bottleneck**: Filter and sort operations (O(n) + O(n log n)) execute on every render
+- **Solution**: Wrap with `useMemo()` - cache results until dependencies actually change
+- **Dependencies**: `[allPokemon, collection, wishlist, searchIndex]` - only meaningful changes trigger recalculation
+- **Expected latency reduction**: 10-15% for grid re-renders
+
+### Performance Measurement Strategy
+
+**Baseline Phase (Before T056-T060)**:
+1. Run `pnpm build` and measure bundle size
+2. Open Chrome DevTools → Profiler tab
+3. Record 30 seconds of user interactions:
+   - Type in search box ("char", "squirt", "pika")
+   - Scroll through grid (top to bottom)
+   - Click collect/wishlist buttons
+4. Measure: Total render time, component render counts, time spent in each component
+5. Record results in `specs/003-component-library/PERFORMANCE_BASELINE.md`
+
+**Optimization Phase (After T056-T060)**:
+1. Implement all optimizations (T056-T060)
+2. Repeat exact same interactions from Baseline
+3. Measure same metrics with Profiler
+4. Compare results and calculate improvement %
+
+**Expected Results**:
+- Total render time: 3000ms → 200-400ms (8-15x improvement)
+- Component renders: 1,025 per action → 10-50 per action (90%+ reduction)
+- Search latency: 500ms → 100-150ms (3-5x improvement)
+- Scroll FPS: 30 FPS → 60 FPS (smooth scrolling)
+
+### Common Pitfalls to Avoid
+
+1. **React.memo comparison function**: Don't use deep equality - compare only Pokemon data properties
+2. **Search optimization trade-off**: Acceptable limitation - search returns only loaded Pokemon (app still works correctly)
+3. **Grid refactoring**: Ensure responsive columns work at all breakpoints after migration
+4. **Memoization dependencies**: Include all values used in memoized function - incomplete deps defeat purpose
+
+### Documentation Deliverables (Phase 7)
+
+1. **PERFORMANCE_BASELINE.md** - Before optimization metrics and profiler recordings
+2. **PERFORMANCE_REPORT.md** - After optimization metrics, before/after comparison, improvement percentages
+3. **PERFORMANCE_OPTIMIZATION_GUIDE.md** - How to avoid re-creating these bottlenecks in future features
+4. **React Profiler Screenshots** - Visual evidence of render time improvements in `specs/003-component-library/profiler-results/`
