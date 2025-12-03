@@ -145,9 +145,147 @@ specs/001-pokemon-collection/
 - **Language**: JavaScript (ES2020+) with TypeScript
 - **Package Manager**: pnpm
 - **Testing**: Vitest + React Testing Library
+- **UI Library**: Chakra UI v2.8+ with Framer Motion
 - **API**: PokéAPI (public, free tier)
 - **Storage**: Browser localStorage
 - **Linting**: ESLint with type-aware rules
+
+## Chakra UI Integration
+
+### Overview
+
+This project uses **Chakra UI v2.8+** as its component library, providing a comprehensive set of accessible, composable React components. All UI elements follow Chakra's design system for consistency and professional appearance.
+
+### Design Tokens
+
+The application uses a custom Chakra theme defined in `src/styles/theme.ts`:
+
+#### Colors
+- **Primary**: Chakra base palette with Pokemon teal accent (#1ba098)
+- **Accent**: Pokemon gold (#ffd700) for special elements
+- **Semantic**: Red for destructive actions, green for success states
+
+#### Spacing Scale (8px base)
+All margin and padding values follow an 8px scale: 4px, 8px, 12px, 16px, 24px, 32px, 48px, 64px
+
+#### Typography
+- **Font Family**: Open Sans (applied via Chakra theme)
+- **Sizes**: 12px, 14px, 16px, 20px, 24px, 32px, 40px
+- **Line Heights**: Optimized for readability (1.5-1.8 depending on size)
+
+#### Component Styling
+- **Border Radius**: 4px-full with consistent 8px on interactive elements
+- **Shadows**: Chakra elevation system (sm, base, md, lg, xl)
+- **Transitions**: Chakra Framer Motion integration for smooth animations
+
+### Component Usage
+
+All UI components use Chakra exclusively with zero custom CSS in component files:
+
+```tsx
+// ✓ Correct: Using Chakra Button
+import { Button } from '@chakra-ui/react'
+
+export function MyComponent() {
+  return <Button colorScheme="teal">Click me</Button>
+}
+
+// ✗ Avoid: Custom CSS in components
+import styles from './MyComponent.css'  // Never import CSS
+```
+
+### Core Wrapper Components
+
+The application provides Pokemon-specific wrapper components built on Chakra:
+
+- **ButtonBase** (`src/components/ButtonBase.tsx`) - Chakra Button with Pokemon variants (primary, secondary, destructive)
+- **Container** (`src/components/Container.tsx`) - Max-width container with responsive padding
+- **Stack** (`src/components/Stack.tsx`) - VStack/HStack from Chakra with Pokemon spacing defaults
+- **CardBase** (`src/components/CardBase.tsx`) - Chakra Card with consistent styling
+
+### Extending the Theme
+
+To add new colors, sizes, or component variants:
+
+1. Edit `src/styles/theme.ts`
+2. Update the corresponding Chakra theme section (colors, spacing, components)
+3. Components automatically inherit the new tokens
+4. No component file changes needed
+
+Example - Adding a new color:
+```typescript
+// In src/styles/theme.ts
+const theme = defineConfig({
+  theme: {
+    colors: {
+      ...
+      pokemonPurple: '#9F51B6',  // Add new color
+    },
+  },
+})
+
+// Use immediately in components
+<Box bg="pokemonPurple">Purple Box</Box>
+```
+
+### Accessibility Features
+
+Chakra UI components include built-in WCAG 2.1 AA compliance:
+- Semantic HTML and ARIA labels
+- Keyboard navigation support
+- Focus management and indicators
+- Color contrast validation (7:1 minimum throughout)
+- Screen reader optimizations
+
+All interactive elements use Chakra's built-in focus states for accessibility.
+
+### Design Metrics
+
+#### Spacing
+- Component padding: 16px (Card), 8-12px (internal elements)
+- Grid gaps: 16px base, responsive scaling
+- 8px spacing scale consistently applied
+
+#### Typography
+- All text uses Open Sans via Chakra theme
+- Body text: 16px with 1.5 line height
+- Headings: 20px (h2), 24px (h3)
+- Labels: 14px with 0.875 opacity on secondary text
+
+#### Color Contrast
+- All text: minimum 7:1 contrast (WCAG AAA)
+- Interactive elements: clear visual states
+- Error messages: red (#E53E3E) on light backgrounds
+- Success states: green (#38A169) on light backgrounds
+
+#### Components
+- Cards: 8px border radius, 0 2px 8px shadow
+- Buttons: 8px border radius, teal (#1ba098) primary
+- Inputs: 4px border radius, teal focus color
+- Grids: 1 column mobile, 2 columns tablet, 3+ columns desktop
+
+### Maintenance & Updates
+
+**Version Management**: Chakra UI updates are applied through pnpm with version constraints in `package.json`
+
+**Update Process**:
+1. Run `pnpm update @chakra-ui/react`
+2. Test with `pnpm test --run`
+3. Review Chakra changelog for breaking changes
+4. Update custom theme if needed
+5. Deploy updated bundle
+
+**Best Practices**:
+- Keep Chakra UI updated monthly
+- Test all components after major version updates
+- Use Chakra's built-in components instead of creating custom CSS
+- Leverage theme tokens for consistency
+- Never override Chakra styles with custom CSS in components
+
+**Troubleshooting**:
+- If components don't render: Check ChakraProvider is wrapping App in `main.tsx`
+- If theme tokens don't apply: Verify `src/styles/theme.ts` is correctly configured
+- If styles seem broken: Clear node_modules and reinstall: `rm -rf node_modules pnpm-lock.yaml && pnpm install`
 
 ## Documentation
 
