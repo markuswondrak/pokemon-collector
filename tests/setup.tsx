@@ -3,6 +3,7 @@ import { configure, screen, render as rtlRender, RenderOptions, fireEvent, waitF
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { ReactElement } from 'react'
 import { vi } from 'vitest'
+import { act } from 'react-dom/test-utils'
 
 // Set global timeout for waitFor commands to 1 second
 // This is a hard requirement for all tests in this project
@@ -30,7 +31,7 @@ export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'
 }
 
 // Re-export testing library utilities
-export { screen, fireEvent, waitFor }
+export { screen, fireEvent, waitFor, act }
 
 // Test utility: Get the search button specifically (not the mode toggle)
 // eslint-disable-next-line @typescript-eslint/no-namespace

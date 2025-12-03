@@ -18,7 +18,7 @@ This document contains granular, independently executable implementation tasks f
 3. Execute User Story phases (2-4) in priority order (P1 stories 1-3, P2 story 4)
 4. Complete Polish phase (Phase 5) for cross-cutting concerns
 
-**Testing Gate**: After each phase, run `pnpm test --run` and verify zero test failures before proceeding.
+**Testing Gate**: After each phase, run `pnpm test --run` and verify zero test failures before proceeding. Per constitution requirement: limit test workers to 4 during implementation (`vitest --run --threads --maxThreads=4`) to prevent resource contention and ensure stable, reproducible results.
 
 ---
 
@@ -139,16 +139,16 @@ Migrate supporting components (CollectionList, WishlistList, App wrapper) to com
 
 ### Tasks
 
-- [ ] T032 [P] [US3] Migrate `src/components/CollectionList.tsx` to use Chakra components: List for container, ListItem for entries, Text for typography, Button for actions; apply consistent spacing and typography
-- [ ] T033 [P] [US3] Migrate `src/components/WishlistList.tsx` to use Chakra components: List container, ListItem entries, Badge for visual status, consistent styling with CollectionList
-- [ ] T034 [US3] Update `src/components/App.tsx` wrapper to use Chakra Box, VStack, HStack for layout (replace any remaining custom CSS Grid/Flexbox rules); apply responsive spacing and transitions
-- [ ] T035 [US3] Create unit tests at `tests/unit/components/CollectionList.test.jsx` validating: uses Chakra List components, spacing consistent with design spec, no custom CSS
-- [ ] T036 [US3] Create unit tests at `tests/unit/components/WishlistList.test.jsx` validating: uses Chakra List/Badge components, styling matches CollectionList for consistency
-- [ ] T037 [US3] Create integration test at `tests/integration/typography-consistency.test.jsx` validating: all text elements use Open Sans (via Chakra theme), font sizes follow hierarchy, line heights appropriate for readability
-- [ ] T038 [US3] Create integration test at `tests/integration/visual-hierarchy.test.jsx` validating: headings visually distinct from body text, active/inactive states clear, spacing creates logical grouping
-- [ ] T039 [US3] Create accessibility test at `tests/integration/a11y-visual.test.jsx` validating: all text meets WCAG AAA contrast (7:1 minimum), interactive elements have visible focus states, color not sole indicator of information
-- [ ] T040 [US3] Add responsive visual validation in `tests/integration/responsive-aesthetic.test.jsx`: verify appearance at 320px, 768px, 1440px viewports; check padding/margin scales appropriately; confirm modern aesthetic maintained at all sizes
-- [ ] T041 [US3] Verify Phase 4: Run `pnpm test --run`, confirm all US3 tests pass (0 failures); audit all component files confirming zero custom CSS; verify bundle size <15% increase
+- [x] T032 [P] [US3] Migrate `src/components/CollectionList.tsx` to use Chakra components: List for container, ListItem for entries, Text for typography, Button for actions; apply consistent spacing and typography
+- [x] T033 [P] [US3] Migrate `src/components/WishlistList.tsx` to use Chakra components: List container, ListItem entries, Badge for visual status, consistent styling with CollectionList
+- [x] T034 [US3] Update `src/components/App.tsx` wrapper to use Chakra Box, VStack, HStack for layout (replace any remaining custom CSS Grid/Flexbox rules); apply responsive spacing and transitions
+- [x] T035 [US3] Create unit tests at `tests/unit/components/CollectionList.test.jsx` validating: uses Chakra List components, spacing consistent with design spec, no custom CSS
+- [x] T036 [US3] Create unit tests at `tests/unit/components/WishlistList.test.jsx` validating: uses Chakra List/Badge components, styling matches CollectionList for consistency
+- [x] T037 [US3] Create integration test at `tests/integration/typography-consistency.test.jsx` validating: all text elements use Open Sans (via Chakra theme), font sizes follow hierarchy, line heights appropriate for readability
+- [x] T038 [US3] Create integration test at `tests/integration/visual-hierarchy.test.jsx` validating: headings visually distinct from body text, active/inactive states clear, spacing creates logical grouping
+- [x] T039 [US3] Create accessibility test at `tests/integration/a11y-visual.test.jsx` validating: all text meets WCAG AAA contrast (7:1 minimum), interactive elements have visible focus states, color not sole indicator of information
+- [x] T040 [US3] Add responsive visual validation in `tests/integration/responsive-aesthetic.test.jsx`: verify appearance at 320px, 768px, 1440px viewports; check padding/margin scales appropriately; confirm modern aesthetic maintained at all sizes
+- [x] T041 [US3] Verify Phase 4: Run `pnpm test --run`, confirm all US3 tests pass (0 failures); audit all component files confirming zero custom CSS; verify bundle size <15% increase
 
 **Validation Gate**: US3 tests pass (0 failures), all components use Chakra exclusively, modern aesthetic verified (typography, spacing, hierarchy, contrast), responsive design tested at all breakpoints.
 

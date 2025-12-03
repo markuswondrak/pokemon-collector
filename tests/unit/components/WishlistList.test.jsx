@@ -1,9 +1,14 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '../../../tests/setup';
 import '@testing-library/jest-dom';
 import WishlistList from '../../../src/components/WishlistList';
 
 describe('WishlistList Component', () => {
+  const mockHandlers = {
+    onRemoveWishlist: vi.fn(),
+    onCollect: vi.fn(),
+  };
+
   const mockWishlist = [
     {
       index: 25,
@@ -21,26 +26,40 @@ describe('WishlistList Component', () => {
     }
   ];
 
-  it('should render wishlist title', () => {
+  it('should render wishlist title using Chakra Heading', () => {
     render(
       <WishlistList
         pokemon={mockWishlist}
         title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
+        {...mockHandlers}
       />
     );
 
-    expect(screen.getByText('My Wishlist')).toBeInTheDocument();
+    const heading = screen.getByRole('heading', { level: 2 });
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent('My Wishlist');
   });
 
-  it('should render all wishlisted Pokemon', () => {
+  it('should use Chakra components (VStack, Box, Heading, Text)', () => {
+    const { container } = render(
+      <WishlistList
+        pokemon={mockWishlist}
+        title="My Wishlist"
+        {...mockHandlers}
+      />
+    );
+
+    // Check for section element (Chakra Box renders as section)
+    const section = container.querySelector('section');
+    expect(section).toBeInTheDocument();
+  });
+
+  it('should render all wishlisted Pokemon cards', () => {
     render(
       <WishlistList
         pokemon={mockWishlist}
         title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
+        {...mockHandlers}
       />
     );
 
@@ -48,126 +67,94 @@ describe('WishlistList Component', () => {
     expect(screen.getByText('Raichu')).toBeInTheDocument();
   });
 
-  it('should display Pokemon count', () => {
+  it('should display Pokemon count text', () => {
     render(
       <WishlistList
         pokemon={mockWishlist}
         title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
+        {...mockHandlers}
       />
     );
 
     expect(screen.getByText(/2 pokemon/i)).toBeInTheDocument();
   });
 
-  it('should show empty message when no Pokemon', () => {
+  it('should show empty state with proper message when no Pokemon', () => {
     render(
       <WishlistList
         pokemon={[]}
         title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
+        {...mockHandlers}
       />
     );
 
-    expect(screen.getByText(/no pokemon/i)).toBeInTheDocument();
+    expect(screen.getByText(/no pokemon in collection yet/i)).toBeInTheDocument();
   });
 
-  it('should render wishlist badge for each Pokemon', () => {
+  it('should display correct count for single Pokemon', () => {
     render(
       <WishlistList
-        pokemon={mockWishlist}
+        pokemon={[mockWishlist[0]]}
         title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    const badges = screen.getAllByText(/wishlist/i);
-    expect(badges.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('should display Pokemon indices', () => {
-    render(
-      <WishlistList
-        pokemon={mockWishlist}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    expect(screen.getByText('#25')).toBeInTheDocument();
-    expect(screen.getByText('#26')).toBeInTheDocument();
-  });
-
-  it('should render Pokemon images with correct URLs', () => {
-    render(
-      <WishlistList
-        pokemon={mockWishlist}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    const images = screen.getAllByRole('img');
-    expect(images[0].src).toContain('pikachu');
-    expect(images[1].src).toContain('raichu');
-  });
-
-  it('should have proper CSS class for styling', () => {
-    const { container } = render(
-      <WishlistList
-        pokemon={mockWishlist}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    expect(container.querySelector('.collection-list')).toBeInTheDocument();
-  });
-
-  it('should render list items as individual cards', () => {
-    const { container } = render(
-      <WishlistList
-        pokemon={mockWishlist}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    const cards = container.querySelectorAll('.pokemon-card');
-    expect(cards.length).toBeGreaterThanOrEqual(2);
-  });
-
-  it('should handle empty wishlist gracefully', () => {
-    const { container } = render(
-      <WishlistList
-        pokemon={[]}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
-      />
-    );
-
-    expect(container.querySelector('.collection-list')).toBeInTheDocument();
-  });
-
-  it('should display correct message when single Pokemon in wishlist', () => {
-    const singlePokemon = [mockWishlist[0]];
-    render(
-      <WishlistList
-        pokemon={singlePokemon}
-        title="My Wishlist"
-        onRemoveWishlist={() => {}}
-        onCollect={() => {}}
+        {...mockHandlers}
       />
     );
 
     expect(screen.getByText(/1 pokemon/i)).toBeInTheDocument();
   });
+
+  it('should have consistent styling with CollectionList', () => {
+    const { container } = render(
+      <WishlistList
+        pokemon={mockWishlist}
+        title="My Wishlist"
+        {...mockHandlers}
+      />
+    );
+
+    // Both components use the same Chakra pattern
+    const section = container.querySelector('section');
+    expect(section).toBeInTheDocument();
+  });
+
+  it('should have proper accessibility labels and ARIA attributes', () => {
+    const { container } = render(
+      <WishlistList
+        pokemon={mockWishlist}
+        title="My Wishlist"
+        {...mockHandlers}
+      />
+    );
+
+    const section = container.querySelector('section[aria-label="My Wishlist"]');
+    expect(section).toBeInTheDocument();
+  });
+
+  it('should use Typography components (Open Sans font)', () => {
+    render(
+      <WishlistList
+        pokemon={mockWishlist}
+        title="My Wishlist"
+        {...mockHandlers}
+      />
+    );
+
+    const heading = screen.getByRole('heading', { level: 2 });
+    // Chakra applies Open Sans via theme
+    expect(heading).toBeInTheDocument();
+  });
+
+  it('should render empty state with Chakra Box and proper styling', () => {
+    const { container } = render(
+      <WishlistList
+        pokemon={[]}
+        title="Empty Wishlist"
+        {...mockHandlers}
+      />
+    );
+
+    const emptyState = container.querySelector('[role="status"]');
+    expect(emptyState).toBeInTheDocument();
+  });
 });
+

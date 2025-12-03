@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, fireEvent, act } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '../setup';
 import '@testing-library/jest-dom';
 
 vi.mock('../../src/services/pokemonApi');
@@ -59,7 +59,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     // Component renders synchronously with title
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
-    const appContainer = document.querySelector('.app');
+    const appContainer = screen.getByRole('main');
     expect(appContainer).toBeInTheDocument();
 
     // Simulate rapid scroll events
@@ -87,7 +87,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
 
     // Component renders synchronously with title
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
-    expect(document.querySelector('.app')).toBeInTheDocument();
+    expect(screen.getByRole('main')).toBeInTheDocument();
   });
 
   it('should handle scroll to bottom repeatedly without memory leak', () => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '../setup'
 import '@testing-library/jest-dom'
 import App from '../../src/components/App'
 
@@ -41,15 +41,15 @@ describe('Sticky Scroll Behavior (T005)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchSection = document.querySelector('[class*="sticky"]') || document.querySelector('[class*="search"]')
+    const searchSection = screen.getByTestId('sticky-search-bar')
     expect(searchSection).toBeInTheDocument()
 
     // In a real test, we would simulate scroll and check position
     // For now, verify the element exists and has sticky styling
     if (searchSection) {
       const styles = window.getComputedStyle(searchSection)
-      // Should have sticky or fixed positioning (or CSS class indicating it)
-      expect(searchSection).toHaveClass(/sticky|fixed|top-0/i)
+      // Should have sticky positioning
+      expect(searchSection).toHaveStyle('position: sticky')
     }
   })
 
@@ -60,7 +60,7 @@ describe('Sticky Scroll Behavior (T005)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchSection = document.querySelector('[class*="sticky"]') || document.querySelector('[class*="search"]')
+    const searchSection = screen.getByTestId('sticky-search-bar')
     expect(searchSection).toBeInTheDocument()
 
     // Verify the sticky element is positioned at top

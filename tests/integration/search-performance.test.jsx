@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '../setup'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import App from '../../src/components/App'
@@ -76,7 +76,7 @@ describe('Performance Tests - Sticky Search Bar (T007)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchSection = document.querySelector('[class*="sticky"]') || document.querySelector('[class*="search"]')
+    const searchSection = screen.getByTestId('sticky-search-bar')
     expect(searchSection).toBeInTheDocument()
 
     // Verify GPU acceleration hints
