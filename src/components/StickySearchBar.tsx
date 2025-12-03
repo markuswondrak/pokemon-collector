@@ -1,4 +1,5 @@
 import React, { useRef, useEffect } from 'react'
+import { Box, HStack, Input, Button } from '@chakra-ui/react'
 
 interface StickySearchBarProps {
   value: string
@@ -62,32 +63,62 @@ export default function StickySearchBar({
   const showClearButton = value.length > 0
 
   return (
-    <div className="sticky-search-bar">
-      <div className="search-input-wrapper">
-        <input
-          ref={inputRef}
-          type="text"
-          value={value}
-          onChange={handleChange}
-          placeholder={placeholder}
-          aria-label={ariaLabel}
-          aria-describedby={ariaDescribedBy}
-          className="search-input"
-          data-testid="sticky-search-input"
-        />
-
+    <Box
+      position="sticky"
+      top={0}
+      zIndex={100}
+      bg="white"
+      boxShadow="sm"
+      p={4}
+      data-testid="sticky-search-bar"
+    >
+      <HStack
+        gap={2}
+        maxW="1440px"
+        mx="auto"
+        px={{ base: 2, md: 4 }}
+      >
+        <Box flex={1}>
+          <Input
+            ref={inputRef}
+            type="text"
+            value={value}
+            onChange={handleChange}
+            placeholder={placeholder}
+            aria-label={ariaLabel}
+            aria-describedby={ariaDescribedBy}
+            data-testid="sticky-search-input"
+            bg="white"
+            borderColor="teal.500"
+            _focus={{
+              borderColor: 'teal.600',
+              boxShadow: '0 0 0 1px var(--chakra-colors-teal-600)',
+            }}
+            _hover={{
+              borderColor: 'teal.400',
+            }}
+            px={4}
+            py={2}
+            fontSize="16px"
+            fontFamily="Open Sans, sans-serif"
+          />
+        </Box>
         {showClearButton && (
-          <button
+          <Button
             onClick={handleClearClick}
-            className="search-clear-btn"
             aria-label="Clear search"
             title="Clear search"
-            type="button"
+            variant="ghost"
+            size="sm"
+            p={2}
+            minW="auto"
+            fontSize="20px"
+            data-testid="search-clear-btn"
           >
             ×
-          </button>
+          </Button>
         )}
-      </div>
-    </div>
+      </HStack>
+    </Box>
   )
 }

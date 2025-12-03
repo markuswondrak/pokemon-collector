@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, ReactElement } from 'react'
+import { Box, VStack, HStack, Container, Heading, Text } from '@chakra-ui/react'
 import { useDebounce } from '../hooks/useDebounce.ts'
 import StickySearchBar from './StickySearchBar.tsx'
 import CollectionList from './CollectionList.tsx'
@@ -6,7 +7,6 @@ import WishlistList from './WishlistList.tsx'
 import AvailableGrid from './AvailableGrid.tsx'
 import * as pokemonApi from '../services/pokemonApi.ts'
 import * as pokemonService from '../services/pokemonService.ts'
-import '../styles/App.css'
 
 interface Pokemon {
   index: number
@@ -296,72 +296,113 @@ export default function App(): ReactElement {
   }), [filteredWishlist])
 
   return (
-    <main className="app" aria-label="Pokemon Collection Organizer">
-      <header className="app-header">
-        <h1>Pokemon Collection Organizer</h1>
-        <p>Build and manage your Pokemon collection</p>
-        <p
-          className="collection-stats"
-          aria-live="polite"
-          aria-atomic="true"
-        >
-          Collection: {collectedCount} / {Math.min(allPokemon.length, 1025)} total
-        </p>
-      </header>
+    <Box as="main" aria-label="Pokemon Collection Organizer">
+      {/* Header */}
+      <Box
+        as="header"
+        bg="gray.50"
+        borderBottomWidth="1px"
+        borderBottomColor="gray.200"
+        py={8}
+        px={{ base: 4, md: 8 }}
+      >
+        <Container maxW="1440px" px={{ base: 2, md: 4 }}>
+          <VStack align="flex-start" gap={2}>
+            <Heading as="h1" size="2xl" fontFamily="Open Sans, sans-serif">
+              Pokemon Collection Organizer
+            </Heading>
+            <Text fontFamily="Open Sans, sans-serif" color="gray.600">
+              Build and manage your Pokemon collection
+            </Text>
+            <Text
+              fontFamily="Open Sans, sans-serif"
+              color="teal.600"
+              fontWeight="500"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              Collection: {collectedCount} / {Math.min(allPokemon.length, 1025)} total
+            </Text>
+          </VStack>
+        </Container>
+      </Box>
 
-      <div className="app-main">
-        {/* NEW: Sticky Search Bar Section (T015, T016) */}
-        <section className="sticky-search-section" aria-label="Sticky search bar">
-          <StickySearchBar
-            value={searchQuery}
-            onChange={handleSearchChange}
-            onClear={handleSearchClear}
-            placeholder="Search Pokemon by name..."
-            minChars={3}
-          />
-        </section>
+      {/* Main Content */}
+      <Box as="section" aria-label="Pokemon grids">
+        {/* Sticky Search Bar */}
+        <StickySearchBar
+          value={searchQuery}
+          onChange={handleSearchChange}
+          onClear={handleSearchClear}
+          placeholder="Search Pokemon by name..."
+          minChars={3}
+        />
 
-        {/* Three Grid Section */}
-        <section className="three-grids-section" aria-label="Pokemon grids">
-          {/* Collected Grid */}
-          <CollectionList
-            pokemon={filteredCollection.map((p) => {
-              const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
-              return { ...p, image: fullPokemon?.image || p.image }
-            })}
-            title="My Collection"
-            onCollect={handleCollect}
-            onRemove={handleRemove}
-            onAddToWishlist={handleAddToWishlist}
-          />
+        {/* Three Grids Section */}
+        <Container maxW="1440px" px={{ base: 2, md: 4 }} py={8}>
+          <VStack
+            gap={8}
+            align="stretch"
+            flexDir={{ base: 'column', md: 'row' }}
+            alignItems={{ base: 'stretch', md: 'flex-start' }}
+          >
+            {/* Collected Grid */}
+            <Box flex={1} minW={0}>
+              <CollectionList
+                pokemon={filteredCollection.map((p) => {
+                  const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
+                  return { ...p, image: fullPokemon?.image || p.image }
+                })}
+                title="My Collection"
+                onCollect={handleCollect}
+                onRemove={handleRemove}
+                onAddToWishlist={handleAddToWishlist}
+              />
+            </Box>
 
-          {/* Wishlist Grid */}
-          <WishlistList
-            pokemon={filteredWishlist.map((p) => {
-              const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
-              return { ...p, image: fullPokemon?.image || p.image }
-            })}
-            title="My Wishlist"
-            onRemoveWishlist={handleRemoveFromWishlist}
-            onCollect={handleCollect}
-          />
+            {/* Wishlist Grid */}
+            <Box flex={1} minW={0}>
+              <WishlistList
+                pokemon={filteredWishlist.map((p) => {
+                  const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
+                  return { ...p, image: fullPokemon?.image || p.image }
+                })}
+                title="My Wishlist"
+                onRemoveWishlist={handleRemoveFromWishlist}
+                onCollect={handleCollect}
+              />
+            </Box>
 
-          {/* Available Grid with Lazy Loading */}
-          <AvailableGrid
-            allPokemon={filteredAllPokemon}
-            collection={mockCollection}
-            wishlist={mockWishlist}
-            onCollect={handleCollect}
-            onAddWishlist={handleAddToWishlist}
-          />
-        </section>
-      </div>
+            {/* Available Grid with Lazy Loading */}
+            <Box flex={1} minW={0}>
+              <AvailableGrid
+                allPokemon={filteredAllPokemon}
+                collection={mockCollection}
+                wishlist={mockWishlist}
+                onCollect={handleCollect}
+                onAddWishlist={handleAddToWishlist}
+              />
+            </Box>
+          </VStack>
+        </Container>
+      </Box>
 
-      <footer className="app-footer">
-        <p>
-          Total Pokemon: {collectedCount} collected, {collection.filter((p) => p.wishlist).length} wishlisted
-        </p>
-      </footer>
-    </main>
+      {/* Footer */}
+      <Box
+        as="footer"
+        bg="gray.50"
+        borderTopWidth="1px"
+        borderTopColor="gray.200"
+        py={6}
+        px={{ base: 4, md: 8 }}
+        textAlign="center"
+      >
+        <Container maxW="1440px" px={{ base: 2, md: 4 }}>
+          <Text fontFamily="Open Sans, sans-serif" color="gray.600" fontSize="sm">
+            Total Pokemon: {collectedCount} collected, {collection.filter((p) => p.wishlist).length} wishlisted
+          </Text>
+        </Container>
+      </Box>
+    </Box>
   )
 }
