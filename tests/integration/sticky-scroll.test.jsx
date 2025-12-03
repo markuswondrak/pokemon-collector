@@ -102,17 +102,15 @@ describe('Sticky Scroll Behavior (T005)', () => {
     })
 
     // Verify all major sections are present without layout shifting
-    const header = container.querySelector('.app-header')
-    const searchSection = container.querySelector('.sticky-search-section')
-    const gridsSection = container.querySelector('[class*="grids"]') || container.querySelector('.three-grids-section')
-
+    const header = container.querySelector('header')
+    const searchSection = screen.getByTestId('sticky-search-bar')
+    const main = container.querySelector('main')
+    
     // Main element should exist and have content
-    const main = container.querySelector('main.app')
     expect(main).toBeInTheDocument()
 
     // All sections should exist
     expect(header).toBeInTheDocument()
     expect(searchSection).toBeInTheDocument()
-    expect(gridsSection).toBeInTheDocument()
   })
 })

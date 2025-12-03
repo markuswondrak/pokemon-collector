@@ -5,6 +5,16 @@ import { ReactElement } from 'react'
 import { vi } from 'vitest'
 import { act } from 'react-dom/test-utils'
 
+// Suppress jsdom CSS parsing warnings - jsdom doesn't support all CSS features
+// These warnings are harmless but create noise in test output
+const originalWarn = console.warn
+console.warn = (...args: any[]) => {
+  if (args[0]?.includes?.('Could not parse CSS stylesheet')) {
+    return // Suppress CSS parsing warnings
+  }
+  originalWarn(...args)
+}
+
 // Set global timeout for waitFor commands to 1 second
 // This is a hard requirement for all tests in this project
 configure({ asyncUtilTimeout: 1000 })

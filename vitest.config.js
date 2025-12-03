@@ -23,8 +23,9 @@ export default defineConfig({
       inline: ['@chakra-ui/react', '@emotion/react', '@emotion/styled'],
     },
 
-    // Mock CSS imports for tests
-    css: false,
+    // Handle CSS imports in tests - use 'inline' to suppress jsdom CSS parsing warnings
+    // jsdom's CSS parser generates warnings for advanced CSS features; inlining avoids this
+    css: 'inline',
     
     coverage: {
       provider: 'v8',

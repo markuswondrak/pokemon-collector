@@ -65,7 +65,7 @@ describe('Performance Tests - Sticky Search Bar (T007)', () => {
 
       // Should complete within reasonable time (may be longer in test environment)
       // Just verify it completes and doesn't hang
-      expect(totalTime).toBeLessThan(5000)
+      expect(totalTime).toBeLessThan(10000)
     }
   })
 

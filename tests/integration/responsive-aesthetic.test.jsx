@@ -1,7 +1,53 @@
-import { describe, it, expect } from 'vitest';
-import { render, screen } from '../setup';
-import '@testing-library/jest-dom';
-import App from '../../src/components/App';
+import { describe, it, expect, vi } from 'vitest'
+import { render, screen } from '../setup'
+import '@testing-library/jest-dom'
+import App from '../../src/components/App'
+
+// Mock the PokéAPI to prevent real network requests
+vi.mock('../../src/services/pokemonApi.ts', () => ({
+  fetchPokemon: vi.fn(async (index) => {
+    const mockPokemon = {
+      1: { index: 1, name: 'Bulbasaur', image: 'https://example.com/1.png' },
+      4: { index: 4, name: 'Charmander', image: 'https://example.com/4.png' },
+      7: { index: 7, name: 'Squirtle', image: 'https://example.com/7.png' },
+      25: { index: 25, name: 'Pikachu', image: 'https://example.com/25.png' },
+      39: { index: 39, name: 'Jigglypuff', image: 'https://example.com/39.png' },
+    }
+    if (!mockPokemon[index]) {
+      throw new Error(`Pokemon ${index} not found`)
+    }
+    return mockPokemon[index]
+  }),
+  fetchMultiplePokemon: vi.fn(async (indices) => {
+    const mockData = {
+      1: { index: 1, name: 'Bulbasaur', image: 'https://example.com/1.png' },
+      4: { index: 4, name: 'Charmander', image: 'https://example.com/4.png' },
+      7: { index: 7, name: 'Squirtle', image: 'https://example.com/7.png' },
+      25: { index: 25, name: 'Pikachu', image: 'https://example.com/25.png' },
+      39: { index: 39, name: 'Jigglypuff', image: 'https://example.com/39.png' },
+    }
+    return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null })
+  }),
+}))
+
+// Mock pokemonService to prevent real API calls
+vi.mock('../../src/services/pokemonService.ts', () => ({
+  searchPokemonByName: vi.fn(async (query) => {
+    const allPokemon = [
+      { index: 1, name: 'Bulbasaur' },
+      { index: 4, name: 'Charmander' },
+      { index: 7, name: 'Squirtle' },
+      { index: 25, name: 'Pikachu' },
+      { index: 39, name: 'Jigglypuff' },
+    ]
+    return allPokemon.filter((p) => p.name.toLowerCase().includes(query.toLowerCase()))
+  }),
+  getCollectionList: vi.fn(() => []),
+  getCollection: vi.fn(() => []),
+  collectPokemon: vi.fn(),
+  removeFromCollection: vi.fn(),
+  isCollected: vi.fn(() => false),
+}))
 
 describe('Responsive Aesthetic - US3: Modern Aesthetic (T040)', () => {
   /**
