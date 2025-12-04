@@ -3,6 +3,7 @@ import {
   saveCollection
 } from './collectionStorage.ts'
 import { MIN_POKEMON_INDEX, MAX_POKEMON_INDEX } from '../utils/constants'
+import { fetchPokemon } from './pokemonApi'
 
 interface PokemonData {
   index: number
@@ -29,46 +30,54 @@ function validateIndex(index: number): void {
 /**
  * Add Pokemon to collection by marking as collected
  */
-export function collectPokemon(index: number): Promise<PokemonData> {
-  return Promise.resolve().then(() => {
-    validateIndex(index)
+export async function collectPokemon(index: number): Promise<PokemonData> {
+  validateIndex(index)
 
-    const collection = getStoredCollection()
-    const existing = collection.find((p: PokemonData) => p.index === index)
+  const collection = getStoredCollection()
+  const existing = collection.find((p: PokemonData) => p.index === index)
 
-    if (existing && existing.collected) {
-      throw new Error(`Pokemon ${String(index)} is already collected`)
-    }
+  if (existing && existing.collected) {
+    throw new Error(`Pokemon ${String(index)} is already collected`)
+  }
 
-    const pokemon: PokemonData = {
-      index,
-      name: `Pokemon ${String(index)}`,
-      image: null,
+  let name = `Pokemon ${String(index)}`
+  let image: string | null = null
+
+  try {
+    const apiPokemon = await fetchPokemon(index)
+    name = apiPokemon.name
+    image = apiPokemon.image
+  } catch (error) {
+    console.warn(`Failed to fetch details for Pokemon ${index}`, error)
+  }
+
+  const pokemon: PokemonData = {
+    index,
+    name,
+    image,
+    collected: true,
+    wishlist: false
+  }
+
+  const updatedCollection = [...collection]
+  const existingIndex = updatedCollection.findIndex(
+    (p) => p.index === index
+  )
+
+  if (existingIndex >= 0) {
+    updatedCollection[existingIndex] = {
+      ...updatedCollection[existingIndex],
       collected: true,
-      wishlist: false
+      name, // Update name in case it was a placeholder
+      image // Update image in case it was missing
     }
+  } else {
+    updatedCollection.push(pokemon)
+  }
 
-    const updatedCollection = [...collection]
-    const existingIndex = updatedCollection.findIndex(
-      (p) => p.index === index
-    )
+  saveCollection(updatedCollection)
 
-    if (existingIndex >= 0) {
-      updatedCollection[existingIndex] = {
-        ...updatedCollection[existingIndex],
-        collected: true
-      }
-    } else {
-      updatedCollection.push(pokemon)
-    }
-
-    saveCollection(updatedCollection)
-
-    return {
-      ...pokemon,
-      ...(existing && { name: existing.name, image: existing.image })
-    }
-  })
+  return existingIndex >= 0 ? updatedCollection[existingIndex] : pokemon
 }
 
 /**
@@ -137,46 +146,54 @@ export function isCollected(index: number): boolean {
 /**
  * Add Pokemon to wishlist
  */
-export function addToWishlist(index: number): Promise<PokemonData> {
-  return Promise.resolve().then(() => {
-    validateIndex(index)
+export async function addToWishlist(index: number): Promise<PokemonData> {
+  validateIndex(index)
 
-    const collection = getStoredCollection()
-    const existing = collection.find((p: PokemonData) => p.index === index)
+  const collection = getStoredCollection()
+  const existing = collection.find((p: PokemonData) => p.index === index)
 
-    if (existing && existing.collected) {
-      throw new Error('Cannot add collected Pokemon to wishlist')
+  if (existing && existing.collected) {
+    throw new Error('Cannot add collected Pokemon to wishlist')
+  }
+
+  let name = `Pokemon ${String(index)}`
+  let image: string | null = null
+
+  try {
+    const apiPokemon = await fetchPokemon(index)
+    name = apiPokemon.name
+    image = apiPokemon.image
+  } catch (error) {
+    console.warn(`Failed to fetch details for Pokemon ${index}`, error)
+  }
+
+  const pokemon: PokemonData = {
+    index,
+    name,
+    image,
+    collected: false,
+    wishlist: true
+  }
+
+  const updatedCollection = [...collection]
+  const existingIndex = updatedCollection.findIndex(
+    (p) => p.index === index
+  )
+
+  if (existingIndex >= 0) {
+    updatedCollection[existingIndex] = {
+      ...updatedCollection[existingIndex],
+      wishlist: true,
+      name, // Update name
+      image // Update image
     }
+  } else {
+    updatedCollection.push(pokemon)
+  }
 
-    const pokemon: PokemonData = {
-      index,
-      name: `Pokemon ${String(index)}`,
-      image: null,
-      collected: false,
-      wishlist: true
-    }
+  saveCollection(updatedCollection)
 
-    const updatedCollection = [...collection]
-    const existingIndex = updatedCollection.findIndex(
-      (p) => p.index === index
-    )
-
-    if (existingIndex >= 0) {
-      updatedCollection[existingIndex] = {
-        ...updatedCollection[existingIndex],
-        wishlist: true
-      }
-    } else {
-      updatedCollection.push(pokemon)
-    }
-
-    saveCollection(updatedCollection)
-
-    return {
-      ...pokemon,
-      ...(existing && { name: existing.name, image: existing.image })
-    }
-  })
+  return existingIndex >= 0 ? updatedCollection[existingIndex] : pokemon
 }
 
 /**
