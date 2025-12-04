@@ -39,6 +39,11 @@ describe('Lazy Loading Edge Cases & Performance', () => {
       };
     });
 
+    // Mock searchPokemonSimple
+    if (pokemonApi.searchPokemonSimple) {
+      pokemonApi.searchPokemonSimple.mockResolvedValue([]);
+    }
+
     pokemonService.getCollectionList.mockReturnValue([]);
 
     // Mock IntersectionObserver for lazy loading

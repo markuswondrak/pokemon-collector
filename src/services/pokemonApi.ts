@@ -33,10 +33,12 @@ interface CacheEntry {
 class PokemonApiService {
   private cache: Map<string, CacheEntry>
   private lastRequestTime: number
+  private allPokemonList: { name: string; url: string }[] | null
 
   constructor() {
     this.cache = new Map()
     this.lastRequestTime = 0
+    this.allPokemonList = null
   }
 
   /**
@@ -157,6 +159,45 @@ class PokemonApiService {
   }
 
   /**
+   * Fetch list of all Pokemon names and URLs
+   * @returns {Promise<{ name: string; url: string }[]>}
+   */
+  async getAllPokemonList(): Promise<{ name: string; url: string }[]> {
+    if (this.allPokemonList) {
+      return this.allPokemonList
+    }
+
+    try {
+      const response = await axios.get<{ results: { name: string; url: string }[] }>(
+        `${POKEMON_ENDPOINT}?limit=${MAX_POKEMON_INDEX}`
+      )
+      this.allPokemonList = response.data.results
+      return this.allPokemonList
+    } catch (error) {
+      console.error('Failed to fetch pokemon list', error)
+      return []
+    }
+  }
+
+  /**
+   * Search Pokemon by name (returns indices and names)
+   * @param {string} query - Search query
+   * @returns {Promise<{ index: number; name: string }[]>}
+   */
+  async searchPokemonSimple(query: string): Promise<{ index: number; name: string }[]> {
+    if (!query || typeof query !== 'string') {
+      return []
+    }
+
+    const searchTerm = query.toLowerCase().trim()
+    const allPokemon = await this.getAllPokemonList()
+
+    return allPokemon
+      .map((p, i) => ({ index: i + 1, name: p.name }))
+      .filter((p) => p.name.includes(searchTerm))
+  }
+
+  /**
    * Search Pokemon by name
    * @param {string} query - Search query
    * @returns {Promise<Pokemon[]>} - Array of matching Pokemon
@@ -246,6 +287,8 @@ export const fetchMultiplePokemon = (indices: number[]): Promise<Pokemon[]> =>
   instance.fetchMultiplePokemon(indices)
 export const searchPokemon = (query: string): Promise<Pokemon[]> =>
   instance.searchPokemon(query)
+export const searchPokemonSimple = (query: string): Promise<{ index: number; name: string }[]> =>
+  instance.searchPokemonSimple(query)
 export const getPokemonByRange = (
   start: number,
   end: number

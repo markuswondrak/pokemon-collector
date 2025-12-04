@@ -113,7 +113,10 @@ export default function App(): ReactElement {
 
   // NEW: Handle debounced name search (T014)
   useEffect(() => {
-    if (!isSearchActive || !debouncedSearchQuery) {
+    // Only search if the DEBOUNCED query is long enough
+    // This prevents freezing when typing the 3rd character (avoiding search for 2 chars)
+    // Also check isSearchActive to prevent searching when the user has cleared the input
+    if (!isSearchActive || !debouncedSearchQuery || debouncedSearchQuery.length < 3) {
       setSearchResults(null)
       return
     }
@@ -122,8 +125,10 @@ export default function App(): ReactElement {
       try {
         const results = await pokemonService.searchPokemonByName(debouncedSearchQuery)
         // Filter to get only Pokemon that exist in allPokemon
-        const filtered = results.filter((result) =>
-          allPokemon.some((p) => p.index === result.index)
+        // Optimized: Use direct index access instead of O(N) .some() check
+        // Since allPokemon is sorted 1-1025, we can just check bounds
+        const filtered = results.filter((result) => 
+          result.index >= 1 && result.index <= allPokemon.length
         )
         setSearchResults(filtered)
       } catch (err) {
@@ -274,8 +279,13 @@ export default function App(): ReactElement {
       return allPokemon
     }
     return searchResults.map((result) => {
-      const fullPokemon = allPokemon.find((p) => p.index === result.index)
-      return fullPokemon || result
+      // Optimized: Use direct index access instead of O(N) .find()
+      // allPokemon is 0-indexed, so index 1 is at [0]
+      const index = result.index - 1
+      if (index >= 0 && index < allPokemon.length) {
+        return allPokemon[index]
+      }
+      return result
     })
   }, [allPokemon, isSearchActive, searchResults])
 

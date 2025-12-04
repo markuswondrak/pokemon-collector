@@ -41,6 +41,11 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
       wishlist: false
     }));
 
+    // Mock searchPokemonSimple
+    if (pokemonApi.searchPokemonSimple) {
+      pokemonApi.searchPokemonSimple.mockResolvedValue([]);
+    }
+
     const mockStorage = [];
     pokemonService.getCollectionList.mockReturnValue(mockStorage);
 

@@ -3,7 +3,7 @@ import {
   saveCollection
 } from './collectionStorage.ts'
 import { MIN_POKEMON_INDEX, MAX_POKEMON_INDEX } from '../utils/constants'
-import { fetchPokemon } from './pokemonApi'
+import { fetchPokemon, searchPokemonSimple } from './pokemonApi'
 
 interface PokemonData {
   index: number
@@ -246,24 +246,35 @@ export function removeFromWishlist(index: number): Promise<boolean> {
  * @returns Promise<PokemonData[]> - Array of matching Pokemon from collection
  */
 export function searchPokemonByName(query: string): Promise<PokemonData[]> {
-  return Promise.resolve().then(() => {
+  return Promise.resolve().then(async () => {
     if (!query || !query.trim()) {
       return []
     }
 
-    const normalizedQuery = query.toLowerCase().trim()
+    // Get all matching Pokemon from API (names and indices)
+    // This searches ALL 1025 Pokemon, not just the collection
+    const apiResults = await searchPokemonSimple(query)
     
-    // OPTIMIZED: Filter only against stored Pokemon (loaded/collected/wishlisted)
-    // Instead of creating all 1,025 Pokemon objects
+    // Get collection to check status
     const collection = getStoredCollection()
-    
-    // Filter by name match (case-insensitive partial match)
-    const results = collection.filter((pokemon) => {
-      const normalizedName = pokemon.name.toLowerCase()
-      return normalizedName.includes(normalizedQuery)
-    })
+    const collectionMap = new Map(collection.map(p => [p.index, p]))
 
-    return results
+    // Merge results
+    return apiResults.map(result => {
+      const stored = collectionMap.get(result.index)
+      if (stored) {
+        return stored
+      }
+      
+      // Return placeholder for available pokemon
+      return {
+        index: result.index,
+        name: result.name.charAt(0).toUpperCase() + result.name.slice(1), // Capitalize
+        image: null,
+        collected: false,
+        wishlist: false
+      }
+    })
   })
 }
 
