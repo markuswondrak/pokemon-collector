@@ -39,7 +39,7 @@ jobs:
         run: pnpm build
 
       - name: Run tests
-        run: pnpm test --run --threads --maxThreads=4
+        run: pnpm test --run
 
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3
