@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '../setup.tsx'
+import { render, screen, waitFor } from '../setup.tsx'
 import userEvent from '@testing-library/user-event'
 import '@testing-library/jest-dom'
 import App from '../../src/components/App'
@@ -30,6 +30,18 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
     return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null })
   }),
 }))
+
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 
 // Mock pokemonService to prevent real API calls
 vi.mock('../../src/services/pokemonService.ts', () => ({
@@ -90,6 +102,10 @@ describe('Search UI Consistency Integration Tests (T019)', () => {
     render(<App />)
 
     const input = screen.getByTestId('sticky-search-input')
+    // Wait for input to be enabled before interacting
+    await waitFor(() => {
+      expect(input).not.toBeDisabled()
+    })
     await user.type(input, 'pika')
 
     const clearButton = screen.getByTestId('search-clear-btn')
@@ -102,6 +118,11 @@ describe('Search UI Consistency Integration Tests (T019)', () => {
     render(<App />)
 
     const input = screen.getByTestId('sticky-search-input')
+    
+    // Wait for input to be enabled before clicking
+    await waitFor(() => {
+      expect(input).not.toBeDisabled()
+    })
     
     await user.click(input)
     expect(input).toHaveFocus()
@@ -184,6 +205,11 @@ describe('Search UI Consistency Integration Tests (T019)', () => {
     render(<App />)
 
     const input = screen.getByTestId('sticky-search-input')
+
+    // Wait for input to be enabled (names loaded)
+    await waitFor(() => {
+      expect(input).not.toBeDisabled()
+    })
 
     // Test focus state
     await user.click(input)

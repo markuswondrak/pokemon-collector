@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, ReactElement } from 'react'
-import { Box, VStack, HStack, Container, Heading, Text } from '@chakra-ui/react'
+import { Box, VStack, Container, Heading, Text } from '@chakra-ui/react'
 import { useDebounce } from '../hooks/useDebounce.ts'
 import StickySearchBar from './StickySearchBar.tsx'
 import CollectionList from './CollectionList.tsx'
@@ -7,6 +7,7 @@ import WishlistList from './WishlistList.tsx'
 import AvailableGrid from './AvailableGrid.tsx'
 import * as pokemonApi from '../services/pokemonApi.ts'
 import * as pokemonService from '../services/pokemonService.ts'
+import { nameRegistry } from '../services/nameRegistry.ts'
 
 interface Pokemon {
   index: number
@@ -38,6 +39,10 @@ export default function App(): ReactElement {
   const { debouncedValue: debouncedSearchQuery } = useDebounce(searchQuery, { delay: 300 })
   const [searchResults, setSearchResults] = useState<Pokemon[] | null>(null)
   const isSearchActive = searchQuery.length >= 3
+
+  // T010: NameRegistry state for preloaded names
+  const [namesReady, setNamesReady] = useState<boolean>(false)
+  const [namesError, setNamesError] = useState<string | null>(null)
 
   // Fetch a batch of Pokemon from the API
   const fetchPokemonBatch = async (indices: number[], currentFetched: Set<number>): Promise<void> => {
@@ -82,6 +87,22 @@ export default function App(): ReactElement {
     }
   }
 
+  // T010: Initialize names preload on mount
+  useEffect(() => {
+    const initializeNames = async () => {
+      try {
+        await nameRegistry.loadAllNamesWithCache()
+        setNamesReady(true)
+      } catch (err) {
+        const errorMessage =
+          err instanceof Error ? err.message : 'Failed to load Pokemon names'
+        setNamesError(errorMessage)
+      }
+    }
+
+    void initializeNames()
+  }, [])
+
   // Load collection from storage on mount and initialize all Pokemon
   useEffect(() => {
     const stored = pokemonService.getCollectionList()
@@ -97,19 +118,24 @@ export default function App(): ReactElement {
     }
 
     // Initialize all Pokemon (1-1025) as available
-    const allPokemonList: Pokemon[] = Array.from({ length: 1025 }, (_, i) => ({
-      index: i + 1,
-      name: `Pokemon ${i + 1}`,
-      image: null,
-      collected: collectedMap.has(i + 1),
-      wishlist: wishlistMap.has(i + 1),
-    }))
+    // T010: Use registry names when available
+    const allPokemonList: Pokemon[] = Array.from({ length: 1025 }, (_, i) => {
+      const index = i + 1
+      const registryName = nameRegistry.getName(index)
+      return {
+        index,
+        name: registryName || `Pokemon ${index}`,
+        image: null,
+        collected: collectedMap.has(index),
+        wishlist: wishlistMap.has(index),
+      }
+    })
     setAllPokemon(allPokemonList)
 
     // Fetch initial batch of Pokemon (first 20)
     const indicesToFetch = Array.from({ length: Math.min(20, 1025) }, (_, i) => i + 1)
     fetchPokemonBatch(indicesToFetch, new Set())
-  }, [])
+  }, [namesReady])
 
   // NEW: Handle debounced name search (T014)
   useEffect(() => {
@@ -307,6 +333,54 @@ export default function App(): ReactElement {
 
   return (
     <Box as="main" aria-label="Pokemon Collection Organizer">
+      {/* T013: Blocking error overlay on preload failure */}
+      {namesError && (
+        <Box
+          position="fixed"
+          top={0}
+          left={0}
+          right={0}
+          bottom={0}
+          bg="rgba(0, 0, 0, 0.8)"
+          zIndex={9999}
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          role="alert"
+          aria-live="assertive"
+        >
+          <Box
+            bg="white"
+            p={8}
+            borderRadius="md"
+            maxW="500px"
+            mx={4}
+            boxShadow="xl"
+          >
+            <Heading as="h2" size="lg" mb={4} color="red.600" fontFamily="Open Sans, sans-serif">
+              Unable to Load Pokemon Names
+            </Heading>
+            <Text mb={4} fontFamily="Open Sans, sans-serif">
+              {namesError}
+            </Text>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#319795',
+                color: 'white',
+                border: 'none',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontFamily: 'Open Sans, sans-serif',
+              }}
+            >
+              Reload Page
+            </button>
+          </Box>
+        </Box>
+      )}
+
       {/* Header */}
       <Box
         as="header"
@@ -339,13 +413,15 @@ export default function App(): ReactElement {
 
       {/* Main Content */}
       <Box as="section" aria-label="Pokemon grids">
-        {/* Sticky Search Bar */}
+        {/* T012: Sticky Search Bar - disabled until names ready */}
         <StickySearchBar
           value={searchQuery}
           onChange={handleSearchChange}
           onClear={handleSearchClear}
           placeholder="Search Pokemon by name..."
           minChars={3}
+          disabled={!namesReady}
+          loadingMessage="Loading names..."
         />
 
         {/* Three Grids Section */}

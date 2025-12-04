@@ -3,6 +3,16 @@ import { render, screen, fireEvent, waitFor, act } from '../setup';
 import '@testing-library/jest-dom';
 
 vi.mock('../../src/services/pokemonApi');
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -38,6 +48,14 @@ describe('Lazy Loading Edge Cases & Performance', () => {
         wishlist: false
       };
     });
+
+    // Mock getAllPokemonList for nameRegistry preload
+    pokemonApi.getAllPokemonList.mockResolvedValue(
+      Array.from({ length: 1025 }, (_, i) => ({
+        name: `pokemon-${i + 1}`,
+        url: `https://pokeapi.co/api/v2/pokemon/${i + 1}/`
+      }))
+    );
 
     // Mock searchPokemonSimple
     if (pokemonApi.searchPokemonSimple) {
@@ -225,7 +243,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
     // Try to interact while network request is pending
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
     });
@@ -244,7 +262,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
     // Rapid search inputs with names
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     const names = ['Bulbasaur', 'Charmander', 'Squirtle', 'Pikachu'];
     for (let i = 0; i < names.length; i++) {
       await act(async () => {
@@ -364,7 +382,7 @@ describe('Lazy Loading Edge Cases & Performance', () => {
     // Component renders synchronously with title
     expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
 
     // Search for Pokemon with name that exists
     const startTime = Date.now();

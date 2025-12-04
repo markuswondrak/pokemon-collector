@@ -25,6 +25,21 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
   }),
 }))
 
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => {
+      const names = { 1: 'Bulbasaur', 25: 'Pikachu' };
+      return names[id] || `Pokemon ${id}`;
+    }),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
+
 describe('Performance Tests - Sticky Search Bar (T007)', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -45,7 +60,7 @@ describe('Performance Tests - Sticky Search Bar (T007)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       const typeStartTime = performance.now()
       await user.type(searchInput, 'pika')
@@ -105,7 +120,7 @@ describe('Performance Tests - Sticky Search Bar (T007)', () => {
     })
 
     // Type to trigger debounce timer
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       // Unmount component
       unmount()

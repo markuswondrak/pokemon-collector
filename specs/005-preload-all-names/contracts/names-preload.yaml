@@ -1,0 +1,101 @@
+openapi: 3.0.3
+info:
+  title: Pokemon Names Preload Contracts
+  version: 1.0.0
+  description: |
+    Contracts for preloading Pokemon names and IDs. Includes external PokeAPI usage
+    and internal service interface used by the app.
+
+paths:
+  /external/pokemon:
+    get:
+      summary: Fetch all Pokemon references (name + resource URL)
+      description: Proxy description of PokeAPI `GET /api/v2/pokemon?limit=N` usage.
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            example: 20000
+          required: true
+      responses:
+        '200':
+          description: List of Pokemon references
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/PokeApiReference'
+        '4XX':
+          description: Upstream client error
+        '5XX':
+          description: Upstream server error
+
+  /internal/names/registry:
+    get:
+      summary: Get NameRegistry readiness and items
+      responses:
+        '200':
+          description: Registry state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NameRegistryState'
+
+components:
+  schemas:
+    PokeApiReference:
+      type: object
+      properties:
+        name:
+          type: string
+          example: bulbasaur
+        url:
+          type: string
+          example: https://pokeapi.co/api/v2/pokemon/1/
+      required: [name, url]
+
+    PokemonReference:
+      type: object
+      properties:
+        id:
+          type: integer
+          minimum: 1
+          example: 1
+        name:
+          type: string
+          example: Bulbasaur
+      required: [id, name]
+
+    NameRegistryState:
+      type: object
+      properties:
+        ready:
+          type: boolean
+        error:
+          type: string
+          nullable: true
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/PokemonReference'
+      required: [ready, error, items]
+
+x-policies:
+  cache:
+    strategy: localStorage
+    key: names.v<appVersion>
+    invalidate: on appVersion change only
+  retry:
+    attempts: 3
+    backoff: exponential
+    baseMs: 500
+    jitter: 0.2
+  completeness:
+    requiredIds: 1..MAX_POKEMON_INDEX
+    onPartial: treat-as-failure

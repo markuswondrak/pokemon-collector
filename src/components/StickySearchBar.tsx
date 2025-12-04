@@ -10,6 +10,8 @@ interface StickySearchBarProps {
   debounceMs?: number
   ariaLabel?: string
   ariaDescribedBy?: string
+  disabled?: boolean
+  loadingMessage?: string
 }
 
 /**
@@ -36,6 +38,8 @@ export default function StickySearchBar({
   placeholder = 'Search Pokemon by name...',
   ariaLabel = 'Search Pokemon by name',
   ariaDescribedBy,
+  disabled = false,
+  loadingMessage = 'Loading names...',
 }: StickySearchBarProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -61,6 +65,9 @@ export default function StickySearchBar({
   }
 
   const showClearButton = value.length > 0
+  
+  // T012: Use loading message as placeholder when disabled
+  const effectivePlaceholder = disabled ? loadingMessage : placeholder
 
   return (
     <Box
@@ -84,7 +91,7 @@ export default function StickySearchBar({
             type="text"
             value={value}
             onChange={handleChange}
-            placeholder={placeholder}
+            placeholder={effectivePlaceholder}
             aria-label={ariaLabel}
             aria-describedby={ariaDescribedBy}
             data-testid="sticky-search-input"
@@ -101,9 +108,11 @@ export default function StickySearchBar({
             py={2}
             fontSize="16px"
             fontFamily="Open Sans, sans-serif"
+            disabled={disabled}
+            aria-disabled={disabled}
           />
         </Box>
-        {showClearButton && (
+        {showClearButton && !disabled && (
           <Button
             onClick={handleClearClick}
             aria-label="Clear search"

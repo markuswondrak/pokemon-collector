@@ -15,6 +15,16 @@ vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
   saveCollection: vi.fn(),
 }));
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -101,7 +111,7 @@ describe('US2 Integration: Add to Wishlist Workflow', () => {
     render(<App />);
 
     // With sticky search bar, search by Pokemon name
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
       await new Promise(resolve => setTimeout(resolve, 350));

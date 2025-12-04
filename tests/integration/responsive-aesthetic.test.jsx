@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '../setup'
+import { render, screen, waitFor } from '../setup'
 import '@testing-library/jest-dom'
 import App from '../../src/components/App'
 
@@ -28,7 +28,26 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
     }
     return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null })
   }),
+  getAllPokemonList: vi.fn(async () => [
+    { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
+    { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
+    { name: 'squirtle', url: 'https://pokeapi.co/api/v2/pokemon/7/' },
+    { name: 'pikachu', url: 'https://pokeapi.co/api/v2/pokemon/25/' },
+    { name: 'jigglypuff', url: 'https://pokeapi.co/api/v2/pokemon/39/' },
+  ]),
 }))
+
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 
 // Mock pokemonService to prevent real API calls
 vi.mock('../../src/services/pokemonService.ts', () => ({
@@ -141,7 +160,7 @@ describe('Responsive Aesthetic - US3: Modern Aesthetic (T040)', () => {
   it('should keep sticky search bar accessible at mobile sizes', () => {
     render(<App />);
     
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
   });
 
@@ -162,12 +181,17 @@ describe('Responsive Aesthetic - US3: Modern Aesthetic (T040)', () => {
     expect(h1).toBeInTheDocument();
   });
 
-  it('should maintain grid gap spacing at all sizes', () => {
+  it('should maintain grid gap spacing at all sizes', async () => {
     render(<App />);
     
-    // Grid sections should have consistent gap spacing
-    const gridsSection = screen.getByLabelText('Pokemon grids');
-    expect(gridsSection).toBeInTheDocument();
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
+    });
+
+    // Grid sections should be rendered
+    const availableSections = screen.getAllByText(/Available Pokemon/i);
+    expect(availableSections.length).toBeGreaterThan(0);
   });
 
   it('should display proper visual hierarchy at mobile viewport', () => {
@@ -237,7 +261,7 @@ describe('Responsive Aesthetic - US3: Modern Aesthetic (T040)', () => {
     render(<App />);
     
     // Search input should be accessible
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toHaveAttribute('type', 'text');
   });
 
