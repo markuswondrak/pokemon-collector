@@ -1,0 +1,37 @@
+# Component Contracts
+
+components:
+  PokemonCard:
+    description: "A card component displaying Pokemon details and actions."
+    props:
+      pokemon:
+        type: "Pokemon"
+        required: true
+        description: "The Pokemon data object."
+      onCollect:
+        type: "(index: number) => void"
+        required: true
+        description: "Callback fired when the user clicks the Collect button."
+      onAddToWishlist:
+        type: "(index: number) => void"
+        required: true
+        description: "Callback fired when the user toggles the Wishlist button."
+      onRemove:
+        type: "(index: number) => void"
+        required: true
+        description: "Callback fired when the user clicks the Remove button."
+    accessibility:
+      aria-label: "Pokemon name and index"
+      actions:
+        collect:
+          aria-label: "Add {name} to collection"
+          tooltip: "Collect"
+        remove:
+          aria-label: "Remove {name} from collection"
+          tooltip: "Remove"
+        wishlist:
+          aria-label: "Add {name} to wishlist"
+          tooltip: "Wishlist"
+        unwishlist:
+          aria-label: "Remove {name} from wishlist"
+          tooltip: "Remove from Wishlist"

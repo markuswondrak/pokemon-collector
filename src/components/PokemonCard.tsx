@@ -1,6 +1,9 @@
 import { ReactElement, memo } from 'react'
-import { Box, Heading, Text, VStack, HStack, Button } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, HStack, Button, IconButton } from '@chakra-ui/react'
 import { Card, Badge } from '@chakra-ui/react'
+import { Tooltip } from '@chakra-ui/react'
+import { TbPokeball, TbPokeballOff } from 'react-icons/tb'
+import { FaHeart, FaRegHeart } from 'react-icons/fa'
 
 interface Pokemon {
   index: number
@@ -179,46 +182,78 @@ function PokemonCard({
         )}
       </VStack>
 
-      <HStack gap={2} w="100%">
+      <HStack gap={2} w="100%" justify="center">
         {!pokemon.collected ? (
-          <Button
-            size="sm"
-            colorScheme="green"
-            onClick={handleCollect}
-            aria-label={`Add ${pokemon.name} to collection`}
-            flex={1}
-          >
-            Collect
-          </Button>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <IconButton
+                w="44px"
+                h="44px"
+                variant="ghost"
+                color="black"
+                _hover={{ bg: 'gray.100' }}
+                onClick={handleCollect}
+                aria-label={`Add ${pokemon.name} to collection`}
+                rounded="full"
+              >
+                <TbPokeball size="20px" />
+              </IconButton>
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content>Collect</Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
         ) : (
-          <Button
-            size="sm"
-            colorScheme="red"
-            onClick={handleRemove}
-            aria-label={`Remove ${pokemon.name} from collection`}
-            flex={1}
-          >
-            Remove
-          </Button>
+          <Tooltip.Root>
+            <Tooltip.Trigger asChild>
+              <IconButton
+                w="44px"
+                h="44px"
+                variant="ghost"
+                color="black"
+                _hover={{ bg: 'gray.100' }}
+                onClick={handleRemove}
+                aria-label={`Remove ${pokemon.name} from collection`}
+                rounded="full"
+              >
+                <TbPokeballOff size="20px" />
+              </IconButton>
+            </Tooltip.Trigger>
+            <Tooltip.Positioner>
+              <Tooltip.Content>Remove</Tooltip.Content>
+            </Tooltip.Positioner>
+          </Tooltip.Root>
         )}
 
-        <Button
-          size="sm"
-          colorScheme="orange"
-          onClick={handleAddToWishlist}
-          disabled={pokemon.collected}
-          aria-label={
-            pokemon.collected
-              ? `Cannot add ${pokemon.name} to wishlist (already collected)`
-              : pokemon.wishlist
-                ? `Remove ${pokemon.name} from wishlist`
-                : `Add ${pokemon.name} to wishlist`
-          }
-          aria-pressed={pokemon.wishlist}
-          flex={1}
-        >
-          {pokemon.wishlist ? '♡ In Wishlist' : '♡ Wishlist'}
-        </Button>
+        <Tooltip.Root>
+          <Tooltip.Trigger asChild>
+            <IconButton
+              w="44px"
+              h="44px"
+              variant="ghost"
+              color="black"
+              _hover={{ bg: 'gray.100' }}
+              onClick={handleAddToWishlist}
+              disabled={pokemon.collected}
+              aria-label={
+                pokemon.collected
+                  ? `Cannot add ${pokemon.name} to wishlist (already collected)`
+                  : pokemon.wishlist
+                    ? `Remove ${pokemon.name} from wishlist`
+                    : `Add ${pokemon.name} to wishlist`
+              }
+              aria-pressed={pokemon.wishlist}
+              rounded="full"
+            >
+              {pokemon.wishlist ? <FaHeart size="20px" /> : <FaRegHeart size="20px" />}
+            </IconButton>
+          </Tooltip.Trigger>
+          <Tooltip.Positioner>
+            <Tooltip.Content>
+              {pokemon.wishlist ? 'Remove from Wishlist' : 'Wishlist'}
+            </Tooltip.Content>
+          </Tooltip.Positioner>
+        </Tooltip.Root>
       </HStack>
     </Card.Root>
   )

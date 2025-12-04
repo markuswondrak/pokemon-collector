@@ -7,6 +7,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-30
 - Browser localStorage (unchanged - collection persistence) (002-sticky-search-bar)
 - TypeScript 5.9+, React 19, React DOM 19 + Chakra UI v2.8+, @emotion/react, @emotion/styled, framer-motion (003-component-library)
 - Browser localStorage (unchanged; no new storage requirements) (003-component-library)
+- TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+, react-icons (004-modern-card-actions)
+- TypeScript 5.9+ + React 19, Chakra UI v3+, react-icons (004-modern-card-actions)
 
 - TypeScript 5.9+ (strict mode enabled) + React 19, Vite 7+, Axios (HTTP client), Vitest + React Testing Library (001-pokemon-collection)
 
@@ -27,10 +29,10 @@ npm test && npm run lint
 TypeScript 5.9+ (strict mode enabled): Follow standard conventions
 
 ## Recent Changes
-- 003-component-library: Added TypeScript 5.9+, React 19, React DOM 19 + Chakra UI v2.8+, @emotion/react, @emotion/styled, framer-motion
-- 002-sticky-search-bar: Added TypeScript 5.9+ (strict mode), React 19, JavaScript ES2020+ + React hooks, existing `pokemonService.searchPokemonByName()`, CSS Grid/Flexbox
+- 004-modern-card-actions: Added TypeScript 5.9+ + React 19, Chakra UI v3+, react-icons
+- 004-modern-card-actions: Added TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+, react-icons
+- 004-modern-card-actions: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
-- 001-pokemon-collection: Added TypeScript 5.9+ (strict mode enabled) + React 19, Vite 7+, Axios (HTTP client), Vitest + React Testing Library
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
