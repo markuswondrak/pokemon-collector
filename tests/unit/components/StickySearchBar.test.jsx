@@ -21,7 +21,7 @@ describe('StickySearchBar Component (T002, T018)', () => {
       />
     )
 
-    const input = screen.getByPlaceholderText('Search Pokemon by name...')
+    const input = screen.getByTestId('sticky-search-input')
     expect(input).toBeInTheDocument()
   })
 
@@ -35,7 +35,7 @@ describe('StickySearchBar Component (T002, T018)', () => {
       />
     )
 
-    const input = screen.getByPlaceholderText('Search Pokemon by name...')
+    const input = screen.getByTestId('sticky-search-input')
     await user.type(input, 'pika')
 
     expect(mockOnChange).toHaveBeenCalled()
@@ -135,7 +135,7 @@ describe('StickySearchBar Component (T002, T018)', () => {
       />
     )
 
-    const input = screen.getByPlaceholderText('Search Pokemon by name...')
+    const input = screen.getByTestId('sticky-search-input')
     await user.click(input)
     await user.keyboard('{Escape}')
 
@@ -152,7 +152,7 @@ describe('StickySearchBar Component (T002, T018)', () => {
       />
     )
 
-    const input = screen.getByPlaceholderText('Search Pokemon by name...')
+    const input = screen.getByTestId('sticky-search-input')
     expect(input).toHaveAttribute('aria-label', 'Search Pokemon')
   })
 

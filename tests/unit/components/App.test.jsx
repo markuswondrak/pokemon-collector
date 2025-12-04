@@ -15,6 +15,16 @@ vi.mock('../../../src/services/pokemonService', () => ({
   removeFromCollection: vi.fn(),
   isCollected: vi.fn(() => false),
 }));
+vi.mock('../../../src/services/nameRegistry', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 vi.mock('../../../src/components/AvailableGrid', () => ({
   default: () => <div data-testid="available-grid">Available Grid</div>,
 }));
@@ -43,7 +53,8 @@ describe('App Component - User Story 1', () => {
   it('should render search component', () => {
     render(<App />);
 
-    expect(screen.getByPlaceholderText(/search pokemon by name/i)).toBeInTheDocument();
+    // Use testid since placeholder changes based on loading state
+    expect(screen.getByTestId('sticky-search-input')).toBeInTheDocument();
   });
 
   it('should render Pokemon card display area', () => {
@@ -77,7 +88,8 @@ describe('App Component - User Story 1', () => {
   it('should initialize with empty search state', () => {
     render(<App />);
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    // Use testid since placeholder changes based on loading state
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput.value).toBe('');
   });
 
@@ -114,16 +126,16 @@ describe('App Component - Search State Management (T003 - Sticky Search Bar)', (
   it('should initialize search query state as empty string', () => {
     render(<App />);
 
-    // Verify search input is present and empty
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    // Verify search input is present and empty (use testid since placeholder changes)
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toHaveValue('');
   });
 
   it('should update search query when user types in search bar', async () => {
     render(<App />);
 
-    // Verify search input is functional
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    // Verify search input is functional (use testid since placeholder changes)
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
   });
 

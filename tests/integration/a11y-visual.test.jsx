@@ -31,6 +31,18 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
   }),
 }))
 
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
+
 // Mock pokemonService to prevent real API calls
 vi.mock('../../src/services/pokemonService.ts', () => ({
   searchPokemonByName: vi.fn(async (query) => {
@@ -129,7 +141,7 @@ describe('Accessibility Visual - US3: Modern Aesthetic (T039)', () => {
     render(<App />);
     
     // Search bar should be accessible
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
   });
 
@@ -197,7 +209,7 @@ describe('Accessibility Visual - US3: Modern Aesthetic (T039)', () => {
   it('should have accessible labels for all form inputs', () => {
     render(<App />);
     
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
   });
 

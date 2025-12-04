@@ -4,6 +4,7 @@ import {
 } from './collectionStorage.ts'
 import { MIN_POKEMON_INDEX, MAX_POKEMON_INDEX } from '../utils/constants'
 import { fetchPokemon, searchPokemonSimple } from './pokemonApi'
+import { nameRegistry } from './nameRegistry.ts'
 
 interface PokemonData {
   index: number
@@ -237,10 +238,8 @@ export function removeFromWishlist(index: number): Promise<boolean> {
 }
 
 /**
- * Search Pokemon by name (case-insensitive, partial matching)
- * Optimized version: filters only against stored Pokemon entries.
- * No longer creates 1,025 placeholder objects on every search.
- * Expected impact: 20-30% rendering improvement.
+ * T014: Search Pokemon by name using NameRegistry
+ * Uses preloaded names for instant search results
  * 
  * @param query - Name query string (case-insensitive partial match)
  * @returns Promise<PokemonData[]> - Array of matching Pokemon from collection
@@ -251,60 +250,57 @@ export function searchPokemonByName(query: string): Promise<PokemonData[]> {
       return []
     }
 
-    // Get all matching Pokemon from API (names and indices)
-    // This searches ALL 1025 Pokemon, not just the collection
-    const apiResults = await searchPokemonSimple(query)
-    
-    // Get collection to check status
-    const collection = getStoredCollection()
-    const collectionMap = new Map(collection.map(p => [p.index, p]))
-
-    // Merge results
-    return apiResults.map(result => {
-      const stored = collectionMap.get(result.index)
-      if (stored) {
-        return stored
-      }
+    // T014: Use NameRegistry for search when ready
+    if (nameRegistry.ready) {
+      const searchResults = nameRegistry.search(query)
       
-      // Return placeholder for available pokemon
-      return {
-        index: result.index,
-        name: result.name.charAt(0).toUpperCase() + result.name.slice(1), // Capitalize
-        image: null,
-        collected: false,
-        wishlist: false
-      }
-    })
-  })
-}
-
-
-/**
- * Search Pokemon by name or index
- * @param query - String that could be a name or index
- * @returns Promise<PokemonData[]> - Array of matching Pokemon
- */
-export function searchPokemon(query: string): Promise<PokemonData[]> {
-  return Promise.resolve().then(async () => {
-    if (!query || !query.trim()) {
-      return []
-    }
-
-    const trimmedQuery = query.trim()
-    
-    // Try to parse as index first
-    const asIndex = parseInt(trimmedQuery, 10)
-    if (!isNaN(asIndex) && asIndex >= MIN_POKEMON_INDEX && asIndex <= MAX_POKEMON_INDEX) {
-      // Could be an index, try that first
+      // Get collection to check status
       const collection = getStoredCollection()
-      const collected = collection.filter((p: PokemonData) => p.index === asIndex)
-      if (collected.length > 0) {
-        return collected
-      }
-    }
+      const collectionMap = new Map(collection.map(p => [p.index, p]))
 
-    // Otherwise, search by name
-    return searchPokemonByName(trimmedQuery)
+      // Merge results
+      return searchResults.map(result => {
+        const stored = collectionMap.get(result.id)
+        if (stored) {
+          return {
+            ...stored,
+            name: result.name, // Use registry name for consistency
+          }
+        }
+        
+        // Return placeholder for available pokemon
+        return {
+          index: result.id,
+          name: result.name,
+          image: null,
+          collected: false,
+          wishlist: false
+        }
+      })
+    } else {
+      // Fallback to API search if registry not ready
+      const apiResults = await searchPokemonSimple(query)
+      
+      // Get collection to check status
+      const collection = getStoredCollection()
+      const collectionMap = new Map(collection.map(p => [p.index, p]))
+
+      // Merge results
+      return apiResults.map(result => {
+        const stored = collectionMap.get(result.index)
+        if (stored) {
+          return stored
+        }
+        
+        // Return placeholder for available pokemon
+        return {
+          index: result.index,
+          name: result.name.charAt(0).toUpperCase() + result.name.slice(1), // Capitalize
+          image: null,
+          collected: false,
+          wishlist: false
+        }
+      })
+    }
   })
 }
-

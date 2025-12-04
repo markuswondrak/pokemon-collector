@@ -25,6 +25,21 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
   }),
 }))
 
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => {
+      const names = { 1: 'Bulbasaur', 25: 'Pikachu' };
+      return names[id] || `Pokemon ${id}`;
+    }),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
+
 describe('Accessibility - Search Bar (T006 - WCAG 2.1 AA)', () => {
   beforeEach(() => {
     localStorage.clear()
@@ -42,7 +57,7 @@ describe('Accessibility - Search Bar (T006 - WCAG 2.1 AA)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       // Should have aria-label or be properly labeled
       expect(
@@ -61,7 +76,7 @@ describe('Accessibility - Search Bar (T006 - WCAG 2.1 AA)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       // Tab to search input
       await user.tab()
@@ -81,7 +96,7 @@ describe('Accessibility - Search Bar (T006 - WCAG 2.1 AA)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       await user.click(searchInput)
       await user.keyboard('pika')
@@ -102,7 +117,7 @@ describe('Accessibility - Search Bar (T006 - WCAG 2.1 AA)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument()
     })
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i)
+    const searchInput = screen.getByTestId('sticky-search-input')
     if (searchInput) {
       await user.click(searchInput)
 

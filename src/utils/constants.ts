@@ -12,6 +12,9 @@ export const STORAGE_KEY_COLLECTION: string = 'pokemon-collection'
 export const STORAGE_KEY_WISHLIST: string = 'pokemon-wishlist'
 export const STORAGE_KEY_CACHE: string = 'pokemon-cache'
 
+// T002: Names Cache Key Prefix (versioned by app version)
+export const NAMES_CACHE_KEY_PREFIX: string = 'names.v'
+
 // Cache Duration (24 hours in milliseconds)
 export const CACHE_DURATION: number = 24 * 60 * 60 * 1000
 

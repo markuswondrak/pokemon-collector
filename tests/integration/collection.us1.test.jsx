@@ -7,6 +7,16 @@ vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
   saveCollection: vi.fn(),
 }));
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
   return {
@@ -57,7 +67,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     render(<App />);
 
     // With sticky search bar, we search by Pokemon name (Pikachu) instead of index
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
@@ -87,7 +97,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     render(<App />);
 
     // With sticky search bar, we search by Pokemon name instead of index
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
       await new Promise(resolve => setTimeout(resolve, 350));
@@ -101,7 +111,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     render(<App />);
 
     // With sticky search bar, we can filter to find Pokemon
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Bulbasaur' } });
       await new Promise(resolve => setTimeout(resolve, 350));
@@ -115,7 +125,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     render(<App />);
 
     // Search for first Pokemon (Pikachu)
-    let searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    let searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
       await new Promise(resolve => setTimeout(resolve, 350));
@@ -136,7 +146,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
     pokemonService.getCollectionList.mockReturnValue(collection);
 
     // Now search for second Pokemon (Raichu)
-    searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Raichu' } });
       await new Promise(resolve => setTimeout(resolve, 350));
@@ -168,7 +178,7 @@ describe('US1 Integration: Search → Collect → Verify Collection', () => {
 
     render(<App />);
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
       await new Promise(resolve => setTimeout(resolve, 350));

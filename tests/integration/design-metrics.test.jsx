@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen } from '../setup.tsx'
+import { render, screen, waitFor } from '../setup.tsx'
 import '@testing-library/jest-dom'
 import App from '../../src/components/App'
 
@@ -29,6 +29,18 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
     return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null })
   }),
 }))
+
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
+}));
 
 // Mock pokemonService to prevent real API calls
 vi.mock('../../src/services/pokemonService.ts', () => ({
@@ -146,7 +158,7 @@ describe('Design Metrics Validation (T021)', () => {
     it('should have readable placeholder text', () => {
       render(<App />)
 
-      const input = screen.getByPlaceholderText(/search pokemon by name/i)
+      const input = screen.getByTestId('sticky-search-input')
       const computedStyle = window.getComputedStyle(input)
       
       // Placeholder should be visible
@@ -157,6 +169,12 @@ describe('Design Metrics Validation (T021)', () => {
       render(<App />)
 
       const input = screen.getByTestId('sticky-search-input')
+      
+      // Wait for input to be enabled before trying to focus
+      await waitFor(() => {
+        expect(input).not.toBeDisabled()
+      })
+      
       input.focus()
       
       // Focused element should maintain contrast

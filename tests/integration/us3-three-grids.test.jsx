@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '../setup';
 import '@testing-library/jest-dom';
 
@@ -6,6 +6,16 @@ vi.mock('../../src/services/pokemonApi');
 vi.mock('../../src/services/collectionStorage', () => ({
   getCollection: vi.fn(() => []),
   saveCollection: vi.fn(),
+}));
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => `Pokemon ${id}`),
+    search: vi.fn(() => []),
+    ready: true,
+    error: null,
+    loading: false,
+  },
 }));
 vi.mock('../../src/services/pokemonService', async (importOriginal) => {
   const actual = await importOriginal();
@@ -41,6 +51,14 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
       wishlist: false
     }));
 
+    // Mock getAllPokemonList for nameRegistry preload
+    pokemonApi.getAllPokemonList.mockResolvedValue(
+      Array.from({ length: 1025 }, (_, i) => ({
+        name: `pokemon-${i + 1}`,
+        url: `https://pokeapi.co/api/v2/pokemon/${i + 1}/`
+      }))
+    );
+
     // Mock searchPokemonSimple
     if (pokemonApi.searchPokemonSimple) {
       pokemonApi.searchPokemonSimple.mockResolvedValue([]);
@@ -59,6 +77,11 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
       disconnect = vi.fn();
     }
     window.IntersectionObserver = MockIntersectionObserver;
+  });
+
+  afterEach(() => {
+    vi.clearAllMocks();
+    localStorage.clear();
   });
 
   it('should display three grids on app load (SC-008)', async () => {
@@ -126,7 +149,7 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     render(<App />);
 
     // With sticky search bar, search by Pokemon name
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     await act(async () => {
       fireEvent.change(searchInput, { target: { value: 'Pikachu' } });
       await new Promise(resolve => setTimeout(resolve, 350));
@@ -154,6 +177,16 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     });
 
     render(<App />);
+
+    // Wait for the component to render - just check for the title first
+    await waitFor(() => {
+      expect(screen.getByText('Pokemon Collection Organizer')).toBeInTheDocument();
+    });
+
+    // Then check for available pokemon section
+    await waitFor(() => {
+      expect(screen.getByText(/available pokemon/i)).toBeInTheDocument();
+    });
 
     // Get collect buttons and click if available
     const collectButtons = screen.queryAllByRole('button', { name: /collect/i });
@@ -224,6 +257,11 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
 
     render(<App />);
 
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText(/available pokemon/i)).toBeInTheDocument();
+    }, { timeout: 3000 });
+
     // Click wishlist button
     const wishlistButtons = screen.queryAllByRole('button', { name: /wishlist|add to wishlist/i });
     if (wishlistButtons.length > 0) {
@@ -240,7 +278,7 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     }
   });
 
-  it('should maintain count badges in headers', () => {
+  it('should maintain count badges in headers', async () => {
     const mockCollection = [
       {
         index: 25,
@@ -262,13 +300,23 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
 
     render(<App />);
 
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText('My Collection')).toBeInTheDocument();
+    });
+
     // Verify counts are displayed
     expect(screen.getByText(/Collection: 1 \//)).toBeInTheDocument();
     expect(screen.getByText(/1 collected, 1 wishlisted/)).toBeInTheDocument();
   });
 
-  it('should display responsive layout on different screen sizes', () => {
+  it('should display responsive layout on different screen sizes', async () => {
     render(<App />);
+
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText('My Collection')).toBeInTheDocument();
+    });
 
     // Check main containers are rendered
     const main = document.querySelector('main');
@@ -279,10 +327,15 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     expect(gridSections.length).toBeGreaterThanOrEqual(2); // At least 2 sections (one for grids, one with aria-label)
   });
 
-  it('should show empty states when grids have no Pokemon', () => {
+  it('should show empty states when grids have no Pokemon', async () => {
     pokemonService.getCollectionList.mockReturnValue([]);
 
     render(<App />);
+
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText('My Collection')).toBeInTheDocument();
+    });
 
     // Collection grid should show empty message
     const collectionSection = screen.getByText('My Collection').closest('section');
@@ -293,7 +346,7 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     expect(wishlistSection).toHaveTextContent(/no pokemon|empty/i);
   });
 
-  it('should prevent adding collected Pokemon to wishlist (FR-003)', () => {
+  it('should prevent adding collected Pokemon to wishlist (FR-003)', async () => {
     const mockCollection = [
       {
         index: 25,
@@ -310,6 +363,11 @@ describe('US3 Integration: Three Grids + Lazy Loading', () => {
     );
 
     render(<App />);
+
+    // Wait for component to render
+    await waitFor(() => {
+      expect(screen.getByText('My Collection')).toBeInTheDocument();
+    });
 
     // Verify the app renders with collected Pokemon
     expect(screen.getByText('My Collection')).toBeInTheDocument();

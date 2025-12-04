@@ -33,6 +33,43 @@ vi.mock('../../src/services/pokemonApi.ts', () => ({
 
     return indices.map((index) => mockData[index] || { index, name: `Pokemon ${index}`, image: null });
   }),
+  getAllPokemonList: vi.fn(async () => [
+    { name: 'bulbasaur', url: 'https://pokeapi.co/api/v2/pokemon/1/' },
+    { name: 'charmander', url: 'https://pokeapi.co/api/v2/pokemon/4/' },
+    { name: 'squirtle', url: 'https://pokeapi.co/api/v2/pokemon/7/' },
+    { name: 'pikachu', url: 'https://pokeapi.co/api/v2/pokemon/25/' },
+    { name: 'jigglypuff', url: 'https://pokeapi.co/api/v2/pokemon/39/' },
+  ]),
+}));
+
+// Mock nameRegistry
+vi.mock('../../src/services/nameRegistry.ts', () => ({
+  nameRegistry: {
+    loadAllNamesWithCache: vi.fn(() => Promise.resolve()),
+    getName: vi.fn((id) => {
+      const names = {
+        1: 'Bulbasaur',
+        4: 'Charmander',
+        7: 'Squirtle',
+        25: 'Pikachu',
+        39: 'Jigglypuff',
+      };
+      return names[id] || `Pokemon ${id}`;
+    }),
+    search: vi.fn((query) => {
+      const allPokemon = [
+        { id: 1, name: 'Bulbasaur' },
+        { id: 4, name: 'Charmander' },
+        { id: 7, name: 'Squirtle' },
+        { id: 25, name: 'Pikachu' },
+        { id: 39, name: 'Jigglypuff' },
+      ];
+      return allPokemon.filter(p => p.name.toLowerCase().includes(query.toLowerCase()));
+    }),
+    ready: true,
+    error: null,
+    loading: false,
+  },
 }));
 
 // Mock pokemonService for sticky search bar feature
@@ -75,7 +112,7 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
     });
 
     // Find search input and verify it's the sticky search bar
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
     expect(searchInput).toHaveValue('');
   });
@@ -88,7 +125,7 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
     });
 
     // Search for a non-existent Pokemon name
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
 
     // Type a name that won't match anything
     await act(async () => {
@@ -119,7 +156,12 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
+    
+    // Wait for input to be enabled before interacting
+    await waitFor(() => {
+      expect(searchInput).not.toBeDisabled();
+    });
 
     // First search
     await act(async () => {
@@ -163,7 +205,7 @@ describe('US4: Search Pokemon by Name Integration Tests', () => {
     });
 
     // Test case-insensitive search with sticky search bar
-    const searchInput = screen.getByPlaceholderText(/search pokemon by name/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     expect(searchInput).toBeInTheDocument();
     
     // Type in mixed case
@@ -194,7 +236,7 @@ describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     if (searchInput) {
       // Type 1-2 characters (should not trigger)
       await user.type(searchInput, 'p');
@@ -217,7 +259,7 @@ describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     if (searchInput) {
       await user.type(searchInput, 'p');
       expect(searchInput).toHaveValue('p');
@@ -233,7 +275,7 @@ describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     if (searchInput) {
       await user.type(searchInput, 'pika');
       expect(searchInput).toHaveValue('pika');
@@ -255,7 +297,7 @@ describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     if (searchInput) {
       await user.type(searchInput, 'xyz');
       // Should show no results message
@@ -270,7 +312,7 @@ describe('US4: Sticky Search Bar - Debounced Name Search (T004)', () => {
       expect(screen.getByText(/pokemon collection organizer/i)).toBeInTheDocument();
     });
 
-    const searchInput = screen.getByPlaceholderText(/search pokemon/i) || screen.queryByPlaceholderText(/pokemon/i);
+    const searchInput = screen.getByTestId('sticky-search-input');
     if (searchInput) {
       // Simulate rapid typing
       await user.type(searchInput, 'p');

@@ -12,9 +12,9 @@ Independent Test Criteria:
 
 Implementation Tasks
 
-- [ ] T001 Create NameRegistry module at `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
-- [ ] T002 Define cache key helpers in `/home/markus/workspace/pokemon-collector/src/utils/constants.ts` (e.g., `NAMES_CACHE_KEY_PREFIX`)
-- [ ] T003 [P] Add version import in `/home/markus/workspace/pokemon-collector/src/utils/version.ts` using `resolveJsonModule` to read `package.json`
+- [X] T001 Create NameRegistry module at `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
+- [X] T002 Define cache key helpers in `/home/markus/workspace/pokemon-collector/src/utils/constants.ts` (e.g., `NAMES_CACHE_KEY_PREFIX`)
+- [X] T003 [P] Add version import in `/home/markus/workspace/pokemon-collector/src/utils/version.ts` using `resolveJsonModule` to read `package.json`
 
 ## Phase 2 — Foundational
 
@@ -27,12 +27,12 @@ Independent Test Criteria:
 
 Implementation Tasks
 
-- [ ] T004 Implement `loadAllNamesWithCache()` in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` (parse IDs from URLs, validate completeness, hydrate in-memory)
-- [ ] T005 Add retry with exponential backoff + jitter in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
-- [ ] T006 [P] Update `/home/markus/workspace/pokemon-collector/src/services/pokemonApi.ts` `getAllPokemonList()` to use single bulk request and surface errors (no silent empty array)
-- [ ] T007 [P] Add `isCompleteList()` validator in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` to verify IDs 1..MAX without gaps
-- [ ] T008 Persist and read cache via localStorage in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` (key `names.v<version>`)
-- [ ] T009 Expose `getName(id:number)`, `search(term:string)`, `ready:boolean`, `error:string|null` from `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
+- [X] T004 Implement `loadAllNamesWithCache()` in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` (parse IDs from URLs, validate completeness, hydrate in-memory)
+- [X] T005 Add retry with exponential backoff + jitter in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
+- [X] T006 [P] Update `/home/markus/workspace/pokemon-collector/src/services/pokemonApi.ts` `getAllPokemonList()` to use single bulk request and surface errors (no silent empty array)
+- [X] T007 [P] Add `isCompleteList()` validator in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` to verify IDs 1..MAX without gaps
+- [X] T008 Persist and read cache via localStorage in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts` (key `names.v<version>`)
+- [X] T009 Expose `getName(id:number)`, `search(term:string)`, `ready:boolean`, `error:string|null` from `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
 
 ## Phase 3 — User Story 1 (P1): Global Search
 
@@ -45,11 +45,11 @@ Independent Test Criteria:
 
 Implementation Tasks
 
-- [ ] T010 [US1] Initialize names preload on app start in `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
-- [ ] T011 [P] [US1] Wire search to `NameRegistry.search()` in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx`
-- [ ] T012 [US1] Disable search input until registry `ready` in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx` (label: "Loading names...")
-- [ ] T013 [US1] Show blocking error overlay on preload failure in `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
-- [ ] T014 [P] [US1] Update `/home/markus/workspace/pokemon-collector/src/services/pokemonService.ts` to use `NameRegistry.search()` results for filtering
+- [X] T010 [US1] Initialize names preload on app start in `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
+- [X] T011 [P] [US1] Wire search to `NameRegistry.search()` in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx`
+- [X] T012 [US1] Disable search input until registry `ready` in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx` (label: "Loading names...")
+- [X] T013 [US1] Show blocking error overlay on preload failure in `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
+- [X] T014 [P] [US1] Update `/home/markus/workspace/pokemon-collector/src/services/pokemonService.ts` to use `NameRegistry.search()` results for filtering
 
 ## Phase 4 — User Story 2 (P2): Correct Names on Placeholders
 
@@ -61,10 +61,10 @@ Independent Test Criteria:
 
 Implementation Tasks
 
-- [ ] T015 [US2] Use `NameRegistry.getName(id)` for card titles in `/home/markus/workspace/pokemon-collector/src/components/PokemonCard.tsx`
-- [ ] T016 [P] [US2] Ensure `CollectionList.tsx` uses registry names in `/home/markus/workspace/pokemon-collector/src/components/CollectionList.tsx`
-- [ ] T017 [P] [US2] Ensure `WishlistList.tsx` uses registry names in `/home/markus/workspace/pokemon-collector/src/components/WishlistList.tsx`
-- [ ] T018 [US2] Ensure `AvailableGrid.tsx` renders registry names for unloaded items in `/home/markus/workspace/pokemon-collector/src/components/AvailableGrid.tsx`
+- [X] T015 [US2] Use `NameRegistry.getName(id)` for card titles in `/home/markus/workspace/pokemon-collector/src/components/PokemonCard.tsx`
+- [X] T016 [P] [US2] Ensure `CollectionList.tsx` uses registry names in `/home/markus/workspace/pokemon-collector/src/components/CollectionList.tsx`
+- [X] T017 [P] [US2] Ensure `WishlistList.tsx` uses registry names in `/home/markus/workspace/pokemon-collector/src/components/WishlistList.tsx`
+- [X] T018 [US2] Ensure `AvailableGrid.tsx` renders registry names for unloaded items in `/home/markus/workspace/pokemon-collector/src/components/AvailableGrid.tsx`
 
 ## Final Phase — Polish & Cross-Cutting
 
@@ -76,8 +76,8 @@ Independent Test Criteria:
 
 Implementation Tasks
 
-- [ ] T019 Add simple dev telemetry logs (duration, retries) behind `import.meta.env.DEV` in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
-- [ ] T020 [P] Ensure a11y for disabled state and error overlay in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx` and `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
+- [X] T019 Add simple dev telemetry logs (duration, retries) behind `import.meta.env.DEV` in `/home/markus/workspace/pokemon-collector/src/services/nameRegistry.ts`
+- [X] T020 [P] Ensure a11y for disabled state and error overlay in `/home/markus/workspace/pokemon-collector/src/components/StickySearchBar.tsx` and `/home/markus/workspace/pokemon-collector/src/components/App.tsx`
 
 ---
 

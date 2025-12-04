@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { collectionStorage } from '../../../src/services/collectionStorage'
-import { Pokemon } from '../../../src/models/Pokemon'
 
 describe('collectionStorage Service', () => {
   beforeEach(() => {
@@ -14,11 +13,16 @@ describe('collectionStorage Service', () => {
 
   describe('saveCollection', () => {
     it('should save collection to localStorage', () => {
-      const pokemon = new Pokemon(25, 'Pikachu', 'https://example.com/pikachu.png')
-      pokemon.setCollected(true)
+      const pokemon = {
+        index: 25,
+        name: 'Pikachu',
+        image: 'https://example.com/pikachu.png',
+        collected: true,
+        wishlist: false
+      }
       const data = {
         id: 'my-collection',
-        pokemon: [pokemon.toJSON()],
+        pokemon: [pokemon],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }
@@ -71,11 +75,16 @@ describe('collectionStorage Service', () => {
 
   describe('saveWishlist', () => {
     it('should save wishlist to localStorage', () => {
-      const pokemon = new Pokemon(25, 'Pikachu', 'https://example.com/pikachu.png')
-      pokemon.setWishlist(true)
+      const pokemon = {
+        index: 25,
+        name: 'Pikachu',
+        image: 'https://example.com/pikachu.png',
+        collected: false,
+        wishlist: true
+      }
       const data = {
         id: 'my-wishlist',
-        pokemon: [pokemon.toJSON()],
+        pokemon: [pokemon],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       }

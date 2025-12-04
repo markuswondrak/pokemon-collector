@@ -6,7 +6,12 @@ import {
   CACHE_DURATION,
   API_RATE_LIMIT_DELAY
 } from '../utils/constants'
-import { Pokemon } from '../models/Pokemon'
+
+export interface Pokemon {
+  index: number
+  name: string
+  image: string
+}
 
 interface PokemonApiResponse {
   id: number
@@ -117,11 +122,11 @@ class PokemonApiService {
         data.sprites.front_default ??
         ''
 
-      const pokemon = new Pokemon(
-        data.id,
-        data.name.charAt(0).toUpperCase() + data.name.slice(1),
-        imageUrl || 'https://via.placeholder.com/96'
-      )
+      const pokemon: Pokemon = {
+        index: data.id,
+        name: data.name.charAt(0).toUpperCase() + data.name.slice(1),
+        image: imageUrl || 'https://via.placeholder.com/96'
+      }
 
       // Cache result
       this.cache.set(cacheKey, {
@@ -159,7 +164,9 @@ class PokemonApiService {
   }
 
   /**
-   * Fetch list of all Pokemon names and URLs
+   * T006: Fetch list of all Pokemon names and URLs
+   * Uses high limit (20000) to future-proof against new generations
+   * Surfaces errors instead of returning empty array
    * @returns {Promise<{ name: string; url: string }[]>}
    */
   async getAllPokemonList(): Promise<{ name: string; url: string }[]> {
@@ -169,13 +176,17 @@ class PokemonApiService {
 
     try {
       const response = await axios.get<{ results: { name: string; url: string }[] }>(
-        `${POKEMON_ENDPOINT}?limit=${MAX_POKEMON_INDEX}`
+        `${POKEMON_ENDPOINT}?limit=20000`
       )
       this.allPokemonList = response.data.results
       return this.allPokemonList
     } catch (error) {
-      console.error('Failed to fetch pokemon list', error)
-      return []
+      // T006: Surface errors instead of silently returning empty array
+      const err = error as { message: string; response?: { status: number } }
+      const message = err.response?.status 
+        ? `Failed to fetch Pokemon list (HTTP ${err.response.status})`
+        : `Failed to fetch Pokemon list: ${err.message}`
+      throw new Error(message)
     }
   }
 
@@ -285,6 +296,8 @@ export const fetchPokemon = (index: number): Promise<Pokemon> =>
   instance.fetchPokemon(index)
 export const fetchMultiplePokemon = (indices: number[]): Promise<Pokemon[]> =>
   instance.fetchMultiplePokemon(indices)
+export const getAllPokemonList = (): Promise<{ name: string; url: string }[]> =>
+  instance.getAllPokemonList()
 export const searchPokemon = (query: string): Promise<Pokemon[]> =>
   instance.searchPokemon(query)
 export const searchPokemonSimple = (query: string): Promise<{ index: number; name: string }[]> =>
