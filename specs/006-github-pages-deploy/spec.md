@@ -5,6 +5,14 @@
 **Status**: Draft  
 **Input**: User description: "Deploy application to personal GitHub Pages with automatic updates on main branch commits"
 
+## Clarifications
+
+### Session 2025-12-04
+
+- Q: Should deployment use GitHub Pages deployment environment or manual gh-pages branch management? → A: Use GitHub Pages deployment environment (modern approach via repository settings)
+- Q: How should the developer be notified of failed deployments? → A: GitHub Actions workflow tab (standard interface; developer can enable personal notifications)
+- Q: What is the target GitHub Pages URL? → A: Project subdirectory format: `https://markuswondrak.github.io/pokemon-collector/`
+
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Initial GitHub Pages Setup (Priority: P1)
@@ -83,15 +91,15 @@ The developer can view deployment history and status for each commit, understand
 
 ### Functional Requirements
 
-- **FR-001**: System MUST automatically trigger a deployment pipeline when commits are pushed to the main branch
-- **FR-002**: System MUST build the application using the existing Vite build configuration and dependencies
+- **FR-001**: System MUST automatically trigger a deployment pipeline via GitHub Actions when commits are pushed to the main branch
+- **FR-002**: System MUST build the application using the existing Vite build configuration with a base path configured for the `/pokemon-collector/` subdirectory
 - **FR-003**: System MUST run all existing tests before deploying to ensure code quality
 - **FR-004**: System MUST only deploy to GitHub Pages if the build and tests pass
-- **FR-005**: System MUST deploy the built application artifacts to GitHub Pages at the configured repository URL
-- **FR-006**: System MUST preserve the Pokemon Collector application's functionality and performance after deployment to GitHub Pages
-- **FR-007**: System MUST handle authentication for accessing the GitHub repository during deployment without exposing credentials
-- **FR-008**: System MUST provide visible feedback when a deployment fails, preventing deployment of broken code
-- **FR-009**: System MUST maintain deployment history and status information for at least the last 30 days
+- **FR-005**: System MUST deploy the built application artifacts to the GitHub Pages `gh-pages` branch via GitHub's deployment environment
+- **FR-006**: System MUST ensure the Pokemon Collector application is accessible at `https://markuswondrak.github.io/pokemon-collector/`
+- **FR-007**: System MUST handle GitHub Actions authentication securely without exposing credentials in logs or repository
+- **FR-008**: System MUST provide failure status visible in the GitHub Actions workflow tab; developers can view logs and errors directly in the Actions interface
+- **FR-009**: System MUST maintain deployment history in GitHub Actions with success/failure status and timestamps for each commit
 - **FR-010**: System MUST work with the existing build tools and project structure without requiring significant refactoring
 
 ### Key Entities
@@ -106,19 +114,22 @@ The developer can view deployment history and status for each commit, understand
 ### Measurable Outcomes
 
 - **SC-001**: Developers can push commits to the main branch and see the application automatically deployed to GitHub Pages without manual intervention
-- **SC-002**: The application is accessible at the configured GitHub Pages URL and loads the latest version from the main branch
+- **SC-002**: The application is accessible at `https://markuswondrak.github.io/pokemon-collector/` and loads the latest version from the main branch
 - **SC-003**: Deployment occurs within 5 minutes of a commit being pushed to the main branch
-- **SC-004**: 100% of commits to main are automatically built and tested before deployment
-- **SC-005**: Broken builds or failing tests prevent deployment to GitHub Pages (zero deployments of failing code)
-- **SC-006**: Deployment history is visible and shows success/failure status for each attempt
-- **SC-007**: The deployed application maintains full feature parity with the development version
-- **SC-008**: No hardcoded credentials or secrets appear in the repository or deployment logs
+- **SC-004**: 100% of commits to main are automatically built and tested before deployment attempt
+- **SC-005**: Broken builds or failing tests prevent deployment to GitHub Pages (zero deployments of failing code reach the live site)
+- **SC-006**: Deployment history is visible in the GitHub Actions workflow tab showing success/failure status and timestamps for each commit
+- **SC-007**: The deployed application at `https://markuswondrak.github.io/pokemon-collector/` maintains full feature parity with the development version
+- **SC-008**: No hardcoded credentials, secrets, or sensitive information appear in the repository, commit history, or GitHub Actions logs
 
 ## Assumptions
 
-- The GitHub Pages deployment will target the `gh-pages` branch or GitHub Pages environment variable within the repository
-- The existing Vite build configuration is sufficient for deployment to GitHub Pages
+- GitHub Pages will be deployed using GitHub's **deployment environment** (modern approach, configured via repository Settings > Pages)
+- The deployment target URL is **`https://markuswondrak.github.io/pokemon-collector/`** (project subdirectory format)
+- Failed deployments will be visible in the **GitHub Actions workflow tab**; developers can enable personal email notifications via GitHub settings if desired
+- Vite build configuration will be updated with appropriate `base` path (`/pokemon-collector/`) for the subdirectory deployment
+- The existing Vite build configuration is otherwise sufficient for deployment to GitHub Pages
 - All existing tests in the test suite should pass before deployment
 - The repository is owned by the user and they have appropriate permissions to configure GitHub Pages and CI/CD
-- GitHub Actions is the chosen CI/CD platform (standard for GitHub repositories)
-- The Pokemon Collector application is a static site or spa-compatible with GitHub Pages hosting
+- GitHub Actions is the CI/CD platform
+- The Pokemon Collector application is a static site / SPA-compatible with GitHub Pages hosting
