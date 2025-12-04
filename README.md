@@ -2,6 +2,8 @@
 
 > **Test Case for SpecKit** - This project is a reference implementation demonstrating SpecKit's end-to-end feature development workflow.
 
+**🚀 [Visit Live Application](https://markuswondrak.github.io/pokemon-collector/)**
+
 A React web application that allows users to organize their Pokemon collection by marking Pokemon as collected or adding them to a wishlist. The application loads Pokemon data from the public PokeAPI, displays Pokemon cards with images, and persists user collection state in browser local storage.
 
 ## Features
@@ -149,6 +151,59 @@ specs/001-pokemon-collection/
 - **API**: PokéAPI (public, free tier)
 - **Storage**: Browser localStorage
 - **Linting**: ESLint with type-aware rules
+- **Deployment**: GitHub Pages with GitHub Actions CI/CD
+
+## Deployment
+
+### GitHub Pages
+
+This application is automatically deployed to GitHub Pages at:
+**https://markuswondrak.github.io/pokemon-collector/**
+
+### Continuous Deployment
+
+Every push to the `main` branch triggers an automatic deployment via GitHub Actions:
+
+1. **Build Process**
+   - Checkout code from main branch
+   - Setup Node.js 18 environment
+   - Install dependencies with pnpm
+   - Build production bundle with Vite
+   - Run full test suite (391 tests)
+   - Upload build artifacts
+
+2. **Deploy Process**
+   - Deploy to GitHub Pages environment
+   - Update live site at configured URL
+   - Deployment completes within 5 minutes
+
+3. **Monitoring**
+   - View deployment status: [Actions Tab](https://github.com/markuswondrak/pokemon-collector/actions)
+   - Failed builds block deployment (site remains on previous version)
+   - Test failures prevent deployment to maintain quality
+
+### Workflow Configuration
+
+The deployment workflow (`.github/workflows/deploy.yml`) includes:
+- **Triggers**: Push to main branch, manual workflow dispatch
+- **Permissions**: Read contents, write to Pages, use ID token
+- **Build Requirements**: All tests must pass before deployment
+- **Node.js Version**: 18 (matches development environment)
+- **Test Configuration**: `--run --threads --maxThreads=4` (4 worker threads, no watch mode)
+- **Concurrency**: Only one deployment at a time, cancels in-progress on new push
+
+### Deployment Status
+
+Check the current deployment status:
+- [![Deploy to GitHub Pages](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yml/badge.svg)](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yml)
+
+### Manual Deployment
+
+To trigger a manual deployment:
+1. Go to [Actions → Deploy to GitHub Pages](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yml)
+2. Click "Run workflow"
+3. Select `main` branch
+4. Click "Run workflow" button
 
 ## Chakra UI Integration
 
