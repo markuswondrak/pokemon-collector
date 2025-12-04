@@ -9,6 +9,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-30
 - Browser localStorage (unchanged; no new storage requirements) (003-component-library)
 - TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+, react-icons (004-modern-card-actions)
 - TypeScript 5.9+ + React 19, Chakra UI v3+, react-icons (004-modern-card-actions)
+- TypeScript 5.9 (strict) + React 19, Axios, Chakra UI 2.8, Vite 7 (005-preload-all-names)
+- Browser `localStorage` (versioned cache key) (005-preload-all-names)
 
 - TypeScript 5.9+ (strict mode enabled) + React 19, Vite 7+, Axios (HTTP client), Vitest + React Testing Library (001-pokemon-collection)
 
@@ -29,9 +31,9 @@ npm test && npm run lint
 TypeScript 5.9+ (strict mode enabled): Follow standard conventions
 
 ## Recent Changes
+- 005-preload-all-names: Added TypeScript 5.9 (strict) + React 19, Axios, Chakra UI 2.8, Vite 7
 - 004-modern-card-actions: Added TypeScript 5.9+ + React 19, Chakra UI v3+, react-icons
 - 004-modern-card-actions: Added TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+, react-icons
-- 004-modern-card-actions: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 
 <!-- MANUAL ADDITIONS START -->
