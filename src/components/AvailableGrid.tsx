@@ -69,7 +69,13 @@ export default function AvailableGrid({
       : availablePokemon
 
     // Sort by index ascending
-    return [...filteredPokemon].sort((a, b) => a.index - b.index)
+    return [...filteredPokemon]
+      .sort((a, b) => a.index - b.index)
+      .map((pokemon) => ({
+        ...pokemon,
+        collected: false,
+        wishlist: false,
+      }))
   }, [allPokemon, collection, wishlist, searchIndex])
 
   const count = sortedPokemon ? sortedPokemon.length : 0
