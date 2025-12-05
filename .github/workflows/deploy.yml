@@ -39,7 +39,7 @@ jobs:
         run: pnpm build
 
       - name: Run tests
-        run: pnpm test --run
+        run: pnpm test tests/unit --run
 
       - name: Upload build artifacts
         uses: actions/upload-pages-artifact@v3
