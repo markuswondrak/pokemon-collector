@@ -76,7 +76,7 @@ class NameRegistry {
       for (let attempt = 1; attempt <= maxRetries; attempt++) {
         try {
           if (import.meta.env.DEV) {
-            console.log(`[NameRegistry] Fetch attempt ${attempt}/${maxRetries}`)
+            console.log(`[NameRegistry] Fetch attempt ${String(attempt)}/${String(maxRetries)}`)
           }
 
           // T004: Fetch all names
@@ -106,7 +106,7 @@ class NameRegistry {
             // Final attempt failed
             const message =
               err instanceof Error ? err.message : 'Failed to load Pokemon names'
-            this._error = `Unable to load Pokemon names after ${maxRetries} attempts. Please check your connection and refresh the page.`
+            this._error = `Unable to load Pokemon names after ${String(maxRetries)} attempts. Please check your connection and refresh the page.`
             this._loading = false
 
             if (import.meta.env.DEV) {
@@ -123,7 +123,7 @@ class NameRegistry {
 
           if (import.meta.env.DEV) {
             console.warn(
-              `[NameRegistry] Attempt ${attempt} failed, retrying in ${Math.round(totalDelay)}ms...`
+              `[NameRegistry] Attempt ${String(attempt)} failed, retrying in ${String(Math.round(totalDelay))}ms...`
             )
           }
 
@@ -210,6 +210,7 @@ class NameRegistry {
         return null
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const record: NamesCacheRecord = JSON.parse(cached)
 
       // Validate structure

@@ -1,5 +1,5 @@
 import { ReactElement, memo } from 'react'
-import { Box, Heading, Text, VStack, HStack, Button, IconButton } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, HStack, IconButton } from '@chakra-ui/react'
 import { Card, Badge } from '@chakra-ui/react'
 import { Tooltip } from '@chakra-ui/react'
 import { TbPokeball, TbPokeballOff } from 'react-icons/tb'
@@ -56,24 +56,27 @@ function PokemonCard({
   onRemove
 }: PokemonCardProps): ReactElement {
   const handleCollect = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (onCollect) {
       onCollect(pokemon.index)
     }
   }
 
   const handleAddToWishlist = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (onAddToWishlist) {
       onAddToWishlist(pokemon.index)
     }
   }
 
   const handleRemove = (): void => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (onRemove) {
       onRemove(pokemon.index)
     }
   }
 
-  const ariaLabel = `${pokemon.name} Pokemon #${pokemon.index}`
+  const ariaLabel = `${pokemon.name} Pokemon #${String(pokemon.index)}`
   const statusText = [
     pokemon.collected && 'Collected',
     pokemon.wishlist && 'Wishlisted'

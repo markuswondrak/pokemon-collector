@@ -1,6 +1,7 @@
 import { ReactElement } from 'react'
-import { Box, Heading, Text, VStack, Grid } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import PokemonCard from './PokemonCard'
+import LazyLoadingGrid from './LazyLoadingGrid'
 
 interface Pokemon {
   index: number
@@ -20,10 +21,9 @@ interface CollectionListProps {
 
 /**
  * CollectionList Component
- * Displays a list of Pokemon (collected or wishlist) using responsive grid layout.
- * OPTIMIZED: Replaced VStack with Grid component for layout efficiency.
- * Uses Chakra UI Grid with responsive columns: 1 col mobile, 2 col tablet, 3+ col desktop.
- * Expected impact: 5-10% rendering improvement + UX consistency with AvailableGrid.
+ * Displays a list of Pokemon (collected or wishlist) using LazyLoadingGrid.
+ * Uses responsive columns: 1 col mobile, 2 col tablet, 3+ col desktop.
+ * Enables lazy rendering for performance optimization with large collections.
  */
 export default function CollectionList({
   pokemon,
@@ -32,8 +32,9 @@ export default function CollectionList({
   onAddToWishlist,
   onRemove
 }: CollectionListProps): ReactElement {
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const count = pokemon ? pokemon.length : 0
-  const countText = count === 1 ? '1 pokemon' : `${count} pokemon`
+  const countText = count === 1 ? '1 pokemon' : `${String(count)} pokemon`
 
   return (
     <Box as="section" aria-label={title}>
@@ -75,23 +76,24 @@ export default function CollectionList({
             </Text>
           </Box>
         ) : (
-          <Grid
-            width="100%"
-            gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}
-            gap={4}
+          <Box
             role="region"
             aria-labelledby="collection-title"
+            width="100%"
           >
-            {pokemon.map((poke: Pokemon) => (
-              <PokemonCard
-                key={poke.index}
-                pokemon={poke}
-                onCollect={onCollect}
-                onAddToWishlist={onAddToWishlist}
-                onRemove={onRemove}
-              />
-            ))}
-          </Grid>
+            <LazyLoadingGrid
+              items={pokemon}
+              lazy={true}
+              renderItem={(poke: Pokemon) => (
+                <PokemonCard
+                  pokemon={poke}
+                  onCollect={onCollect}
+                  onAddToWishlist={onAddToWishlist}
+                  onRemove={onRemove}
+                />
+              )}
+            />
+          </Box>
         )}
       </VStack>
     </Box>

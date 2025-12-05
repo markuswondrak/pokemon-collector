@@ -49,7 +49,7 @@ export async function collectPokemon(index: number): Promise<PokemonData> {
     name = apiPokemon.name
     image = apiPokemon.image
   } catch (error) {
-    console.warn(`Failed to fetch details for Pokemon ${index}`, error)
+    console.warn(`Failed to fetch details for Pokemon ${String(index)}`, error)
   }
 
   const pokemon: PokemonData = {
@@ -165,7 +165,7 @@ export async function addToWishlist(index: number): Promise<PokemonData> {
     name = apiPokemon.name
     image = apiPokemon.image
   } catch (error) {
-    console.warn(`Failed to fetch details for Pokemon ${index}`, error)
+    console.warn(`Failed to fetch details for Pokemon ${String(index)}`, error)
   }
 
   const pokemon: PokemonData = {

@@ -30,37 +30,37 @@ This document breaks down the lazy card rendering feature into executable implem
 
 ### Task Setup & Initialization
 
-- [ ] T001 Create project structure per implementation plan, set up Git branches, verify all dependencies installed
+- [X] T001 Create project structure per implementation plan, set up Git branches, verify all dependencies installed
   - Files: No new files, verify `package.json` and `pnpm-lock.yaml`
   - Dependencies: None
   - Acceptance: `pnpm install` succeeds, all tests pass on baseline
 
-- [ ] T002 [P] Create `src/services/lazyRenderService.ts` skeleton with class declaration and constructor
+- [X] T002 [P] Create `src/services/lazyRenderService.ts` skeleton with class declaration and constructor
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: None (T001)
   - Acceptance: File exists, TypeScript compiles, class instantiation works
 
-- [ ] T003 [P] Create `src/hooks/useLazyRender.ts` skeleton with hook declaration
+- [X] T003 [P] Create `src/hooks/useLazyRender.ts` skeleton with hook declaration
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: None (T001)
   - Acceptance: File exists, TypeScript compiles, hook can be imported
 
-- [ ] T004 [P] Create `src/components/SkeletonCard.tsx` with Chakra UI Skeleton placeholder
+- [X] T004 [P] Create `src/components/SkeletonCard.tsx` with Chakra UI Skeleton placeholder
   - Files: `src/components/SkeletonCard.tsx`
   - Dependencies: T001
   - Acceptance: Component renders without error, dimensions are 140px × 180px, no custom CSS
 
-- [ ] T005 Create `tests/unit/services/lazyRenderService.test.ts` test file skeleton
+- [X] T005 Create `tests/unit/services/lazyRenderService.test.ts` test file skeleton
   - Files: `tests/unit/services/lazyRenderService.test.ts`
   - Dependencies: T002
   - Acceptance: Test file created, imports service correctly, test suite runs
 
-- [ ] T006 Create `tests/unit/hooks/useLazyRender.test.ts` test file skeleton
+- [X] T006 Create `tests/unit/hooks/useLazyRender.test.ts` test file skeleton
   - Files: `tests/unit/hooks/useLazyRender.test.ts`
   - Dependencies: T003
   - Acceptance: Test file created, imports hook correctly, test suite runs
 
-- [ ] T007 Create `tests/integration/lazy-loading-grid.test.jsx` integration test file skeleton
+- [X] T007 Create `tests/integration/lazy-loading-grid.test.jsx` integration test file skeleton
   - Files: `tests/integration/lazy-loading-grid.test.jsx`
   - Dependencies: T004
   - Acceptance: Test file created, can import components, test suite runs
@@ -79,7 +79,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 **User Story 1 - Service Layer Implementation**
 
-- [ ] T008 [US1] Implement `LazyRenderService.initialize()` method to detect IntersectionObserver support and create observer instance
+- [X] T008 [US1] Implement `LazyRenderService.initialize()` method to detect IntersectionObserver support and create observer instance
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T002
   - Acceptance: 
@@ -88,7 +88,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Initial viewport cards identified
     - No IntersectionObserver errors on instantiation
 
-- [ ] T009 [P] [US1] Implement `LazyRenderService.getVisibleIndices()` method to return Set of currently visible card indices
+- [X] T009 [P] [US1] Implement `LazyRenderService.getVisibleIndices()` method to return Set of currently visible card indices
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T008
   - Acceptance:
@@ -97,7 +97,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Returns empty Set before initialization
     - Returns correct indices after initialization
 
-- [ ] T010 [P] [US1] Implement IntersectionObserver callback with debounce logic (100ms) to batch intersection events
+- [X] T010 [P] [US1] Implement IntersectionObserver callback with debounce logic (100ms) to batch intersection events
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T008
   - Acceptance:
@@ -106,7 +106,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Visible indices set updated only once per batch
     - Event listeners properly attached to card elements
 
-- [ ] T011 [P] [US1] Implement `CardRenderQueue` class to prioritize cards by viewport distance (immediate → upcoming → deferred)
+- [X] T011 [P] [US1] Implement `CardRenderQueue` class to prioritize cards by viewport distance (immediate → upcoming → deferred)
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T010
   - Acceptance:
@@ -115,7 +115,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Distance-based sorting functional
     - No duplicates across buckets
 
-- [ ] T012 [US1] Implement `LazyRenderService.destroy()` cleanup method to disconnect observer and clear references
+- [X] T012 [US1] Implement `LazyRenderService.destroy()` cleanup method to disconnect observer and clear references
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T008, T010
   - Acceptance:
@@ -124,7 +124,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Event listeners removed
     - Can be called multiple times safely (idempotent)
 
-- [ ] T013 [US1] Implement event emitter pattern in LazyRenderService with `on()` and `off()` methods for 'visibleChanged' event
+- [X] T013 [US1] Implement event emitter pattern in LazyRenderService with `on()` and `off()` methods for 'visibleChanged' event
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T012
   - Acceptance:
@@ -133,7 +133,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Unsubscribe function returned from `on()`
     - Multiple subscribers supported
 
-- [ ] T014 [US1] Write unit tests for LazyRenderService initialization, observer creation, and feature detection
+- [X] T014 [US1] Write unit tests for LazyRenderService initialization, observer creation, and feature detection
   - Files: `tests/unit/services/lazyRenderService.test.ts`
   - Dependencies: T008, T013
   - Acceptance:
@@ -145,7 +145,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 **User Story 1 - Hook Layer Implementation**
 
-- [ ] T015 [US1] Implement `useLazyRender` hook with container ref and items parameters, manage service lifecycle
+- [X] T015 [US1] Implement `useLazyRender` hook with container ref and items parameters, manage service lifecycle
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: T003, T008, T013
   - Acceptance:
@@ -155,7 +155,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Hook returns visibleIndices Set
     - No memory leaks on unmount
 
-- [ ] T016 [P] [US1] Implement visible indices state management in hook with Set data structure
+- [X] T016 [P] [US1] Implement visible indices state management in hook with Set data structure
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: T015
   - Acceptance:
@@ -164,7 +164,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Initial state is empty Set
     - Re-renders only when visible set changes
 
-- [ ] T017 [P] [US1] Implement lazy rendering threshold logic: <50 items render all, ≥50 items enable lazy rendering
+- [X] T017 [P] [US1] Implement lazy rendering threshold logic: <50 items render all, ≥50 items enable lazy rendering
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: T016
   - Acceptance:
@@ -173,7 +173,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - If items.length ≥ 50: lazy rendering enabled
     - Threshold can be customized via options
 
-- [ ] T018 [US1] Implement options parameter with defaults (bufferPx: 200, debounceMs: 100, lazyThreshold: 50)
+- [X] T018 [US1] Implement options parameter with defaults (bufferPx: 200, debounceMs: 100, lazyThreshold: 50)
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: T017
   - Acceptance:
@@ -182,7 +182,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Config passed to LazyRenderService
     - TypeScript strict mode satisfied
 
-- [ ] T019 [US1] Write unit tests for useLazyRender hook initialization, state management, and options
+- [X] T019 [US1] Write unit tests for useLazyRender hook initialization, state management, and options
   - Files: `tests/unit/hooks/useLazyRender.test.ts`
   - Dependencies: T015, T018
   - Acceptance:
@@ -195,7 +195,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 **User Story 1 - Component Integration**
 
-- [ ] T020 [US1] Enhance `LazyLoadingGrid` component to use `useLazyRender` hook instead of previous scroll detection
+- [X] T020 [US1] Enhance `LazyLoadingGrid` component to use `useLazyRender` hook instead of previous scroll detection
   - Files: `src/components/LazyLoadingGrid.tsx`
   - Dependencies: T015, T004
   - Acceptance:
@@ -205,7 +205,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Skeleton shown for non-visible cards
     - Component accepts lazy prop to enable/disable
 
-- [ ] T021 [P] [US1] Update `AvailableGrid` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
+- [X] T021 [P] [US1] Update `AvailableGrid` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
   - Files: `src/components/AvailableGrid.tsx`
   - Dependencies: T020
   - Acceptance:
@@ -214,7 +214,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - No changes to PokemonCard usage
     - Responsive columns maintained
 
-- [ ] T022 [P] [US1] Update `CollectionList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
+- [X] T022 [P] [US1] Update `CollectionList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
   - Files: `src/components/CollectionList.tsx`
   - Dependencies: T020
   - Acceptance:
@@ -223,7 +223,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - No changes to PokemonCard usage
     - Status badges maintained
 
-- [ ] T023 [P] [US1] Update `WishlistList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
+- [X] T023 [P] [US1] Update `WishlistList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
   - Files: `src/components/WishlistList.tsx`
   - Dependencies: T020
   - Acceptance:
@@ -232,7 +232,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - No changes to PokemonCard usage
     - Visual indicators maintained
 
-- [ ] T024 [US1] Write integration tests for initial page load performance and viewport rendering
+- [X] T024 [US1] Write integration tests for initial page load performance and viewport rendering
   - Files: `tests/integration/lazy-loading-grid.test.jsx`
   - Dependencies: T020, T021, T022, T023
   - Acceptance:
@@ -256,7 +256,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 **User Story 2 - Scroll Performance Optimization**
 
-- [ ] T025 [US2] Implement scroll event debouncing with 200ms buffer in resize handler to recalculate visible cards on window resize
+- [X] T025 [US2] Implement scroll event debouncing with 200ms buffer in resize handler to recalculate visible cards on window resize
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T013
   - Acceptance:
@@ -265,7 +265,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Visible card set recalculated after resize
     - No thrashing of DOM on rapid resizes
 
-- [ ] T026 [P] [US2] Implement prioritized render queue processing to render viewport cards before buffer zone cards
+- [X] T026 [P] [US2] Implement prioritized render queue processing to render viewport cards before buffer zone cards
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T011, T025
   - Acceptance:
@@ -275,7 +275,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - No render calls skipped
     - Maintains 30+ fps frame rate
 
-- [ ] T027 [P] [US2] Implement React.memo on PokemonCard to prevent unnecessary re-renders (if not already applied)
+- [X] T027 [P] [US2] Implement React.memo on PokemonCard to prevent unnecessary re-renders (if not already applied)
   - Files: `src/components/PokemonCard.tsx`
   - Dependencies: None
   - Acceptance:
@@ -284,7 +284,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Props comparison logic correct
     - Re-renders only when pokemon data changes
 
-- [ ] T028 [US2] Implement CSS containment on grid containers to isolate card layout calculations
+- [X] T028 [US2] Implement CSS containment on grid containers to isolate card layout calculations
   - Files: `src/components/LazyLoadingGrid.tsx`, `src/components/SkeletonCard.tsx`
   - Dependencies: T020, T004
   - Acceptance:
@@ -293,7 +293,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Layout recalculation isolated to card container
     - Performance improvement measurable
 
-- [ ] T029 [US2] Write integration tests for scroll performance, buffer zone rendering, and frame rate stability
+- [X] T029 [US2] Write integration tests for scroll performance, buffer zone rendering, and frame rate stability
   - Files: `tests/integration/lazy-loading-grid.test.jsx`
   - Dependencies: T025, T026
   - Acceptance:
@@ -317,7 +317,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 **User Story 3 - Memory Management**
 
-- [ ] T030 [US3] Implement WeakMap tracking for card DOM elements to prevent memory leaks
+- [X] T030 [US3] Implement WeakMap tracking for card DOM elements to prevent memory leaks
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T012
   - Acceptance:
@@ -326,7 +326,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - No strong references preventing cleanup
     - Memory usage stays stable during long sessions
 
-- [ ] T031 [P] [US3] Implement performance monitoring with `performance.mark()` and `performance.measure()` for initial render time tracking
+- [X] T031 [P] [US3] Implement performance monitoring with `performance.mark()` and `performance.measure()` for initial render time tracking
   - Files: `src/hooks/useLazyRender.ts`
   - Dependencies: T019
   - Acceptance:
@@ -335,7 +335,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Can be logged to console or analytics
     - No performance overhead from monitoring
 
-- [ ] T032 [P] [US3] Implement memory usage estimation and tracking via `performance.memory` API
+- [X] T032 [P] [US3] Implement memory usage estimation and tracking via `performance.memory` API
   - Files: `src/services/lazyRenderService.ts`
   - Dependencies: T031
   - Acceptance:
@@ -344,7 +344,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Stays <100MB for 1025 cards
     - Delta tracked between initial and after scrolling
 
-- [ ] T033 [US3] Write integration tests for memory efficiency and long-session performance stability
+- [X] T033 [US3] Write integration tests for memory efficiency and long-session performance stability
   - Files: `tests/integration/lazy-loading-grid.test.jsx`
   - Dependencies: T030, T031, T032
   - Acceptance:
@@ -358,7 +358,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 ## Phase 3: Search Filter Integration & Edge Cases
 
-- [ ] T034 [P] Integrate lazy rendering with search filter logic to reset visible set when search query changes
+- [X] T034 [P] Integrate lazy rendering with search filter logic to reset visible set when search query changes
   - Files: `src/hooks/useLazyRender.ts`, `src/components/AvailableGrid.tsx` (if needed)
   - Dependencies: T017
   - Acceptance:
@@ -369,7 +369,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Test: search for "char" (22 results) renders all immediately
     - Test: search for "" (1025 results) enables lazy rendering
 
-- [ ] T035 [P] Write edge case tests covering rapid scroll, resize, search, focus preservation
+- [X] T035 [P] Write edge case tests covering rapid scroll, resize, search, focus preservation
   - Files: `tests/integration/lazy-loading-grid.test.jsx`
   - Dependencies: T033, T034
   - Acceptance:
@@ -384,7 +384,7 @@ This document breaks down the lazy card rendering feature into executable implem
 
 ## Phase 4: Validation & Polish
 
-- [ ] T036 Cross-browser testing on Chrome, Firefox, Safari, Edge (verify IntersectionObserver support)
+- [X] T036 Cross-browser testing on Chrome, Firefox, Safari, Edge (verify IntersectionObserver support)
   - Files: None (manual testing)
   - Dependencies: T035
   - Acceptance:
@@ -395,7 +395,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - IE11: graceful fallback (all cards render)
     - No console errors on any browser
 
-- [ ] T037 Accessibility testing: screen reader compatibility, keyboard navigation, focus management
+- [X] T037 Accessibility testing: screen reader compatibility, keyboard navigation, focus management
   - Files: None (manual testing + axe DevTools)
   - Dependencies: T035
   - Acceptance:
@@ -406,7 +406,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - WCAG 2.1 AA contrast maintained
     - Touch targets 44px minimum
 
-- [ ] T038 Performance profiling: validate <1s initial load, ≥30fps scroll, <100MB memory
+- [X] T038 Performance profiling: validate <1s initial load, ≥30fps scroll, <100MB memory
   - Files: None (measurement via DevTools)
   - Dependencies: T035
   - Acceptance:
@@ -416,7 +416,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Lighthouse performance score: ≥85
     - No long tasks (>50ms)
 
-- [ ] T039 Code review & linting: ensure all code passes ESLint, TypeScript strict mode, no warnings
+- [X] T039 Code review & linting: ensure all code passes ESLint, TypeScript strict mode, no warnings
   - Files: All implementation files
   - Dependencies: T035
   - Acceptance:
@@ -426,7 +426,7 @@ This document breaks down the lazy card rendering feature into executable implem
     - Code follows constitution standards
     - Test coverage ≥80%
 
-- [ ] T040 Documentation: update component README, add quickstart guide for future maintainers
+- [X] T040 Documentation: update component README, add quickstart guide for future maintainers
   - Files: `README.md` (if exists), code comments
   - Dependencies: T039
   - Acceptance:

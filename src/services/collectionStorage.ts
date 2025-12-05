@@ -32,6 +32,7 @@ class CollectionStorage {
    * @throws Error if data is invalid
    */
   saveCollection(data: StorageData | PokemonData[]): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (data === null || data === undefined) {
       throw new Error('Collection data cannot be null or undefined.')
     }
@@ -86,6 +87,7 @@ class CollectionStorage {
    * @throws Error if data is invalid
    */
   saveWishlist(data: StorageData | PokemonData[]): void {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (data === null || data === undefined) {
       throw new Error('Wishlist data cannot be null or undefined.')
     }

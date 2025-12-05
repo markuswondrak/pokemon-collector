@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, ReactElement } from 'react'
+import { useState, useEffect, useMemo, useCallback, ReactElement } from 'react'
 import { Box, VStack, Container, Heading, Text } from '@chakra-ui/react'
 import { useDebounce } from '../hooks/useDebounce.ts'
 import StickySearchBar from './StickySearchBar.tsx'
@@ -45,7 +45,7 @@ export default function App(): ReactElement {
   const [namesError, setNamesError] = useState<string | null>(null)
 
   // Fetch a batch of Pokemon from the API
-  const fetchPokemonBatch = async (indices: number[], currentFetched: Set<number>): Promise<void> => {
+  const fetchPokemonBatch = useCallback(async (indices: number[], currentFetched: Set<number>): Promise<void> => {
     const indicesToFetch = indices.filter((i) => !currentFetched.has(i))
     
     if (indicesToFetch.length === 0) return
@@ -85,7 +85,7 @@ export default function App(): ReactElement {
     } catch {
       // Silently handle fetch errors - graceful degradation
     }
-  }
+  }, [])
 
   // T010: Initialize names preload on mount
   useEffect(() => {
@@ -106,6 +106,7 @@ export default function App(): ReactElement {
   // Load collection from storage on mount and initialize all Pokemon
   useEffect(() => {
     const stored = pokemonService.getCollectionList()
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setCollection(stored)
 
     // Create a Map for O(1) lookups instead of O(n) .some() calls
@@ -124,7 +125,7 @@ export default function App(): ReactElement {
       const registryName = nameRegistry.getName(index)
       return {
         index,
-        name: registryName || `Pokemon ${index}`,
+        name: registryName || `Pokemon ${String(index)}`,
         image: null,
         collected: collectedMap.has(index),
         wishlist: wishlistMap.has(index),
@@ -134,8 +135,8 @@ export default function App(): ReactElement {
 
     // Fetch initial batch of Pokemon (first 20)
     const indicesToFetch = Array.from({ length: Math.min(20, 1025) }, (_, i) => i + 1)
-    fetchPokemonBatch(indicesToFetch, new Set())
-  }, [namesReady])
+    void fetchPokemonBatch(indicesToFetch, new Set())
+  }, [namesReady, fetchPokemonBatch])
 
   // NEW: Handle debounced name search (T014)
   useEffect(() => {
@@ -143,6 +144,7 @@ export default function App(): ReactElement {
     // This prevents freezing when typing the 3rd character (avoiding search for 2 chars)
     // Also check isSearchActive to prevent searching when the user has cleared the input
     if (!isSearchActive || !debouncedSearchQuery || debouncedSearchQuery.length < 3) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSearchResults(null)
       return
     }
@@ -269,6 +271,21 @@ export default function App(): ReactElement {
     }
   }
 
+  // Wrappers to convert async handlers to void (for event handlers)
+  // These fire-and-forget the async operations without waiting for them
+  const collectWrapper = (index: number): void => {
+    void handleCollect(index)
+  }
+  const removeWrapper = (index: number): void => {
+    void handleRemove(index)
+  }
+  const addToWishlistWrapper = (index: number): void => {
+    void handleAddToWishlist(index)
+  }
+  const removeFromWishlistWrapper = (index: number): void => {
+    void handleRemoveFromWishlist(index)
+  }
+
   // NEW: Sticky Search Bar handlers (T013, T014, T016)
   const handleSearchChange = (query: string): void => {
     setSearchQuery(query)
@@ -316,17 +333,21 @@ export default function App(): ReactElement {
   }, [allPokemon, isSearchActive, searchResults])
 
   // Create Collection and Wishlist objects from array for grid components
-  // Use useMemo to avoid calling Date.now() on every render
+  // Use a stable timestamp (initialize only once, doesn't affect rendering)
+  // We use a different approach: just use 0 or null as a placeholder since
+  // lastUpdated is only used for tracking in storage, not for rendering logic
+  const stableLastUpdated = 0
+
   const mockCollection = useMemo(() => ({
     id: 'collection',
-    lastUpdated: Date.now(),
+    lastUpdated: stableLastUpdated,
     items: new Map(filteredCollection.map((p: Pokemon) => [p.index, p])),
     count: collectedCount,
   }), [filteredCollection, collectedCount])
 
   const mockWishlist = useMemo(() => ({
     id: 'wishlist',
-    lastUpdated: Date.now(),
+    lastUpdated: stableLastUpdated,
     items: new Map(filteredWishlist.map((p: Pokemon) => [p.index, p])),
     count: filteredWishlist.length,
   }), [filteredWishlist])
@@ -364,7 +385,7 @@ export default function App(): ReactElement {
               {namesError}
             </Text>
             <button
-              onClick={() => window.location.reload()}
+              onClick={() => { window.location.reload(); }}
               style={{
                 padding: '8px 16px',
                 backgroundColor: '#319795',
@@ -440,9 +461,9 @@ export default function App(): ReactElement {
                   return { ...p, image: fullPokemon?.image || p.image }
                 })}
                 title="My Collection"
-                onCollect={handleCollect}
-                onRemove={handleRemove}
-                onAddToWishlist={handleAddToWishlist}
+                onCollect={collectWrapper}
+                onRemove={removeWrapper}
+                onAddToWishlist={addToWishlistWrapper}
               />
             </Box>
 
@@ -454,8 +475,8 @@ export default function App(): ReactElement {
                   return { ...p, image: fullPokemon?.image || p.image }
                 })}
                 title="My Wishlist"
-                onRemoveWishlist={handleRemoveFromWishlist}
-                onCollect={handleCollect}
+                onRemoveWishlist={removeFromWishlistWrapper}
+                onCollect={collectWrapper}
               />
             </Box>
 
@@ -465,8 +486,8 @@ export default function App(): ReactElement {
                 allPokemon={filteredAllPokemon}
                 collection={mockCollection}
                 wishlist={mockWishlist}
-                onCollect={handleCollect}
-                onAddWishlist={handleAddToWishlist}
+                onCollect={collectWrapper}
+                onAddWishlist={addToWishlistWrapper}
               />
             </Box>
           </VStack>

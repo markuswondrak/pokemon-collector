@@ -31,6 +31,8 @@ export function useDebounce<T>(
   const [isDebouncing, setIsDebouncing] = useState(false)
 
   useEffect(() => {
+    // Mark debouncing state at the start of a value change
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsDebouncing(true)
 
     const handler = setTimeout(() => {

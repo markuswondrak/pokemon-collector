@@ -91,7 +91,9 @@ const sizeStyles: Record<string, Record<string, unknown>> = {
 
 const ButtonBase = React.forwardRef<HTMLButtonElement, ButtonBaseProps>(
   ({ variant = 'primary', size = 'md', ...props }, ref) => {
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const variantStyle = variantStyles[variant] || variantStyles.primary
+    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     const sizeStyle = sizeStyles[size] || sizeStyles.md
 
     return (

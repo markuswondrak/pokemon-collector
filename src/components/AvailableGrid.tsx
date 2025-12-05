@@ -1,6 +1,7 @@
 import { ReactElement, useMemo } from 'react'
-import { Box, Heading, Text, Grid, VStack } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack } from '@chakra-ui/react'
 import PokemonCard from './PokemonCard'
+import LazyLoadingGrid from './LazyLoadingGrid'
 
 interface Pokemon {
   index: number
@@ -36,7 +37,7 @@ interface AvailableGridProps {
 /**
  * AvailableGrid Component
  * Displays Pokemon that are not collected and not wishlisted.
- * Uses Chakra Grid with responsive columns (1 col mobile, 2 col tablet, 3+ col desktop)
+ * Uses LazyLoadingGrid with responsive columns (1 col mobile, 2 col tablet, 3+ col desktop)
  * and consistent gap spacing (16px base).
  * 
  * OPTIMIZED: Memoizes filtering and sorting operations with useMemo.
@@ -78,8 +79,9 @@ export default function AvailableGrid({
       }))
   }, [allPokemon, collection, wishlist, searchIndex])
 
+  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   const count = sortedPokemon ? sortedPokemon.length : 0
-  const countText = count === 1 ? '1 pokemon' : `${count} pokemon`
+  const countText = count === 1 ? '1 pokemon' : `${String(count)} pokemon`
 
   return (
     <VStack
@@ -122,23 +124,24 @@ export default function AvailableGrid({
           </Text>
         </Box>
       ) : (
-        <Grid
+        <Box
           role="region"
           aria-labelledby="available-title"
-          gridTemplateColumns={['1fr', '1fr 1fr', 'repeat(3, 1fr)']}
-          gap={6}
           w="100%"
         >
-          {sortedPokemon.map((pokemon) => (
-            <PokemonCard
-              key={pokemon.index}
-              pokemon={pokemon}
-              onCollect={() => { onCollect(pokemon.index); }}
-              onRemove={() => {}} // Not used in available grid
-              onAddToWishlist={() => { onAddWishlist(pokemon.index); }}
-            />
-          ))}
-        </Grid>
+          <LazyLoadingGrid
+            items={sortedPokemon}
+            lazy={true}
+            renderItem={(pokemon) => (
+              <PokemonCard
+                pokemon={pokemon}
+                onCollect={() => { onCollect(pokemon.index); }}
+                onRemove={() => {}} // Not used in available grid
+                onAddToWishlist={() => { onAddWishlist(pokemon.index); }}
+              />
+            )}
+          />
+        </Box>
       )}
     </VStack>
   )

@@ -3,15 +3,18 @@ import { configure, screen, render as rtlRender, RenderOptions, fireEvent, waitF
 import { ChakraProvider, defaultSystem } from '@chakra-ui/react'
 import { ReactElement } from 'react'
 import { vi } from 'vitest'
-import { act } from 'react-dom/test-utils'
+import { act } from 'react'
 
 // Suppress jsdom CSS parsing warnings - jsdom doesn't support all CSS features
 // These warnings are harmless but create noise in test output
 const originalWarn = console.warn
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 console.warn = (...args: any[]) => {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   if (args[0]?.includes?.('Could not parse CSS stylesheet')) {
     return // Suppress CSS parsing warnings
   }
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   originalWarn(...args)
 }
 
@@ -29,6 +32,7 @@ configure({ asyncUtilTimeout: 1000 })
  * @param options - Additional render options
  * @returns Render result with ChakraProvider wrapper
  */
+// eslint-disable-next-line react-refresh/only-export-components
 function Wrapper({ children }: { children: ReactElement }) {
   return <ChakraProvider value={defaultSystem}>{children}</ChakraProvider>
 }
@@ -41,11 +45,13 @@ export function render(ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'
 }
 
 // Re-export testing library utilities
-export { screen, fireEvent, waitFor, act }
+export { screen, fireEvent, waitFor }
+
+export { act }
 
 // Test utility: Get the search button specifically (not the mode toggle)
-// eslint-disable-next-line @typescript-eslint/no-namespace
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Vi {
     interface TestContext {
       getSearchButton: () => HTMLButtonElement

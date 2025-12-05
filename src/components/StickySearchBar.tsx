@@ -52,7 +52,9 @@ export default function StickySearchBar({
     }
 
     document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown)
+    }
   }, [onClear])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -184,7 +184,7 @@ class PokemonApiService {
       // T006: Surface errors instead of silently returning empty array
       const err = error as { message: string; response?: { status: number } }
       const message = err.response?.status 
-        ? `Failed to fetch Pokemon list (HTTP ${err.response.status})`
+        ? `Failed to fetch Pokemon list (HTTP ${String(err.response.status)})`
         : `Failed to fetch Pokemon list: ${err.message}`
       throw new Error(message)
     }
