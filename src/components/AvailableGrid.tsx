@@ -1,7 +1,6 @@
 import { ReactElement, useMemo, useCallback, memo } from 'react'
-import { Box, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, Grid } from '@chakra-ui/react'
 import PokemonCard from './PokemonCard'
-import LazyLoadingGrid from './LazyLoadingGrid'
 
 interface Pokemon {
   index: number
@@ -37,7 +36,7 @@ interface AvailableGridProps {
 /**
  * AvailableGrid Component
  * Displays Pokemon that are not collected and not wishlisted.
- * Uses LazyLoadingGrid with responsive columns (1 col mobile, 2 col tablet, 3+ col desktop)
+  * Uses responsive Grid layout with columns (1 col mobile, 2 col tablet, 3+ col desktop)
  * and consistent gap spacing (16px base).
  * 
  * OPTIMIZED: Memoizes filtering and sorting operations with useMemo.
@@ -136,11 +135,18 @@ function AvailableGrid({
           aria-labelledby="available-title"
           w="100%"
         >
-          <LazyLoadingGrid
-            items={sortedPokemon}
-            lazy={true}
-            renderItem={renderItem}
-          />
+          <Grid
+            templateColumns={{
+              base: '1fr',
+              sm: 'repeat(2, 1fr)',
+              md: 'repeat(3, 1fr)',
+              lg: 'repeat(4, 1fr)',
+            }}
+            gap={4}
+            w="100%"
+          >
+            {sortedPokemon.map((pokemon) => renderItem(pokemon))}
+          </Grid>
         </Box>
       )}
     </VStack>

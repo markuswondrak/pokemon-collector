@@ -259,11 +259,33 @@ export default function App(): ReactElement {
 
   const handleCollect = async (index: number): Promise<void> => {
     try {
-      await pokemonService.collectPokemon(index)
+      const updatedPokemon = await pokemonService.collectPokemon(index)
 
-      // Update collection list
-      const updated = pokemonService.getCollectionList()
-      setCollection(updated)
+      // Update collection list locally to preserve stable references
+      setCollection((prev) => {
+        const existingIndex = prev.findIndex((p) => p.index === index)
+        if (existingIndex >= 0) {
+          const existing = prev[existingIndex]
+          if (
+            existing.collected === updatedPokemon.collected &&
+            existing.wishlist === updatedPokemon.wishlist &&
+            existing.name === updatedPokemon.name &&
+            existing.image === updatedPokemon.image
+          ) {
+            return prev
+          }
+          const next = [...prev]
+          next[existingIndex] = {
+            ...existing,
+            collected: true,
+            wishlist: false,
+            name: updatedPokemon.name,
+            image: updatedPokemon.image,
+          }
+          return next
+        }
+        return [...prev, updatedPokemon]
+      })
     } catch (err) {
       // Silently handle errors - graceful degradation
       console.error('Failed to collect Pokemon:', err)
@@ -274,9 +296,21 @@ export default function App(): ReactElement {
     try {
       await pokemonService.removeFromCollection(index)
 
-      // Update collection list
-      const updated = pokemonService.getCollectionList()
-      setCollection(updated)
+      setCollection((prev) => {
+        const existingIndex = prev.findIndex((p) => p.index === index)
+        if (existingIndex < 0) return prev
+
+        const existing = prev[existingIndex]
+        if (!existing.wishlist) {
+          const next = [...prev]
+          next.splice(existingIndex, 1)
+          return next
+        }
+
+        const next = [...prev]
+        next[existingIndex] = { ...existing, collected: false }
+        return next
+      })
     } catch (err) {
       // Silently handle errors - graceful degradation
       console.error('Failed to remove Pokemon:', err)
@@ -285,11 +319,32 @@ export default function App(): ReactElement {
 
   const handleAddToWishlist = async (index: number): Promise<void> => {
     try {
-      await pokemonService.addToWishlist(index)
+      const updatedPokemon = await pokemonService.addToWishlist(index)
 
-      // Update collection list
-      const updated = pokemonService.getCollectionList()
-      setCollection(updated)
+      setCollection((prev) => {
+        const existingIndex = prev.findIndex((p) => p.index === index)
+        if (existingIndex >= 0) {
+          const existing = prev[existingIndex]
+          if (
+            existing.collected === updatedPokemon.collected &&
+            existing.wishlist === updatedPokemon.wishlist &&
+            existing.name === updatedPokemon.name &&
+            existing.image === updatedPokemon.image
+          ) {
+            return prev
+          }
+          const next = [...prev]
+          next[existingIndex] = {
+            ...existing,
+            collected: false,
+            wishlist: true,
+            name: updatedPokemon.name,
+            image: updatedPokemon.image,
+          }
+          return next
+        }
+        return [...prev, updatedPokemon]
+      })
     } catch (err) {
       // Silently handle errors - graceful degradation
       console.error('Failed to add to wishlist:', err)
@@ -300,9 +355,21 @@ export default function App(): ReactElement {
     try {
       await pokemonService.removeFromWishlist(index)
 
-      // Update collection list
-      const updated = pokemonService.getCollectionList()
-      setCollection(updated)
+      setCollection((prev) => {
+        const existingIndex = prev.findIndex((p) => p.index === index)
+        if (existingIndex < 0) return prev
+
+        const existing = prev[existingIndex]
+        if (!existing.collected) {
+          const next = [...prev]
+          next.splice(existingIndex, 1)
+          return next
+        }
+
+        const next = [...prev]
+        next[existingIndex] = { ...existing, wishlist: false }
+        return next
+      })
     } catch (err) {
       // Silently handle errors - graceful degradation
       console.error('Failed to remove from wishlist:', err)
@@ -376,6 +443,23 @@ export default function App(): ReactElement {
       return index >= 0 && index < allPokemon.length ? allPokemon[index] : result
     })
   }, [allPokemon, isSearchActive, searchResults])
+
+  // Stable lookup for images to avoid recreating per-card objects when flags change
+  const imageByIndex = useMemo(() => new Map(allPokemon.map((p) => [p.index, p.image])), [allPokemon])
+
+  const collectionWithImages = useMemo(() => (
+    filteredCollection.map((p) => {
+      const img = imageByIndex.get(p.index) ?? p.image ?? null
+      return p.image === img ? p : { ...p, image: img }
+    })
+  ), [filteredCollection, imageByIndex])
+
+  const wishlistWithImages = useMemo(() => (
+    filteredWishlist.map((p) => {
+      const img = imageByIndex.get(p.index) ?? p.image ?? null
+      return p.image === img ? p : { ...p, image: img }
+    })
+  ), [filteredWishlist, imageByIndex])
 
   // Create Collection and Wishlist objects from array for grid components
   // Use a stable timestamp (initialize only once, doesn't affect rendering)
@@ -501,10 +585,7 @@ export default function App(): ReactElement {
             {/* Collected Grid */}
             <Box flex={1} minW={0}>
               <CollectionList
-                pokemon={filteredCollection.map((p) => {
-                  const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
-                  return { ...p, image: fullPokemon?.image || p.image }
-                })}
+                pokemon={collectionWithImages}
                 title="My Collection"
                 onCollect={collectWrapper}
                 onRemove={removeWrapper}
@@ -515,10 +596,7 @@ export default function App(): ReactElement {
             {/* Wishlist Grid */}
             <Box flex={1} minW={0}>
               <WishlistList
-                pokemon={filteredWishlist.map((p) => {
-                  const fullPokemon = allPokemon.find((ap) => ap.index === p.index)
-                  return { ...p, image: fullPokemon?.image || p.image }
-                })}
+                pokemon={wishlistWithImages}
                 title="My Wishlist"
                 onRemoveWishlist={removeFromWishlistWrapper}
                 onCollect={collectWrapper}

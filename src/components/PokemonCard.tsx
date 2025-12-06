@@ -1,9 +1,10 @@
-import { ReactElement, memo } from 'react'
-import { Box, Heading, Text, VStack, HStack, IconButton } from '@chakra-ui/react'
+import { ReactElement, memo, useRef, useEffect } from 'react'
+import { Box, Heading, Text, VStack, HStack, IconButton, Spinner, Button } from '@chakra-ui/react'
 import { Card, Badge } from '@chakra-ui/react'
 import { Tooltip } from '@chakra-ui/react'
 import { TbPokeball, TbPokeballOff } from 'react-icons/tb'
 import { FaHeart, FaRegHeart } from 'react-icons/fa'
+import { useImageCache } from '../hooks/useImageCache'
 
 interface Pokemon {
   index: number
@@ -48,6 +49,9 @@ function arePropsEqual(
  * 
  * Wrapped with React.memo to prevent unnecessary re-renders when parent updates
  * callbacks but Pokemon data remains the same.
+ * 
+ * Feature 008: Uses IntersectionObserver for viewport-based image loading
+ * with localStorage caching via useImageCache hook.
  */
 function PokemonCard({
   pokemon,
@@ -55,6 +59,44 @@ function PokemonCard({
   onAddToWishlist,
   onRemove
 }: PokemonCardProps): ReactElement {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const { imageDataUrl, isLoading, hasError, errorMessage, loadImage } = useImageCache(pokemon.index)
+
+  // IntersectionObserver for viewport-based loading
+  useEffect(() => {
+    const element = cardRef.current
+    if (!element) return
+
+    // Check if IntersectionObserver is available
+    if (typeof IntersectionObserver === 'undefined') {
+      // Fallback: load image immediately if IntersectionObserver not supported
+      if (!imageDataUrl && !isLoading && !hasError) {
+        void loadImage()
+      }
+      return
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !imageDataUrl && !isLoading && !hasError) {
+            void loadImage()
+          }
+        })
+      },
+      {
+        rootMargin: '200px', // Load 200px before entering viewport
+        threshold: 0.01
+      }
+    )
+
+    observer.observe(element)
+
+    return () => {
+      observer.disconnect()
+    }
+  }, [imageDataUrl, isLoading, hasError, loadImage])
+
   const handleCollect = (): void => {
     // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
     if (onCollect) {
@@ -84,6 +126,7 @@ function PokemonCard({
 
   return (
     <Card.Root
+      ref={cardRef}
       as="article"
       data-pokemon-index={pokemon.index}
       aria-label={ariaLabel}
@@ -116,11 +159,29 @@ function PokemonCard({
         overflow="hidden"
         flexShrink={0}
       >
-        {pokemon.image ? (
+        {isLoading ? (
+          <Spinner size="md" color="teal.500" />
+        ) : hasError ? (
+          <VStack spacing={1}>
+            <Text
+              color="red.600"
+              fontSize="xs"
+              fontWeight="500"
+              role="status"
+              aria-label={errorMessage || 'Error loading image'}
+              textAlign="center"
+              px={1}
+            >
+              Image unavailable
+            </Text>
+            <Button size="xs" variant="outline" colorScheme="teal" onClick={() => { void loadImage() }}>
+              Retry
+            </Button>
+          </VStack>
+        ) : imageDataUrl ? (
           <img
-            src={pokemon.image}
+            src={imageDataUrl}
             alt={`${pokemon.name} sprite`}
-            loading="lazy"
             style={{
               width: '75px',
               height: '75px',

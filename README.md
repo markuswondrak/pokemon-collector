@@ -12,6 +12,7 @@ A React web application that allows users to organize their Pokemon collection b
 - 🔍 **Pokemon API Integration**: Fetch Pokemon data from the public PokéAPI
 - 🎨 **Modern UI**: Built with Chakra UI for a consistent, accessible, and responsive design
 - 💾 **Persistent Storage**: Collection state saved in browser localStorage
+- 🖼️ **Simplified Image Loading**: Cards load images on demand with localStorage caching (LRU eviction) and no LazyLoadingGrid dependency
 - ⚡ **Fast Development**: Built with Vite for <1s build times and instant HMR
 - ✅ **Fully Tested**: Unit tests, integration tests, and API contract tests
 - 🧩 **Minimal Dependencies**: React 18 + Vite core with clean architecture

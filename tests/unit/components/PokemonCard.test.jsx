@@ -1,7 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '../../../tests/setup';
 import '@testing-library/jest-dom';
 import PokemonCard from '../../../src/components/PokemonCard';
+
+const mockUseImageCache = vi.fn();
+
+vi.mock('../../../src/hooks/useImageCache', () => ({
+  useImageCache: (pokemonIndex) => mockUseImageCache(pokemonIndex),
+}))
 
 describe('PokemonCard Component', () => {
   const mockPokemon = {
@@ -15,6 +21,18 @@ describe('PokemonCard Component', () => {
   const mockOnCollect = vi.fn();
   const mockOnAddToWishlist = vi.fn();
   const mockOnRemove = vi.fn();
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    // Default mock implementation: return image URL
+    mockUseImageCache.mockReturnValue({
+      imageDataUrl: 'https://example.com/pokemon-25.png',
+      isLoading: false,
+      hasError: false,
+      errorMessage: null,
+      loadImage: vi.fn(),
+    });
+  });
 
   it('should render Pokemon information', () => {
     render(
@@ -42,7 +60,7 @@ describe('PokemonCard Component', () => {
 
     const img = screen.getByAltText('Pikachu sprite');
     expect(img).toBeInTheDocument();
-    expect(img.src).toBe('https://example.com/pikachu.png');
+    expect(img.src).toBe('https://example.com/pokemon-25.png');
   });
 
   it('should show Collect button when Pokemon not collected', () => {
@@ -152,6 +170,15 @@ describe('PokemonCard Component', () => {
   });
 
   it('should handle missing image gracefully', () => {
+    // Override mock to return null imageDataUrl
+    mockUseImageCache.mockReturnValue({
+      imageDataUrl: null,
+      isLoading: false,
+      hasError: false,
+      errorMessage: null,
+      loadImage: vi.fn(),
+    });
+
     const pokemonNoImage = { ...mockPokemon, image: null };
     render(
       <PokemonCard

@@ -1,7 +1,6 @@
 import { ReactElement } from 'react'
-import { Box, Heading, Text, VStack } from '@chakra-ui/react'
+import { Box, Heading, Text, VStack, Grid } from '@chakra-ui/react'
 import PokemonCard from './PokemonCard'
-import LazyLoadingGrid from './LazyLoadingGrid'
 
 interface Pokemon {
   index: number
@@ -22,8 +21,13 @@ interface CollectionListProps {
 /**
  * CollectionList Component
  * Displays a list of Pokemon (collected or wishlist) using LazyLoadingGrid.
+ * Displays a list of Pokemon (collected or wishlist) using Grid layout.
  * Uses responsive columns: 1 col mobile, 2 col tablet, 3+ col desktop.
  * Enables lazy rendering for performance optimization with large collections.
+/**
+ * CollectionList Component
+ * Displays a list of Pokemon (collected or wishlist) using Grid layout.
+ * Uses responsive columns: 1 col mobile, 2 col tablet, 3+ col desktop.
  */
 export default function CollectionList({
   pokemon,
@@ -81,18 +85,26 @@ export default function CollectionList({
             aria-labelledby="collection-title"
             width="100%"
           >
-            <LazyLoadingGrid
-              items={pokemon}
-              lazy={true}
-              renderItem={(poke: Pokemon) => (
+            <Grid
+              templateColumns={{
+                base: '1fr',
+                sm: 'repeat(2, 1fr)',
+                md: 'repeat(3, 1fr)',
+                lg: 'repeat(4, 1fr)',
+              }}
+              gap={4}
+              w="100%"
+            >
+              {pokemon.map((poke: Pokemon) => (
                 <PokemonCard
+                  key={poke.index}
                   pokemon={poke}
                   onCollect={onCollect}
                   onAddToWishlist={onAddToWishlist}
                   onRemove={onRemove}
                 />
-              )}
-            />
+              ))}
+            </Grid>
           </Box>
         )}
       </VStack>
