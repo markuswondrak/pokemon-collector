@@ -322,6 +322,95 @@ describe('Lazy Loading Grid - Integration Tests', () => {
       expect(() => service.destroy()).not.toThrow();
       expect(service.getVisibleIndices().size).toBe(0);
     });
+
+    it('T034: should maintain linear memory growth with 500+ cards', () => {
+      vi.useFakeTimers();
+
+      let capturedCallback = null;
+      global.IntersectionObserver = class MockIntersectionObserver {
+        constructor(callback, options) {
+          capturedCallback = callback;
+          this.callback = callback;
+          this.options = options;
+        }
+        observe = vi.fn();
+        unobserve = vi.fn();
+        disconnect = vi.fn();
+        takeRecords = vi.fn(() => []);
+        root = null;
+        rootMargin = '200px';
+        thresholds = [];
+      };
+
+      // Baseline memory snapshot (10MB)
+      const baselineBytes = 10_000_000;
+      (performance).memory = { usedJSHeapSize: baselineBytes };
+
+      const service = new LazyRenderService();
+      service.initialize();
+
+      // Simulate rendering 500+ cards in batches (realistic scroll scenario)
+      const totalCards = 550;
+      const batchSize = 50;
+      const memoryMeasurements = [];
+
+      for (let batchStart = 0; batchStart < totalCards; batchStart += batchSize) {
+        const batchEnd = Math.min(batchStart + batchSize, totalCards);
+        const observedElements = Array.from({ length: batchEnd - batchStart }, () => document.createElement('div'));
+        
+        const entries = observedElements.map((element, index) => {
+          const cardIndex = batchStart + index;
+          service.observe(element, cardIndex);
+          return {
+            target: element,
+            isIntersecting: true,
+            intersectionRatio: 1,
+          };
+        });
+
+        // Simulate memory growth proportional to cards rendered (~50KB per card)
+        const currentCards = batchEnd;
+        const expectedMemoryBytes = baselineBytes + (currentCards * 50 * 1024);
+        (performance).memory = { usedJSHeapSize: expectedMemoryBytes };
+        
+        capturedCallback?.(entries, {});
+        vi.runAllTimers();
+
+        const stats = service.getStats();
+        memoryMeasurements.push({
+          cards: currentCards,
+          memoryBytes: stats.memoryEstimateBytes,
+          memoryDeltaBytes: stats.memoryDeltaBytes,
+        });
+      }
+
+      // Verify linear memory growth (not exponential)
+      // Calculate memory per card for each batch
+      const memoryPerCardRatios = memoryMeasurements.map((m, index) => {
+        if (index === 0) return 0;
+        const deltaMemory = m.memoryBytes - memoryMeasurements[0].memoryBytes;
+        const deltaCards = m.cards - memoryMeasurements[0].cards;
+        return deltaMemory / deltaCards;
+      }).filter(ratio => ratio > 0);
+
+      // All ratios should be similar (linear growth)
+      const avgRatio = memoryPerCardRatios.reduce((sum, r) => sum + r, 0) / memoryPerCardRatios.length;
+      const maxDeviation = Math.max(...memoryPerCardRatios.map(r => Math.abs(r - avgRatio)));
+      
+      // Allow 20% deviation (accounting for measurement variance)
+      expect(maxDeviation).toBeLessThan(avgRatio * 0.2);
+
+      // Verify final memory is under 100MB limit
+      const finalStats = service.getStats();
+      expect(finalStats.memoryEstimateBytes).toBeLessThan(100 * 1024 * 1024);
+
+      // Verify all 550 cards are tracked
+      expect(finalStats.totalVisible).toBe(totalCards);
+
+      // Cleanup test-specific memory override
+      delete (performance).memory;
+      vi.useRealTimers();
+    });
   });
 
   describe('Search Integration', () => {

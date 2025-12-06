@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, ReactElement } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef, ReactElement } from 'react'
 import { Box, VStack, Container, Heading, Text } from '@chakra-ui/react'
 import { useDebounce } from '../hooks/useDebounce.ts'
 import StickySearchBar from './StickySearchBar.tsx'
@@ -44,11 +44,20 @@ export default function App(): ReactElement {
   const [namesReady, setNamesReady] = useState<boolean>(false)
   const [namesError, setNamesError] = useState<string | null>(null)
 
+  // Track in-flight fetch requests to prevent duplicate calls (especially in React StrictMode)
+  const inFlightFetches = useRef<Set<number>>(new Set())
+
   // Fetch a batch of Pokemon from the API
   const fetchPokemonBatch = useCallback(async (indices: number[], currentFetched: Set<number>): Promise<void> => {
-    const indicesToFetch = indices.filter((i) => !currentFetched.has(i))
+    // Filter out already fetched AND currently in-flight requests
+    const indicesToFetch = indices.filter((i) => 
+      !currentFetched.has(i) && !inFlightFetches.current.has(i)
+    )
     
     if (indicesToFetch.length === 0) return
+
+    // Mark these indices as in-flight to prevent duplicate fetches
+    indicesToFetch.forEach((i) => inFlightFetches.current.add(i))
 
     try {
       const fetchedPokemon = await pokemonApi.fetchMultiplePokemon(indicesToFetch)
@@ -84,6 +93,9 @@ export default function App(): ReactElement {
       })
     } catch {
       // Silently handle fetch errors - graceful degradation
+    } finally {
+      // Remove from in-flight tracking regardless of success/failure
+      indicesToFetch.forEach((i) => inFlightFetches.current.delete(i))
     }
   }, [])
 
@@ -136,7 +148,8 @@ export default function App(): ReactElement {
     // Fetch initial batch of Pokemon (first 20)
     const indicesToFetch = Array.from({ length: Math.min(20, 1025) }, (_, i) => i + 1)
     void fetchPokemonBatch(indicesToFetch, new Set())
-  }, [namesReady, fetchPokemonBatch])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // Run only once on mount - don't depend on namesReady to avoid redundant fetches
 
   // NEW: Handle debounced name search (T014)
   useEffect(() => {
@@ -200,6 +213,21 @@ export default function App(): ReactElement {
       threshold: 0.01,
     })
 
+    // Use MutationObserver to detect new cards being added to the DOM
+    const mutationObserver = new MutationObserver(() => {
+      const allCards = document.querySelectorAll('[data-pokemon-index]')
+      allCards.forEach((card) => {
+        const element = card as HTMLElement
+        const indexStr = element.getAttribute('data-pokemon-index')
+        if (indexStr !== null) {
+          const index = parseInt(indexStr, 10)
+          if (!fetchedIndices.has(index)) {
+            observer.observe(element)
+          }
+        }
+      })
+    })
+
     // Observe all visible cards to enable lazy loading across all Pokemon
     const allCards = document.querySelectorAll('[data-pokemon-index]')
     
@@ -214,8 +242,18 @@ export default function App(): ReactElement {
       }
     })
 
+    // Start observing DOM changes in the main content area
+    const mainContent = document.querySelector('[aria-label="Pokemon grids"]')
+    if (mainContent) {
+      mutationObserver.observe(mainContent, {
+        childList: true,
+        subtree: true,
+      })
+    }
+
     return () => {
       observer.disconnect()
+      mutationObserver.disconnect()
     }
   }, [fetchedIndices, fetchPokemonBatch])
 
@@ -317,18 +355,25 @@ export default function App(): ReactElement {
     return wishlist.filter((p) => searchIndexSet.has(p.index))
   }, [collection, isSearchActive, searchResults])
 
+  // Memoize collection and wishlist Maps to prevent unnecessary re-renders
+  const collectionItemsMap = useMemo(() => 
+    new Map(filteredCollection.map((p: Pokemon) => [p.index, p])),
+    [filteredCollection]
+  )
+
+  const wishlistItemsMap = useMemo(() => 
+    new Map(filteredWishlist.map((p: Pokemon) => [p.index, p])),
+    [filteredWishlist]
+  )
+
   const filteredAllPokemon = useMemo(() => {
     if (!isSearchActive || !searchResults) {
       return allPokemon
     }
+    // Return Pokemon references from allPokemon array (not new objects)
     return searchResults.map((result) => {
-      // Optimized: Use direct index access instead of O(N) .find()
-      // allPokemon is 0-indexed, so index 1 is at [0]
       const index = result.index - 1
-      if (index >= 0 && index < allPokemon.length) {
-        return allPokemon[index]
-      }
-      return result
+      return index >= 0 && index < allPokemon.length ? allPokemon[index] : result
     })
   }, [allPokemon, isSearchActive, searchResults])
 
@@ -341,16 +386,16 @@ export default function App(): ReactElement {
   const mockCollection = useMemo(() => ({
     id: 'collection',
     lastUpdated: stableLastUpdated,
-    items: new Map(filteredCollection.map((p: Pokemon) => [p.index, p])),
+    items: collectionItemsMap,
     count: collectedCount,
-  }), [filteredCollection, collectedCount])
+  }), [collectionItemsMap, collectedCount])
 
   const mockWishlist = useMemo(() => ({
     id: 'wishlist',
     lastUpdated: stableLastUpdated,
-    items: new Map(filteredWishlist.map((p: Pokemon) => [p.index, p])),
+    items: wishlistItemsMap,
     count: filteredWishlist.length,
-  }), [filteredWishlist])
+  }), [wishlistItemsMap, filteredWishlist.length])
 
   return (
     <Box as="main" aria-label="Pokemon Collection Organizer">

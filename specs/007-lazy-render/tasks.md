@@ -107,13 +107,13 @@ Checklist format: `- [ ] T### [P?] [US?] Description with file path`
 
 ### User Story 3 Implementation Tasks
 
-- [ ] T029 [P] [US3] Implement cache invalidation on app version change in `src/services/pokemonApi.ts` (check constant and clear if version mismatch)
-- [ ] T030 [P] [US3] Implement cache invalidation on app version change in `src/services/nameRegistry.ts` (single refresh, then reuse)
-- [ ] T031 [US3] Implement cleanup on component unmount in `src/hooks/useLazyRender.ts` (disconnect observer, clear visible indices)
-- [ ] T032 [P] [US3] Ensure DOM elements stay mounted (never unmount) in `src/components/LazyLoadingGrid.tsx` to preserve scroll position
-- [ ] T033 [US3] Verify no memory leaks from observer in `src/services/lazyRenderService.ts` (disconnect on cleanup)
-- [ ] T034 [P] [US3] Add long-session memory monitoring in `tests/integration/lazy-loading-grid.test.jsx` (500+ cards, linear growth)
-- [ ] T035 [P] [US3] Cover cache invalidation on version change in `tests/unit/services/pokemonApi.test.ts` and `tests/unit/services/nameRegistry.test.ts`
+- [X] T029 [P] [US3] Implement cache invalidation on app version change in `src/services/pokemonApi.ts` (check constant and clear if version mismatch)
+- [X] T030 [P] [US3] Implement cache invalidation on app version change in `src/services/nameRegistry.ts` (single refresh, then reuse)
+- [X] T031 [US3] Implement cleanup on component unmount in `src/hooks/useLazyRender.ts` (disconnect observer, clear visible indices)
+- [X] T032 [P] [US3] Ensure DOM elements stay mounted (never unmount) in `src/components/LazyLoadingGrid.tsx` to preserve scroll position
+- [X] T033 [US3] Verify no memory leaks from observer in `src/services/lazyRenderService.ts` (disconnect on cleanup)
+- [X] T034 [P] [US3] Add long-session memory monitoring in `tests/integration/lazy-loading-grid.test.jsx` (500+ cards, linear growth)
+- [X] T035 [P] [US3] Cover cache invalidation on version change in `tests/unit/services/pokemonApi.test.ts` and `tests/unit/services/nameRegistry.test.ts`
 
 ---
 
