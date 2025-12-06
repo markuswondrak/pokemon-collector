@@ -32,6 +32,8 @@ export interface RenderStats {
   initialRenderTimeMs: number;
   memoryEstimateBytes: number;
   memoryDeltaBytes: number;
+  lastIntersectionBatchSize?: number;
+  lastIntersectionBatchTimeMs?: number;
 }
 
 /**
@@ -70,6 +72,8 @@ export function useLazyRender(
     initialRenderTimeMs: 0,
     memoryEstimateBytes: 0,
     memoryDeltaBytes: 0,
+    lastIntersectionBatchSize: 0,
+    lastIntersectionBatchTimeMs: 0,
   });
   const performanceMarkIdRef = useRef<string | null>(null);
   const initialRenderMeasuredRef = useRef(false);
@@ -183,9 +187,40 @@ export function useLazyRender(
         initialRenderTimeMs: renderStatsRef.current.initialRenderTimeMs,
         memoryEstimateBytes: items.length * 50 * 1024,
         memoryDeltaBytes: 0,
+        lastIntersectionBatchSize: 0,
+        lastIntersectionBatchTimeMs: 0,
       }
     }
   }, [allIndices, isLazyEnabled, items.length])
+
+  // T025: Track intersection event batch metrics (lightweight alternative to FPS)
+  // Instead of continuous FPS tracking, we monitor the efficiency of intersection batching
+  // This is a much lighter-weight approach that indirectly measures scroll performance
+  useEffect(() => {
+    if (!isLazyEnabled) return;
+
+    const service = serviceRef.current;
+    if (!service) return;
+
+    // Track batch timing metrics from intersection events
+    let lastBatchTime = 0;
+
+    const unsubscribe = service.on((indices) => {
+      const now = Date.now();
+      const batchTime = lastBatchTime > 0 ? now - lastBatchTime : 0;
+      
+      // Update stats with batch metrics
+      renderStatsRef.current.lastIntersectionBatchSize = indices.size;
+      renderStatsRef.current.lastIntersectionBatchTimeMs = batchTime;
+      
+      lastBatchTime = now;
+    });
+
+    return () => {
+      unsubscribe();
+      lastBatchTime = 0;
+    };
+  }, [isLazyEnabled]);
 
   return {
     visibleIndices: isLazyEnabled ? visibleIndices : allIndices,
