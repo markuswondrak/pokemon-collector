@@ -118,7 +118,7 @@ export default function App(): ReactElement {
   // Load collection from storage on mount and initialize all Pokemon
   useEffect(() => {
     const stored = pokemonService.getCollectionList()
-    // eslint-disable-next-line react-hooks/set-state-in-effect
+     
     setCollection(stored)
 
     // Create a Map for O(1) lookups instead of O(n) .some() calls
@@ -157,7 +157,7 @@ export default function App(): ReactElement {
     // This prevents freezing when typing the 3rd character (avoiding search for 2 chars)
     // Also check isSearchActive to prevent searching when the user has cleared the input
     if (!isSearchActive || !debouncedSearchQuery || debouncedSearchQuery.length < 3) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+       
       setSearchResults(null)
       return
     }
