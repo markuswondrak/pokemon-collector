@@ -4,7 +4,8 @@ import {
   MIN_POKEMON_INDEX,
   MAX_POKEMON_INDEX,
   CACHE_DURATION,
-  API_RATE_LIMIT_DELAY
+  API_RATE_LIMIT_DELAY,
+  APP_VERSION
 } from '../utils/constants'
 
 export interface Pokemon {
@@ -31,6 +32,13 @@ interface CacheEntry {
   timestamp: number
 }
 
+// T003: In-memory response cache for API endpoints (session-scoped)
+interface ResponseCacheEntry<T> {
+  data: T
+  timestamp: number
+  version: string
+}
+
 /**
  * Pokemon API Service
  * Handles all PokeAPI calls with caching and rate limiting
@@ -39,11 +47,19 @@ class PokemonApiService {
   private cache: Map<string, CacheEntry>
   private lastRequestTime: number
   private allPokemonList: { name: string; url: string }[] | null
+  
+  // T003: Response cache for list/detail endpoints
+  private responseCache: Map<string, ResponseCacheEntry<unknown>>
+  
+  // T004: In-flight request deduplication
+  private inFlightRequests: Map<string, Promise<unknown>>
 
   constructor() {
     this.cache = new Map()
     this.lastRequestTime = 0
     this.allPokemonList = null
+    this.responseCache = new Map()
+    this.inFlightRequests = new Map()
   }
 
   /**
@@ -61,6 +77,58 @@ class PokemonApiService {
         `Invalid Pokemon index: ${String(index)}. Must be between ${String(MIN_POKEMON_INDEX)} and ${String(MAX_POKEMON_INDEX)}.`
       )
     }
+  }
+
+  /**
+   * T003: Check if response cache entry is valid
+   * Invalidates on version mismatch or expiry
+   */
+  private _isResponseCacheValid(
+    entry: ResponseCacheEntry<unknown> | undefined
+  ): boolean {
+    if (!entry) return false
+    if (entry.version !== APP_VERSION) return false // Invalidate on version change
+    if (Date.now() - entry.timestamp >= CACHE_DURATION) return false
+    return true
+  }
+
+  /**
+   * T003: Get response from cache or execute request with deduplication
+   * @param cacheKey - Unique cache key
+   * @param fetcher - Function that fetches data
+   * @returns Cached or freshly fetched data
+   */
+  private async _getCachedOrFetch<T>(
+    cacheKey: string,
+    fetcher: () => Promise<T>
+  ): Promise<T> {
+    // Check response cache first
+    const cached = this.responseCache.get(cacheKey) as ResponseCacheEntry<T> | undefined
+    if (this._isResponseCacheValid(cached)) {
+      return cached.data
+    }
+
+    // T004: Deduplicate in-flight requests
+    if (this.inFlightRequests.has(cacheKey)) {
+      return this.inFlightRequests.get(cacheKey) as Promise<T>
+    }
+
+    // Execute fetch and cache request promise
+    const request = fetcher().then((data) => {
+      this.responseCache.set(cacheKey, {
+        data,
+        timestamp: Date.now(),
+        version: APP_VERSION
+      })
+      this.inFlightRequests.delete(cacheKey)
+      return data
+    }).catch((error: unknown) => {
+      this.inFlightRequests.delete(cacheKey)
+      throw error
+    })
+
+    this.inFlightRequests.set(cacheKey, request)
+    return request
   }
 
   /**
@@ -164,30 +232,27 @@ class PokemonApiService {
   }
 
   /**
-   * T006: Fetch list of all Pokemon names and URLs
-   * Uses high limit (20000) to future-proof against new generations
-   * Surfaces errors instead of returning empty array
+   * T003/T006: Fetch list of all Pokemon names and URLs
+   * Uses response cache and deduplication for single-call-per-session
    * @returns {Promise<{ name: string; url: string }[]>}
    */
   async getAllPokemonList(): Promise<{ name: string; url: string }[]> {
-    if (this.allPokemonList) {
-      return this.allPokemonList
-    }
-
-    try {
-      const response = await axios.get<{ results: { name: string; url: string }[] }>(
-        `${POKEMON_ENDPOINT}?limit=20000`
-      )
-      this.allPokemonList = response.data.results
-      return this.allPokemonList
-    } catch (error) {
-      // T006: Surface errors instead of silently returning empty array
-      const err = error as { message: string; response?: { status: number } }
-      const message = err.response?.status 
-        ? `Failed to fetch Pokemon list (HTTP ${String(err.response.status)})`
-        : `Failed to fetch Pokemon list: ${err.message}`
-      throw new Error(message)
-    }
+    const cacheKey = 'pokemon_list_all'
+    return this._getCachedOrFetch(cacheKey, async () => {
+      try {
+        const response = await axios.get<{ results: { name: string; url: string }[] }>(
+          `${POKEMON_ENDPOINT}?limit=20000`
+        )
+        this.allPokemonList = response.data.results
+        return this.allPokemonList
+      } catch (error) {
+        const err = error as { message: string; response?: { status: number } }
+        const message = err.response?.status 
+          ? `Failed to fetch Pokemon list (HTTP ${String(err.response.status)})`
+          : `Failed to fetch Pokemon list: ${err.message}`
+        throw new Error(message)
+      }
+    })
   }
 
   /**
@@ -285,6 +350,25 @@ class PokemonApiService {
    */
   clearCache(): void {
     this.cache.clear()
+    this.responseCache.clear()
+    this.inFlightRequests.clear()
+    this.allPokemonList = null
+  }
+
+  /**
+   * T003: Invalidate response cache for version change
+   * Clears all cached responses to force refresh on app version change
+   */
+  invalidateResponseCache(): void {
+    this.responseCache.clear()
+    this.allPokemonList = null
+  }
+
+  /**
+   * T003: Get response cache stats for monitoring
+   */
+  getResponseCacheSize(): number {
+    return this.responseCache.size
   }
 }
 
@@ -307,3 +391,6 @@ export const getPokemonByRange = (
   end: number
 ): Promise<Pokemon[]> => instance.getPokemonByRange(start, end)
 export const clearCache = (): void => { instance.clearCache(); }
+export const invalidateResponseCache = (): void => { instance.invalidateResponseCache(); }
+export const getResponseCacheSize = (): number => instance.getResponseCacheSize()
+

@@ -1,588 +1,248 @@
-# Implementation Tasks: Lazy Card Rendering
+# Task Execution Plan: Lazy Card Rendering (007-lazy-render)
 
-**Feature**: 007-lazy-render | **Branch**: `007-lazy-render`  
-**Phase**: 2 (Implementation) | **Date**: 2025-12-04  
+**Feature**: Lazy Card Rendering | **Branch**: `007-lazy-render`  
+**Phase**: 2 (Implementation) | **Date**: 2025-12-05  
 **Status**: Ready for development
 
----
-
-## Overview
-
-This document breaks down the lazy card rendering feature into executable implementation tasks organized by user story and phase. Each task includes:
-- Clear acceptance criteria
-- File paths affected
-- Dependencies on other tasks
-- Independent test validation
-
-**Key Outcomes**:
-- Initial viewport renders in <1 second (60% faster)
-- Smooth 30+ fps scrolling throughout collection
-- Memory usage stays <100MB for 1025 cards
-- Zero breaking changes to existing components
-- 80%+ code coverage with comprehensive tests
-
-**Total Tasks**: 35 tasks across 3 user stories + setup/polish  
-**Estimated Duration**: 5-7 days for experienced React developer
+Checklist format: `- [ ] T### [P?] [US?] Description with file path`
 
 ---
 
-## Phase 1: Setup & Foundational Infrastructure
+## Phase 1: Setup (Shared Infrastructure)
 
-### Task Setup & Initialization
-
-- [X] T001 Create project structure per implementation plan, set up Git branches, verify all dependencies installed
-  - Files: No new files, verify `package.json` and `pnpm-lock.yaml`
-  - Dependencies: None
-  - Acceptance: `pnpm install` succeeds, all tests pass on baseline
-
-- [X] T002 [P] Create `src/services/lazyRenderService.ts` skeleton with class declaration and constructor
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: None (T001)
-  - Acceptance: File exists, TypeScript compiles, class instantiation works
-
-- [X] T003 [P] Create `src/hooks/useLazyRender.ts` skeleton with hook declaration
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: None (T001)
-  - Acceptance: File exists, TypeScript compiles, hook can be imported
-
-- [X] T004 [P] Create `src/components/SkeletonCard.tsx` with Chakra UI Skeleton placeholder
-  - Files: `src/components/SkeletonCard.tsx`
-  - Dependencies: T001
-  - Acceptance: Component renders without error, dimensions are 140px × 180px, no custom CSS
-
-- [X] T005 Create `tests/unit/services/lazyRenderService.test.ts` test file skeleton
-  - Files: `tests/unit/services/lazyRenderService.test.ts`
-  - Dependencies: T002
-  - Acceptance: Test file created, imports service correctly, test suite runs
-
-- [X] T006 Create `tests/unit/hooks/useLazyRender.test.ts` test file skeleton
-  - Files: `tests/unit/hooks/useLazyRender.test.ts`
-  - Dependencies: T003
-  - Acceptance: Test file created, imports hook correctly, test suite runs
-
-- [X] T007 Create `tests/integration/lazy-loading-grid.test.jsx` integration test file skeleton
-  - Files: `tests/integration/lazy-loading-grid.test.jsx`
-  - Dependencies: T004
-  - Acceptance: Test file created, can import components, test suite runs
+- [x] T001 Verify baseline tooling (`pnpm install`, `pnpm lint`) and confirm vitest environment in repository root
+- [x] T002 [P] Capture shared constants (buffer size 200px, batch sizes 20-30, IntersectionObserver threshold) in `src/utils/constants.ts`
 
 ---
 
-## Phase 2: User Story 1 - Fast Initial Page Load (P1)
+## Phase 2: Foundational (Blocking Prerequisites)
 
-**User Story Goal**: When a user first visits the Pokemon collection site, they should see the initial viewport of Pokemon cards appear quickly without waiting for all 1025+ cards to render.
-
-**Independent Test Criteria**:
-- Initial viewport (20-30 cards) renders in <1 second
-- Interactive elements (buttons) respond immediately
-- Memory footprint for initial render <20MB
-- No console errors or warnings on page load
-
-**User Story 1 - Service Layer Implementation**
-
-- [X] T008 [US1] Implement `LazyRenderService.initialize()` method to detect IntersectionObserver support and create observer instance
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T002
-  - Acceptance: 
-    - Feature detection works correctly
-    - Observer created with correct config (rootMargin: '200px', threshold: 0)
-    - Initial viewport cards identified
-    - No IntersectionObserver errors on instantiation
-
-- [X] T009 [P] [US1] Implement `LazyRenderService.getVisibleIndices()` method to return Set of currently visible card indices
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T008
-  - Acceptance:
-    - Returns Set<number> (not array)
-    - O(1) lookup performance
-    - Returns empty Set before initialization
-    - Returns correct indices after initialization
-
-- [X] T010 [P] [US1] Implement IntersectionObserver callback with debounce logic (100ms) to batch intersection events
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T008
-  - Acceptance:
-    - Multiple rapid intersection events batched into single update
-    - Debounce delay is exactly 100ms
-    - Visible indices set updated only once per batch
-    - Event listeners properly attached to card elements
-
-- [X] T011 [P] [US1] Implement `CardRenderQueue` class to prioritize cards by viewport distance (immediate → upcoming → deferred)
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T010
-  - Acceptance:
-    - Three priority buckets implemented (immediate, upcoming, deferred)
-    - Viewport cards prioritized above buffer zone
-    - Distance-based sorting functional
-    - No duplicates across buckets
-
-- [X] T012 [US1] Implement `LazyRenderService.destroy()` cleanup method to disconnect observer and clear references
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T008, T010
-  - Acceptance:
-    - Observer disconnected on destroy
-    - All Sets cleared
-    - Event listeners removed
-    - Can be called multiple times safely (idempotent)
-
-- [X] T013 [US1] Implement event emitter pattern in LazyRenderService with `on()` and `off()` methods for 'visibleChanged' event
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T012
-  - Acceptance:
-    - Event can be subscribed to with callback
-    - Callback fired when visible indices change
-    - Unsubscribe function returned from `on()`
-    - Multiple subscribers supported
-
-- [X] T014 [US1] Write unit tests for LazyRenderService initialization, observer creation, and feature detection
-  - Files: `tests/unit/services/lazyRenderService.test.ts`
-  - Dependencies: T008, T013
-  - Acceptance:
-    - Test: observer created with correct config
-    - Test: feature detection returns boolean
-    - Test: graceful fallback when IntersectionObserver unavailable
-    - Test: visible indices empty before cards observed
-    - Coverage: >80% of initialization logic
-
-**User Story 1 - Hook Layer Implementation**
-
-- [X] T015 [US1] Implement `useLazyRender` hook with container ref and items parameters, manage service lifecycle
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: T003, T008, T013
-  - Acceptance:
-    - Hook accepts containerRef and items array
-    - Service created and initialized on mount
-    - Service destroyed on unmount
-    - Hook returns visibleIndices Set
-    - No memory leaks on unmount
-
-- [X] T016 [P] [US1] Implement visible indices state management in hook with Set data structure
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: T015
-  - Acceptance:
-    - useState hook manages visible card indices
-    - State updates when service emits 'visibleChanged' event
-    - Initial state is empty Set
-    - Re-renders only when visible set changes
-
-- [X] T017 [P] [US1] Implement lazy rendering threshold logic: <50 items render all, ≥50 items enable lazy rendering
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: T016
-  - Acceptance:
-    - Threshold check on items.length change
-    - If items.length < 50: all rendered immediately
-    - If items.length ≥ 50: lazy rendering enabled
-    - Threshold can be customized via options
-
-- [X] T018 [US1] Implement options parameter with defaults (bufferPx: 200, debounceMs: 100, lazyThreshold: 50)
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: T017
-  - Acceptance:
-    - Options object optional (all defaults provided)
-    - Partial options override defaults correctly
-    - Config passed to LazyRenderService
-    - TypeScript strict mode satisfied
-
-- [X] T019 [US1] Write unit tests for useLazyRender hook initialization, state management, and options
-  - Files: `tests/unit/hooks/useLazyRender.test.ts`
-  - Dependencies: T015, T018
-  - Acceptance:
-    - Test: hook initializes with items and ref
-    - Test: service lifecycle managed correctly
-    - Test: visible indices state updates on service event
-    - Test: threshold logic works for <50 and ≥50 items
-    - Test: options override defaults
-    - Coverage: >80% of hook logic
-
-**User Story 1 - Component Integration**
-
-- [X] T020 [US1] Enhance `LazyLoadingGrid` component to use `useLazyRender` hook instead of previous scroll detection
-  - Files: `src/components/LazyLoadingGrid.tsx`
-  - Dependencies: T015, T004
-  - Acceptance:
-    - Hook integrated into component
-    - Previous scroll listeners removed
-    - Children render function receives isVisible parameter
-    - Skeleton shown for non-visible cards
-    - Component accepts lazy prop to enable/disable
-
-- [X] T021 [P] [US1] Update `AvailableGrid` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
-  - Files: `src/components/AvailableGrid.tsx`
-  - Dependencies: T020
-  - Acceptance:
-    - Component wraps grid children with LazyLoadingGrid
-    - Passes props correctly to wrapper
-    - No changes to PokemonCard usage
-    - Responsive columns maintained
-
-- [X] T022 [P] [US1] Update `CollectionList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
-  - Files: `src/components/CollectionList.tsx`
-  - Dependencies: T020
-  - Acceptance:
-    - Component wraps grid children with LazyLoadingGrid
-    - Passes props correctly to wrapper
-    - No changes to PokemonCard usage
-    - Status badges maintained
-
-- [X] T023 [P] [US1] Update `WishlistList` to use `LazyLoadingGrid` wrapper with lazy rendering enabled
-  - Files: `src/components/WishlistList.tsx`
-  - Dependencies: T020
-  - Acceptance:
-    - Component wraps grid children with LazyLoadingGrid
-    - Passes props correctly to wrapper
-    - No changes to PokemonCard usage
-    - Visual indicators maintained
-
-- [X] T024 [US1] Write integration tests for initial page load performance and viewport rendering
-  - Files: `tests/integration/lazy-loading-grid.test.jsx`
-  - Dependencies: T020, T021, T022, T023
-  - Acceptance:
-    - Test: initial viewport renders in <1 second
-    - Test: 20-30 cards visible on initial load
-    - Test: interactive elements respond immediately
-    - Test: skeleton cards shown for off-screen items
-    - Performance profiling captures metrics
+- [x] T003 Implement in-memory API response cache singleton in `src/services/pokemonApi.ts` with session-scoped lifecycle
+- [x] T004 [P] Add request deduplication to in-flight API calls in `src/services/pokemonApi.ts` to prevent duplicate fetches
+- [x] T005 [P] Implement version-aware names cache loader in `src/services/nameRegistry.ts` with invalidation on app version change
+- [x] T006 [P] Create lazy render service with IntersectionObserver orchestration in `src/services/lazyRenderService.ts`
+- [x] T007 Wire version-aware cache invalidation through constants consumed by services in `src/utils/constants.ts`
 
 ---
 
-## Phase 2: User Story 2 - Smooth Scrolling Experience (P2)
+## Phase 3: User Story 1 - Fast Initial Page Load (Priority: P1)
 
-**User Story Goal**: As a user scrolls through the Pokemon collection, cards should appear seamlessly just before they enter the viewport, creating a smooth browsing experience without visible loading gaps.
+**Goal**: Initial viewport renders in <1 second; each external API endpoint called once per session; names cache reused immediately when valid.
 
-**Independent Test Criteria**:
-- Cards render 200px before entering viewport (no visible gap)
-- Scroll frame rate maintains ≥30 fps
-- No stuttering or jank during continuous scrolling
-- Focus remains stable on currently focused element
+**Independent Test**: Cold-load the page; each endpoint is requested once; search becomes interactive within 0.5s when names cache is valid; initial viewport cards render before other content.
 
-**User Story 2 - Scroll Performance Optimization**
+### User Story 1 Implementation Tasks
 
-- [X] T025 [US2] Implement scroll event debouncing with 200ms buffer in resize handler to recalculate visible cards on window resize
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T013
-  - Acceptance:
-    - Window resize events listened to
-    - Resize handling debounced exactly 200ms
-    - Visible card set recalculated after resize
-    - No thrashing of DOM on rapid resizes
-
-- [X] T026 [P] [US2] Implement prioritized render queue processing to render viewport cards before buffer zone cards
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T011, T025
-  - Acceptance:
-    - Immediate priority bucket rendered first
-    - Upcoming priority bucket rendered second
-    - Deferred bucket rendered last (non-blocking)
-    - No render calls skipped
-    - Maintains 30+ fps frame rate
-
-- [X] T027 [P] [US2] Implement React.memo on PokemonCard to prevent unnecessary re-renders (if not already applied)
-  - Files: `src/components/PokemonCard.tsx`
-  - Dependencies: None
-  - Acceptance:
-    - Verify existing React.memo wrapper
-    - If missing: apply memo with custom comparison function
-    - Props comparison logic correct
-    - Re-renders only when pokemon data changes
-
-- [X] T028 [US2] Implement CSS containment on grid containers to isolate card layout calculations
-  - Files: `src/components/LazyLoadingGrid.tsx`, `src/components/SkeletonCard.tsx`
-  - Dependencies: T020, T004
-  - Acceptance:
-    - Box containers have `css={{ contain: 'layout paint' }}`
-    - No custom CSS used (Chakra UI only)
-    - Layout recalculation isolated to card container
-    - Performance improvement measurable
-
-- [X] T029 [US2] Write integration tests for scroll performance, buffer zone rendering, and frame rate stability
-  - Files: `tests/integration/lazy-loading-grid.test.jsx`
-  - Dependencies: T025, T026
-  - Acceptance:
-    - Test: cards render before entering viewport (200px buffer)
-    - Test: continuous scroll maintains ≥30 fps
-    - Test: no visible loading gaps during scroll
-    - Test: rapid scroll doesn't cause jank
-    - Performance metrics logged for validation
+- [x] T008 [P] [US1] Implement `useLazyRender` hook in `src/hooks/useLazyRender.ts` with IntersectionObserver initialization and visible card index tracking
+- [x] T009 [P] [US1] Create viewport calculation service in `src/services/lazyRenderService.ts` to determine visible card indices based on scroll position
+- [x] T010 [P] [US1] Route Pokemon list/detail fetches through API response cache in `src/services/pokemonService.ts` to enable single-call-per-endpoint
+- [x] T011 [US1] Integrate `useLazyRender` hook into `src/components/LazyLoadingGrid.tsx` to conditionally render cards based on visibility
+- [x] T012 [P] [US1] Ensure `src/components/AvailableGrid.tsx` uses LazyLoadingGrid with cached data; skip fetch for cached list/detail
+- [x] T013 [P] [US1] Reuse names cache and apply version-aware refresh in `src/services/pokemonService.ts` for search initialization
+- [x] T014 [US1] Create SkeletonCard placeholder in `src/components/SkeletonCard.tsx` using Chakra UI Skeleton with fixed card dimensions
+- [x] T015 [P] [US1] Render skeleton placeholders for non-visible cards in `src/components/LazyLoadingGrid.tsx` to reserve layout space
+- [x] T016 [US1] Implement initial render time measurement in `src/hooks/useLazyRender.ts` and expose via hook return (target: <1s)
+- [x] T017 [P] [US1] Cover API cache initialization and single-call logic in `tests/unit/services/pokemonApi.test.ts`
+- [x] T018 [P] [US1] Cover LazyRenderService viewport calculations in `tests/unit/services/lazyRenderService.test.ts`
+- [x] T019 [US1] Cover useLazyRender hook with initial load scenario in `tests/unit/hooks/useLazyRender.test.tsx`
+- [x] T020 [US1] Verify single API call per endpoint and initial viewport render <1s in `tests/integration/lazy-loading-grid.test.jsx`
 
 ---
 
-## Phase 2: User Story 3 - Memory-Efficient Long Sessions (P3)
+## Phase 4: User Story 2 - Smooth Scrolling Experience (Priority: P2)
 
-**User Story Goal**: Users who browse through large portions of the collection should experience consistent performance throughout their session without memory bloat or performance degradation.
+**Goal**: Scrolling stays smooth (≥30fps); cards appear 200px before viewport; revisited cards reuse cache without refetch.
 
-**Independent Test Criteria**:
-- Memory usage grows linearly, not exponentially
-- Scroll performance doesn't degrade after scrolling 100+ cards
-- No memory leaks on component unmount
-- DOM element count stays reasonable
+**Independent Test**: Scroll down then up; no additional API requests for revisited Pokemon; frame rate maintained ≥30fps; no visible loading gaps.
 
-**User Story 3 - Memory Management**
+### User Story 2 Implementation Tasks
 
-- [X] T030 [US3] Implement WeakMap tracking for card DOM elements to prevent memory leaks
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T012
-  - Acceptance:
-    - WeakMap used for element → index mapping
-    - Elements can be garbage collected
-    - No strong references preventing cleanup
-    - Memory usage stays stable during long sessions
-
-- [X] T031 [P] [US3] Implement performance monitoring with `performance.mark()` and `performance.measure()` for initial render time tracking
-  - Files: `src/hooks/useLazyRender.ts`
-  - Dependencies: T019
-  - Acceptance:
-    - Initial render time marked and measured
-    - Metric available via `getStats()` method
-    - Can be logged to console or analytics
-    - No performance overhead from monitoring
-
-- [X] T032 [P] [US3] Implement memory usage estimation and tracking via `performance.memory` API
-  - Files: `src/services/lazyRenderService.ts`
-  - Dependencies: T031
-  - Acceptance:
-    - Memory estimate calculated from rendered card count
-    - Estimate accuracy verified during testing
-    - Stays <100MB for 1025 cards
-    - Delta tracked between initial and after scrolling
-
-- [X] T033 [US3] Write integration tests for memory efficiency and long-session performance stability
-  - Files: `tests/integration/lazy-loading-grid.test.jsx`
-  - Dependencies: T030, T031, T032
-  - Acceptance:
-    - Test: memory grows linearly with cards rendered
-    - Test: scroll performance consistent after 100+ cards
-    - Test: no memory leaks on component unmount
-    - Test: DOM element count reasonable (<1500)
-    - Memory profiling captures baseline and delta
+- [ ] T021 [P] [US2] Implement intersection event batching in `src/hooks/useLazyRender.ts` to group multiple events before state update (debounce 100ms)
+- [ ] T022 [P] [US2] Add buffer zone pre-rendering (200px) in `src/services/lazyRenderService.ts` to prevent visible loading gaps on scroll
+- [ ] T023 [P] [US2] Implement render queue prioritization in `src/services/lazyRenderService.ts` to prioritize viewport over buffer zone cards
+- [ ] T024 [US2] Prevent duplicate fetch triggers for re-entry cards in `src/services/pokemonService.ts` by checking cache before fetch
+- [ ] T025 [P] [US2] Add scroll performance monitoring to `src/hooks/useLazyRender.ts` to measure and expose frame rate
+- [ ] T026 [P] [US2] Cover intersection batching and buffer zone logic in `tests/unit/services/lazyRenderService.test.ts`
+- [ ] T027 [US2] Cover cache hit behavior for revisited cards in `tests/unit/services/pokemonService.test.ts`
+- [ ] T028 [P] [US2] Validate revisit-no-refetch and ≥30fps scroll in `tests/integration/lazy-loading-grid.test.jsx`
 
 ---
 
-## Phase 3: Search Filter Integration & Edge Cases
+## Phase 5: User Story 3 - Memory-Efficient Long Sessions (Priority: P3)
 
-- [X] T034 [P] Integrate lazy rendering with search filter logic to reset visible set when search query changes
-  - Files: `src/hooks/useLazyRender.ts`, `src/components/AvailableGrid.tsx` (if needed)
-  - Dependencies: T017
-  - Acceptance:
-    - Search query change triggers reset
-    - New result count evaluated against threshold
-    - Visible set cleared for new search
-    - Lazy rendering re-enables for ≥50 results
-    - Test: search for "char" (22 results) renders all immediately
-    - Test: search for "" (1025 results) enables lazy rendering
+**Goal**: Long sessions remain stable; caches stay fresh per version; memory grows linearly not exponentially.
 
-- [X] T035 [P] Write edge case tests covering rapid scroll, resize, search, focus preservation
-  - Files: `tests/integration/lazy-loading-grid.test.jsx`
-  - Dependencies: T033, T034
-  - Acceptance:
-    - Test: rapid scroll jump doesn't cause jank
-    - Test: window resize recalculates correctly
-    - Test: search change transitions smoothly
-    - Test: keyboard focus preserved during rendering
-    - Test: accessibility announcements work (aria-live)
-    - All edge cases from spec handled
+**Independent Test**: Browse 500+ Pokemon; memory increases linearly; names cache refreshes exactly once on version change; no stale data.
+
+### User Story 3 Implementation Tasks
+
+- [ ] T029 [P] [US3] Implement cache invalidation on app version change in `src/services/pokemonApi.ts` (check constant and clear if version mismatch)
+- [ ] T030 [P] [US3] Implement cache invalidation on app version change in `src/services/nameRegistry.ts` (single refresh, then reuse)
+- [ ] T031 [US3] Implement cleanup on component unmount in `src/hooks/useLazyRender.ts` (disconnect observer, clear visible indices)
+- [ ] T032 [P] [US3] Ensure DOM elements stay mounted (never unmount) in `src/components/LazyLoadingGrid.tsx` to preserve scroll position
+- [ ] T033 [US3] Verify no memory leaks from observer in `src/services/lazyRenderService.ts` (disconnect on cleanup)
+- [ ] T034 [P] [US3] Add long-session memory monitoring in `tests/integration/lazy-loading-grid.test.jsx` (500+ cards, linear growth)
+- [ ] T035 [P] [US3] Cover cache invalidation on version change in `tests/unit/services/pokemonApi.test.ts` and `tests/unit/services/nameRegistry.test.ts`
 
 ---
 
-## Phase 4: Validation & Polish
+## Final Phase: Polish & Cross-Cutting Concerns
 
-- [X] T036 Cross-browser testing on Chrome, Firefox, Safari, Edge (verify IntersectionObserver support)
-  - Files: None (manual testing)
-  - Dependencies: T035
-  - Acceptance:
-    - Chrome 51+: fully functional
-    - Firefox 55+: fully functional
-    - Safari 12.1+: fully functional
-    - Edge 79+: fully functional
-    - IE11: graceful fallback (all cards render)
-    - No console errors on any browser
-
-- [X] T037 Accessibility testing: screen reader compatibility, keyboard navigation, focus management
-  - Files: None (manual testing + axe DevTools)
-  - Dependencies: T035
-  - Acceptance:
-    - Screen reader announces card count updates
-    - Keyboard Tab navigation works through all cards
-    - Focus doesn't jump unexpectedly
-    - ARIA attributes correct (aria-live on skeletons)
-    - WCAG 2.1 AA contrast maintained
-    - Touch targets 44px minimum
-
-- [X] T038 Performance profiling: validate <1s initial load, ≥30fps scroll, <100MB memory
-  - Files: None (measurement via DevTools)
-  - Dependencies: T035
-  - Acceptance:
-    - Initial render time measured: <1 second
-    - Scroll frame rate sampled: ≥30 fps sustained
-    - Memory delta measured: <50MB for 100+ cards
-    - Lighthouse performance score: ≥85
-    - No long tasks (>50ms)
-
-- [X] T039 Code review & linting: ensure all code passes ESLint, TypeScript strict mode, no warnings
-  - Files: All implementation files
-  - Dependencies: T035
-  - Acceptance:
-    - `pnpm lint` passes without errors or warnings
-    - `tsc --noEmit` passes in strict mode
-    - No `any` types used (except unavoidable cases)
-    - Code follows constitution standards
-    - Test coverage ≥80%
-
-- [X] T040 Documentation: update component README, add quickstart guide for future maintainers
-  - Files: `README.md` (if exists), code comments
-  - Dependencies: T039
-  - Acceptance:
-    - Hook API documented with examples
-    - Service API documented with lifecycle
-    - Component props documented
-    - Edge cases and limitations noted
-    - Performance tips included
+- [ ] T036 Run regression checks: `pnpm test --run tests/integration/lazy-loading-grid.test.jsx tests/integration/search-performance.test.jsx`
+- [ ] T037 [P] Verify accessibility: screen reader announces updates, keyboard Tab works, focus stable in `tests/integration/a11y-search.test.jsx`
+- [ ] T038 [P] Performance profiling: validate <1s initial load, ≥30fps scroll, <100MB memory via DevTools (measurements in research.md)
+- [ ] T039 Code review & linting: ensure all code passes `pnpm lint`, `tsc --noEmit`, no warnings in implementation files
+- [ ] T040 [P] Update `specs/007-lazy-render/quickstart.md` with caching behavior, version rules, and examples for future maintainers
+- [ ] T041 [P] Update `specs/007-lazy-render/research.md` with final cache strategy, risks, and performance findings
+- [ ] T042 Mark feature complete: update `PHASE4_COMPLETION.md` with final status, test results, and deployment notes
 
 ---
 
 ## Task Dependency Graph
 
 ```
-T001 (Setup)
-  ├→ T002, T003, T004 (Skeleton structure) [P]
-  │   ├→ T005, T006, T007 (Test files)
-  │   │
-  │   ├→ T008 (Service.initialize)
-  │   │   ├→ T009 (Service.getVisibleIndices) [P]
-  │   │   ├→ T010 (Intersection callback + debounce) [P]
-  │   │   │   └→ T011 (CardRenderQueue) [P]
-  │   │   │       ├→ T026 (Priority render queue) [P]
-  │   │   ├→ T012 (Service.destroy)
-  │   │   │   └→ T013 (Event emitter)
-  │   │   │       └→ T025 (Resize debounce)
-  │   │   └→ T014 (Service unit tests)
-  │   │       └→ T019 (Hook unit tests)
-  │   │
-  │   ├→ T015 (useLazyRender hook)
-  │   │   ├→ T016 (Visible indices state) [P]
-  │   │   │   └→ T017 (Threshold logic) [P]
-  │   │   │       └→ T018 (Options param)
-  │   │   │           └→ T034 (Search integration) [P]
-  │   │   └→ T019 (Hook unit tests)
-  │   │
-  │   ├→ T020 (LazyLoadingGrid enhancement)
-  │   │   ├→ T021 (AvailableGrid) [P]
-  │   │   ├→ T022 (CollectionList) [P]
-  │   │   ├→ T023 (WishlistList) [P]
-  │   │   └→ T024 (Integration tests - initial load)
-  │   │       └→ T029 (Integration tests - scroll) [P]
-  │   │           └→ T033 (Integration tests - memory) [P]
-  │   │               └→ T035 (Edge case tests) [P]
-  │   │
-  │   ├→ T027 (PokemonCard.memo) [P]
-  │   └→ T028 (CSS containment)
-  │
-  ├→ T030 (WeakMap cleanup) [P]
-  ├→ T031 (Performance monitoring) [P]
-  ├→ T032 (Memory tracking) [P]
-  │
-  └→ T036, T037, T038, T039, T040 (Validation & polish)
+T001 (Setup: tooling)
+  ↓
+T002 (Setup: constants)
+  ↓
+T003-T007 (Foundational: APIs, cache, service)
+  ↓
+T008-T020 (US1: Fast Load) → Independent test ✓
+  ↓
+T021-T028 (US2: Smooth Scroll) → Independent test ✓
+  ↓
+T029-T035 (US3: Memory Efficient) → Independent test ✓
+  ↓
+T036-T042 (Polish & Validation) → MVP + Enhancements complete
 ```
 
 ---
 
-## Parallel Execution Opportunities
+## Parallel Execution Examples
 
-### Batch 1 (Days 1-2): Setup & Skeletons
-**Can run in parallel**:
-- T002, T003, T004 (create files)
-- T005, T006, T007 (create test files)
+### Phase 2 (Foundational)
+- **Batch 1**: T003, T004, T005 can run in parallel (different services, no dependencies)
+- **Batch 2**: T006, T007 run after Batch 1 (T006 depends on constants from T002, T007 wires the invalidation)
 
-### Batch 2 (Days 2-3): Service Layer
-**Can run in parallel**:
-- T008 (initialize)
-- T014 (service tests)
-- T015 (hook skeleton)
+### Phase 3 (US1)
+- **Batch 1**: T008, T009 run in parallel (hook and service, no dependencies yet)
+- **Batch 2**: T010, T012, T013 run in parallel (pokemonService methods, all depend on foundational cache from T003-T004)
+- **Batch 3**: T014, T015 run in parallel (SkeletonCard component and LazyLoadingGrid integration)
+- **Batch 4**: T016 (measurement) runs after T008 hook is done
+- **Batch 5**: T017, T018, T019 run in parallel (unit tests for each service/hook)
+- **Batch 6**: T020 (integration test) runs after T017-T019 pass
 
-### Batch 3 (Days 3-4): State Management
-**Can run in parallel**:
-- T009, T010, T011 (service methods)
-- T016, T017, T018 (hook state)
-- T012, T013 (cleanup & events)
+### Phase 4 (US2)
+- **Batch 1**: T021, T022, T023 run in parallel (all in lazyRenderService)
+- **Batch 2**: T024 (pokemonService) can start once T010 done
+- **Batch 3**: T025, T026, T027 run in parallel (monitoring and tests)
+- **Batch 4**: T028 (integration) runs after T025-T027 pass
 
-### Batch 4 (Days 4-5): Components
-**Can run in parallel**:
-- T020 (LazyLoadingGrid)
-- T021, T022, T023 (consumer components)
-- T027, T028 (optimizations)
-
-### Batch 5 (Days 5-6): Integration & Testing
-**Sequential** (dependent on previous batches):
-- T024 (initial load tests)
-- T025, T026, T029 (scroll tests)
-- T030, T031, T032, T033 (memory tests)
-- T034, T035 (edge cases)
-
-### Batch 6 (Day 7): Validation
-**Sequential** (after all implementation complete):
-- T036 (cross-browser)
-- T037 (accessibility)
-- T038 (performance)
-- T039 (code review)
-- T040 (documentation)
+### Phase 3 & 4 Testing in Parallel
+- Unit tests (T017-T019, T026-T027) can run while Phase 4 implementation proceeds
+- Integration tests (T020, T028) depend on respective implementation phases
 
 ---
 
-## Success Metrics
+## Implementation Strategy
 
-### Phase 2 Completion Checklist
-- [ ] All T001-T024 tasks completed
-- [ ] Initial page load <1 second (verified)
-- [ ] Interactive elements responsive on viewport cards
-- [ ] Memory <20MB for initial render
-- [ ] No console errors on page load
-- [ ] Unit tests pass, 80%+ coverage
+**MVP Scope (US1 - Fast Initial Page Load)**:
+1. Setup (T001-T002) establishes baseline and constants
+2. Foundational (T003-T007) implements API caching and service layer
+3. US1 (T008-T020) implements lazy rendering, cache reuse, and initial load optimization
+4. **MVP Test Gate**: T020 integration test must pass single-endpoint-per-session and <1s initial viewport
 
-### Phase 3 Completion Checklist
-- [ ] All T025-T035 tasks completed
-- [ ] Scroll frame rate ≥30 fps sustained
-- [ ] Buffer zone rendering working (cards appear before viewport)
-- [ ] No visible loading gaps
-- [ ] Memory grows linearly, <100MB total
-- [ ] Search integration working (threshold-based)
-- [ ] All edge cases handled
-- [ ] Integration tests pass
+**Incremental Delivery**:
+1. **US1 Complete** → Users see fast initial page load and single API calls per endpoint
+2. **US2 Addition** → Users experience smooth scrolling with pre-rendered buffer zone and no refetches on revisit
+3. **US3 Addition** → Users enjoy stable performance in long sessions with version-aware cache invalidation
+4. **Polish Phase** → Accessibility validated, performance verified, documentation complete
 
-### Phase 4 Completion Checklist
-- [ ] All T036-T040 tasks completed
-- [ ] Cross-browser testing passed
-- [ ] Accessibility testing passed (WCAG AA)
-- [ ] Performance profiling validated all metrics
-- [ ] Code passes linting and type checking
-- [ ] 80%+ test coverage achieved
-- [ ] Documentation complete
-- [ ] Ready for merge to main branch
+**Testing Strategy**:
+- Unit tests (T017-T019, T026-T027, T035) validate individual service behavior in isolation
+- Integration tests (T020, T028, T034) validate end-to-end flows and performance metrics
+- Accessibility tests (T037) validate WCAG 2.1 AA compliance and keyboard navigation
+- Performance profiling (T038) captures real-world metrics (DevTools measurements)
 
 ---
 
-## Estimated Timeline
+## Success Criteria Summary
 
-| Phase | Tasks | Duration | Status |
-|-------|-------|----------|--------|
-| **Setup** | T001-T007 | 1 day | Ready |
-| **User Story 1** | T008-T024 | 2 days | Blocked on setup |
-| **User Story 2** | T025-T029 | 1 day | Blocked on US1 |
-| **User Story 3** | T030-T033 | 1 day | Blocked on US2 |
-| **Integration** | T034-T035 | 1 day | Blocked on US3 |
-| **Validation** | T036-T040 | 1 day | Blocked on integration |
-| **Total** | 40 tasks | **5-7 days** | Ready to start |
-
----
-
-## Getting Started
-
-1. **Review** the research.md, data-model.md, and quickstart.md files
-2. **Start with** T001 (setup) - no dependencies
-3. **Work through** tasks in order, respecting dependencies
-4. **Use parallel batches** to accelerate when independent
-5. **Run tests** after each task to validate correctness
-6. **Check progress** against acceptance criteria
+| Criterion | Target | Validation Task |
+|-----------|--------|-----------------|
+| Initial viewport render | <1s | T016, T020 |
+| Scroll frame rate | ≥30fps | T025, T028 |
+| Single API call per endpoint | 1 call/session | T017, T020 |
+| Names cache reuse | <0.5s search with cache | T020 |
+| Memory growth | Linear (500+ cards) | T034 |
+| Cache invalidation | 1 refresh per version change | T035 |
+| Accessibility | WCAG 2.1 AA, Tab navigation | T037 |
+| Linting & TypeScript | Zero errors, strict mode | T039 |
 
 ---
 
-**Status**: Implementation plan is complete and detailed. Ready to assign tasks to developers and begin Phase 2 development.
+## File Changes Summary
 
-**Next Command**: After assigning tasks, run implementation and execute tests as each task completes.
+### New Files
+- `src/services/lazyRenderService.ts` — Intersection orchestration & viewport calculations
+- `src/hooks/useLazyRender.ts` — Core hook for lazy rendering management
+- `src/components/SkeletonCard.tsx` — Animated placeholder for unloaded cards
+- Tests under `tests/unit/` and `tests/integration/` for new services and hooks
+
+### Modified Files
+- `src/services/pokemonApi.ts` — Add API cache singleton and deduplication
+- `src/services/pokemonService.ts` — Route fetches through cache, wire version invalidation
+- `src/services/nameRegistry.ts` — Version-aware cache with single refresh on version change
+- `src/components/LazyLoadingGrid.tsx` — Integrate useLazyRender hook, render skeletons
+- `src/components/AvailableGrid.tsx` — Use cached data, skip redundant fetches
+- `src/utils/constants.ts` — Add shared constants for buffer size, batch sizes, thresholds
+- `specs/007-lazy-render/quickstart.md` — Add caching behavior and version rules
+- `specs/007-lazy-render/research.md` — Document final cache strategy and findings
+
+### No Changes
+- `src/components/PokemonCard.tsx` — Render behavior unchanged
+- `src/components/CollectionList.tsx`, `src/components/WishlistList.tsx` — Can use same LazyLoadingGrid pattern
+- `src/styles/theme.ts` — No theme changes needed
+
+---
+
+## Notes for Implementers
+
+1. **API Caching**: Session-scoped caches are in-memory only. They clear on page reload (expected). No localStorage involvement beyond feature 005's names cache.
+
+2. **Version Invalidation**: Check `import { APP_VERSION } from 'src/utils/constants'` on mount and on periodic checks (if needed). When version changes, clear API caches and refresh names cache exactly once.
+
+3. **IntersectionObserver Fallback**: If browser doesn't support IntersectionObserver, `useLazyRender` should return all items as visible (graceful degradation).
+
+4. **Skeleton Sizing**: SkeletonCard must match PokemonCard dimensions exactly to prevent layout shift.
+
+5. **Memory Monitoring**: Use Chrome DevTools Memory Profiler during development to validate linear growth. Run tests/integration/lazy-loading-grid.test.jsx with memory monitoring.
+
+6. **Accessibility**: Ensure aria-live regions announce card count changes. Keyboard Tab must skip skeleton cards and only focus rendered cards.
+
+---
+
+## Estimated Effort
+
+| Phase | Task Count | Estimated Hours |
+|-------|-----------|-----------------|
+| Setup | 2 | 0.5 |
+| Foundational | 5 | 4 |
+| US1 | 13 | 8 |
+| US2 | 8 | 6 |
+| US3 | 7 | 4 |
+| Polish | 7 | 3 |
+| **Total** | **42** | **25.5** |
+
+**MVP (US1)**: 12.5 hours (Setup + Foundational + US1 with tests)
+
+---
+
+## References
+
+- **Spec**: `/specs/007-lazy-render/spec.md` (user stories, requirements, success criteria)
+- **Plan**: `/specs/007-lazy-render/plan.md` (tech stack, project structure, constitution check)
+- **Data Model**: `/specs/007-lazy-render/data-model.md` (entities: Viewport, BufferZone, CardRenderQueue, VisibleCardSet)
+- **Research**: `/specs/007-lazy-render/research.md` (IntersectionObserver rationale, rendering batching, memory strategy)
+- **Contracts**: `/specs/007-lazy-render/contracts/hook-service-component.md` (API signatures for hook, services, components)
+- **Quickstart**: `/specs/007-lazy-render/quickstart.md` (test scenarios, setup guide)

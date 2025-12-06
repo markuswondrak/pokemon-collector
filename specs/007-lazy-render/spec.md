@@ -62,6 +62,8 @@ Users who browse through large portions of the collection should experience cons
 - What happens when browser window is resized? Viewport calculations update and additional cards render if newly visible.
 - How does search filtering affect lazy rendering? When search returns fewer than 50 cards, all results render immediately for instant display. When search returns 50 or more cards, lazy rendering applies. When search clears, lazy rendering resumes for all cards.
 - What happens on browsers without IntersectionObserver support? System falls back to rendering all cards upfront (graceful degradation).
+- How do cached API responses behave on repeated visits within a session? Cached data must be reused so endpoints are not called more than once per session without a full page reload.
+- How is the names cache handled when the app version changes? Cached names must be invalidated and refetched once when the version changes, then reused.
 
 ## Requirements *(mandatory)*
 
@@ -80,6 +82,8 @@ Users who browse through large portions of the collection should experience cons
 - **FR-011**: System MUST fall back to full rendering on browsers without IntersectionObserver support
 - **FR-012**: System MUST render skeleton screen placeholders (animated card-shaped boxes) immediately for unloaded cards to reserve layout space and provide visual feedback
 - **FR-013**: System MUST batch render operations to minimize DOM thrashing (render multiple cards in single pass)
+- **FR-014**: Each distinct external API endpoint required for the page MUST be requested no more than once per session; cached responses MUST be reused across all components and interactions.
+- **FR-015**: The Pokemon names cache from feature 005 MUST be reused on load when valid; when the application version changes, the names list MUST be refreshed once and the cache replaced before reuse.
 
 ### Key Entities
 
@@ -99,6 +103,8 @@ Users who browse through large portions of the collection should experience cons
 - **SC-005**: Users never see blank card spaces during normal-speed scrolling (cards appear before entering view)
 - **SC-006**: Page remains responsive on standard devices (4GB RAM or more)
 - **SC-007**: All visible cards appear fully rendered within 200ms after stopping rapid scroll
+- **SC-008**: During a single page session, no external API endpoint is called more than once; repeated interactions do not increase request counts without a full page reload.
+- **SC-009**: With a valid names cache and unchanged app version, search is usable within 0.5 seconds of page load without issuing a new names fetch; when the version changes, the names API is called exactly once and reused thereafter in the session.
 
 ## Scope *(mandatory)*
 
@@ -111,6 +117,8 @@ Users who browse through large portions of the collection should experience cons
 - Performance monitoring to verify frame rate and render time improvements
 - Maintaining existing card functionality (collect, wishlist, remove actions)
 - Preserving existing search and filter behavior
+- Reusing cached API responses so each endpoint is called only once per session without duplicate requests across components
+- Honoring the Pokemon names cache from feature 005, including refresh on app version change
 
 ### Out of Scope
 
@@ -133,6 +141,8 @@ Users who browse through large portions of the collection should experience cons
 8. Grid layout (Chakra UI Grid) supports dynamic children rendering
 9. Search filtering reduces total cards to render, making lazy rendering more effective
 10. Users prefer immediate visible content over complete page rendering
+11. A shared cache layer is available to coordinate API responses across components within a session.
+12. The names cache from feature 005 is present for returning users unless cleared by the user or invalidated by app version change.
 
 ## Dependencies *(mandatory)*
 
@@ -142,6 +152,8 @@ Users who browse through large portions of the collection should experience cons
 - Existing LazyLoadingGrid component (can be adapted or replaced)
 - React 18+ with concurrent rendering support
 - Chakra UI Grid component maintains stable layout with dynamic children
+- Shared caching mechanism for external API responses, coordinated across components
+- Existing names cache from feature 005 to supply Pokemon names without re-fetching when valid
 
 ### External Dependencies
 

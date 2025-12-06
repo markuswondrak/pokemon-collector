@@ -3,45 +3,47 @@
 ║                       SYNC IMPACT REPORT                                  ║
 ╚═══════════════════════════════════════════════════════════════════════════╝
 
-VERSION CHANGE: 1.3.0 → 1.4.0 (component library integration)
-RATIONALE: MINOR version bump - integrated Chakra UI as the standard component library.
-  Enforced usage of library components and theme configuration over custom CSS.
-  Updates technology stack and development standards to reflect new styling paradigm.
+VERSION CHANGE: 1.4.0 → 1.4.1 (test suite separation strategy for implementation phase)
+RATIONALE: PATCH version bump - added Test Suite Separation rule to Development Standards.
+  Enforces controlled test execution with unit/contract tests in batch mode and integration
+  tests running sequentially. This prevents resource contention, API rate limiting, and 
+  ensures stable, reproducible test results during implementation work.
 
 SECTIONS MODIFIED:
-  • Project Setup & Architecture - Added Chakra UI to tech stack
-  • Development Standards - Added styling constraints
-
-SECTIONS ADDED:
-  • Styling & Design System (under Project Setup & Architecture)
+  • Development Standards - Added Test Suite Separation subsection
 
 SECTIONS UNCHANGED:
   • Core Principles (I-IV remain stable)
+  • Project Setup & Architecture (unchanged)
+  • Build & Development Tools (unchanged)
+  • Baseline Features (unchanged)
   • Governance (amendment procedure maintained)
-  • Build & Development Tools (no changes)
-  • Baseline Features (no changes)
 
 PRINCIPLES PRESERVED:
-  ✅ Test worker configuration (4 threads during implementation) - retained from v1.2.0
+  ✅ Test worker configuration (4 threads during implementation) - reinforced
   ✅ Testing standards (TDD, 80% coverage) - unchanged
-  ✅ UX Consistency - reinforced by component library
+  ✅ Code Quality First - unchanged
+  ✅ Fast Development Velocity - supported by new strategy
 
 TEMPLATES REVIEWED FOR CONSISTENCY:
   ✅ .specify/templates/plan-template.md - No changes needed
   ✅ .specify/templates/spec-template.md - No changes needed
   ✅ .specify/templates/tasks-template.md - No changes needed
 
-RUNTIME CHANGES:
-  • Styling workflow: use Chakra UI components and theme.ts instead of CSS files
-  • Custom CSS is now prohibited for component styling
-  • New dependencies: @chakra-ui/react, @emotion/react, framer-motion
+PACKAGE.JSON CHANGES:
+  • Added npm script `test:unit` - explicit unit + contract test execution
+  • Added npm script `test:integration` - sequential integration test execution
+  • Added npm script `test:all` - complete test suite execution
+  • Updated `test` script - now defaults to unit + contract only
+  • Updated `test:coverage` script - now excludes integration tests
 
 FOLLOW-UP ITEMS:
-  • Configure pre-commit hooks for linting enforcement
-  • Set up CI/CD pipeline for automated testing
-  • Establish performance baselines for lazy loading
+  • Ensure implementation agent uses new test scripts per constitution rules
+  • Monitor test execution times to validate resource allocation assumptions
+  • Document test results in feature completion checklists
 
 -->
+
 
 # Pokemon Collector Constitution
 
@@ -69,6 +71,12 @@ Development processes MUST be streamlined to maximize speed without sacrificing 
 - **Test Execution**: All test commands MUST use the `--run` flag (e.g., `pnpm test --run`) for one-time execution in automated workflows, CI/CD pipelines, and implementation tasks; watch mode only when explicitly requested by the user
 - **Test File Isolation**: During implementation, tests MUST be executed as single test files (e.g., `pnpm test tests/unit/components/Button.test.jsx --run`) to verify implementation success in isolation. **Exception**: Full project test runs (e.g., `pnpm test --run` without file argument) are used only when checking for errors across the entire codebase or validating integration between multiple features
 - **Test Worker Configuration**: During implementation and feature development, test execution MUST limit workers to 4 (`vitest --run --threads --maxThreads=4`) to prevent resource contention and ensure stable, reproducible test results; CI/CD pipelines may configure worker counts based on infrastructure capacity
+- **Test Suite Separation**: The test suite MUST be executed according to the following rules:
+  - **Standard test execution** (`pnpm test` or `pnpm test:unit`): Runs ONLY unit tests (`tests/unit/`) and contract tests (`tests/contract/`) in parallel. Integration tests are EXCLUDED by default.
+  - **Integration test execution** (`pnpm test:integration`): Must be executed SEPARATELY and SEQUENTIALLY (one test file at a time) to prevent resource contention and API rate limiting. Running with verbose reporting (`--reporter=verbose`).
+  - **Complete test suite** (`pnpm test:all`): Runs all tests (unit, contract, then integration). Used only before production deployment or final validation.
+  - **Coverage reports** (`pnpm test:coverage`): Must include ONLY unit and contract tests (integration tests excluded) to maintain coverage accuracy for implementation focus.
+  - **Rationale**: Integration tests require exclusive resource access and may make external API calls that are rate-limited. Separating them prevents false test failures and resource exhaustion during development. Unit tests are fast and can run in parallel; integration tests validate end-to-end scenarios and must run sequentially.
 
 ## Governance
 
@@ -80,7 +88,7 @@ This constitution supersedes all other development practices and guidelines. All
 
 All PRs MUST include a constitution compliance checklist. Code reviews MUST explicitly verify principle adherence. Violations MUST be resolved before merge. Metrics MUST be tracked quarterly to ensure principles are sustained.
 
-**Version**: 1.4.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
+**Version**: 1.4.1 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-05
 
 ## Project Setup & Architecture
 
@@ -274,5 +282,5 @@ pnpm test:coverage # Generates code coverage reports
 - **Search Performance**: Results update within 350ms (300ms debounce + 50ms render)
 - **Responsive Breakpoints**: 320px (mobile) through desktop with fluid scaling
 
-**Version**: 1.3.0 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-03
+**Version**: 1.4.1 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-05
 ```

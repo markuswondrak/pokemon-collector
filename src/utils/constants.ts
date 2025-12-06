@@ -20,3 +20,16 @@ export const CACHE_DURATION: number = 24 * 60 * 60 * 1000
 
 // API Rate Limiting
 export const API_RATE_LIMIT_DELAY: number = 100 // ms between requests
+
+// T002: Lazy Rendering Constants
+export const LAZY_RENDER_BUFFER_SIZE: number = 200 // pixels above/below viewport
+export const LAZY_RENDER_BATCH_SIZE: number = 25 // cards to render per batch
+export const LAZY_RENDER_BATCH_DELAY: number = 16 // ms between batches (~60fps)
+export const LAZY_RENDER_INTERSECTION_THRESHOLD: number = 0.01 // 1% visible triggers visibility
+export const LAZY_RENDER_INTERSECTION_ROOT_MARGIN: string = '200px' // 200px buffer zone
+
+// T007: App Version for Cache Invalidation
+// Imported from package.json for semantic versioning and cache key generation
+import packageJson from '../../package.json'
+export const APP_VERSION: string = packageJson.version
+

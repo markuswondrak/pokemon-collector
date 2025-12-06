@@ -1,69 +1,33 @@
 # Implementation Plan: Lazy Card Rendering
 
-**Branch**: `007-lazy-render` | **Date**: 2025-12-04 | **Spec**: [spec.md](./spec.md)
+**Branch**: `007-lazy-render` | **Date**: 2025-12-05 | **Spec**: [spec.md](./spec.md)
 **Input**: Feature specification from `/specs/007-lazy-render/spec.md`
-
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Implement lazy rendering of Pokemon cards to reduce initial page load time by 60% and maintain smooth scrolling performance. The system will use IntersectionObserver API to render only visible cards plus a 200px buffer zone, with skeleton screen placeholders for unrealized cards. This approach preserves rendered cards in the DOM to maintain scroll position while deferring initial render of 1000+ cards to progressive on-scroll rendering. Graceful fallback for browsers without IntersectionObserver support ensures broad compatibility. The feature integrates with existing LazyLoadingGrid component and maintains compatibility with Chakra UI theme configuration.
+Implement lazy rendering of Pokemon cards using IntersectionObserver with a 200px buffer, preserving rendered DOM nodes to avoid scroll jumps, and extending behavior to reuse cached API responses so each endpoint is called only once per session. Respect the feature-005 names cache: use it immediately when valid, refresh once on app version change, and share cached data across Available, Collection, and Wishlist views to keep scrolling smooth and initial load fast.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.9+ (strict mode), React 19, React DOM 19  
-**Primary Dependencies**: IntersectionObserver Web API (native, no installation), existing LazyLoadingGrid component, Chakra UI v2.8+  
-**Storage**: N/A (no persistent storage changes)  
-**Testing**: Vitest with jsdom environment, React Testing Library  
-**Target Platform**: Web browser (Chrome 51+, Firefox 55+, Safari 12.1+, Edge 79+)  
-**Project Type**: Single-package web application (React + TypeScript)  
-**Performance Goals**: 
-  - Initial viewport render: <1 second (60% improvement over current)
-  - Scroll frame rate: ≥30 fps during continuous scrolling
-  - Memory overhead: <100MB for 1000+ rendered cards
-  - Card render batch size: 20-30 cards per intersection event
-
-**Constraints**: 
-  - <200ms card appearance time after scroll stops
-  - Preserve scroll position (no unmounting of rendered cards)
-  - Graceful degradation for IE11 and browsers without IntersectionObserver
-  - All interactive elements must remain immediately responsive on initial viewport
-
-**Scale/Scope**: 
-  - Dataset: 1025 Pokemon total
-  - Three grids to optimize: Available Pokemon, Collection list, Wishlist list
-  - Search threshold: Lazy rendering applies for ≥50 results, all render for <50 results
+**Language/Version**: TypeScript 5.9+, React 19, React DOM 19  
+**Primary Dependencies**: Chakra UI v2.8+, IntersectionObserver (native), existing `LazyLoadingGrid`, `pokemonApi`, `pokemonService`, `nameRegistry`  
+**Storage**: Browser localStorage for persisted names cache (feature 005); in-memory shared caches per session for other API responses  
+**Testing**: Vitest + React Testing Library; tests run with `--run` and max 4 threads per constitution  
+**Target Platform**: Modern browsers (Chrome 51+, Firefox 55+, Safari 12.1+, Edge 79+) with graceful fallback  
+**Project Type**: Single-package web application (Vite + React + Chakra UI)  
+**Performance Goals**: Initial viewport render <1s; scroll ≥30fps; previously fetched Pokemon render in <300ms when revisited; names cache enables search in <0.5s when valid  
+**Constraints**: No virtualization (cards stay mounted once rendered); no custom CSS (Chakra-only styling); each external API endpoint max one call per session; names cache refresh only on version change  
+**Scale/Scope**: ~1,025 Pokemon; three grids (Available, Collection, Wishlist); lazy rendering applies at ≥50 results, full render <50
 
 ## Constitution Check
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-### Principle I: Code Quality First
-✅ **PASS**: Lazy rendering implementation will follow TDD practices with comprehensive test coverage for intersection observer logic, card batching, and memory management. Code will be maintainable and refactored continuously.
-
-### Principle II: Testing Standards
-✅ **PASS**: Implementation will use Vitest with 80%+ coverage requirement. Tests will validate:
-  - IntersectionObserver callback execution and card rendering
-  - Batch operations for DOM efficiency  
-  - Memory cleanup on component unmount
-  - Edge cases (rapid scroll, window resize, search filters)
-  - Graceful fallback on missing IntersectionObserver
-
-### Principle III: User Experience Consistency
-✅ **PASS**: Lazy rendering maintains existing UX patterns. Cards use same PokemonCard component with no functional changes. Skeleton placeholders provide visual consistency. Search behavior remains unchanged (filtered results follow same lazy rendering logic).
-
-### Principle IV: Fast Development Velocity
-✅ **PASS**: Implementation reuses existing LazyLoadingGrid component and Chakra UI infrastructure. No new external dependencies required (IntersectionObserver is native Web API). Build time remains unaffected.
-
-### Development Standards Compliance
-✅ **Styling**: Will use Chakra UI components exclusively. No custom CSS for lazy rendering UI.  
-✅ **Linting**: All code must pass ESLint checks.  
-✅ **Testing**: Tests will use `--run` flag with 4 worker threads during implementation.  
-✅ **Performance**: Initial render and scroll metrics will be profiled during development.
-
-**Gate Status**: ✅ **APPROVED** - No principle violations. Implementation aligns with all constitution requirements.
-
----
+- **Principle I: Code Quality First** — PASS: Plan keeps logic isolated (service for observer + shared cache, hook for React lifecycle) and will follow TDD.
+- **Principle II: Testing Standards** — PASS: Vitest with 80%+ coverage; tests executed with `--run` and ≤4 threads; single-file runs during dev.
+- **Principle III: User Experience Consistency** — PASS: Reuses Chakra components and existing card UX; skeletons remain; names cache preserves search responsiveness.
+- **Principle IV: Fast Development Velocity** — PASS: No new dependencies; leverages existing components/services; minimal surface area changes.
+- **Development Standards** — PASS: Chakra-only styling, linting required, performance baselines documented; shared caching avoids duplicate calls.
 
 ## Project Structure
 
@@ -71,13 +35,13 @@ Implement lazy rendering of Pokemon cards to reduce initial page load time by 60
 
 ```text
 specs/007-lazy-render/
-├── plan.md              # This file (speckit.plan command output)
-├── research.md          # Phase 0 output (speckit.plan command)
-├── data-model.md        # Phase 1 output (speckit.plan command)
-├── quickstart.md        # Phase 1 output (speckit.plan command)
-├── spec.md              # Feature specification
-├── tasks.md             # Phase 2 output (speckit.tasks command)
-└── checklists/          # Implementation checklists
+├── plan.md          # Implementation plan (this file)
+├── spec.md          # Feature specification
+├── research.md      # Phase 0 (existing; update if new findings)
+├── data-model.md    # Phase 1 data entities/state
+├── quickstart.md    # Phase 1 implementation steps
+├── contracts/       # Phase 1 API/component contracts
+└── tasks.md         # Phase 2 execution tasks
 ```
 
 ### Source Code (repository root)
@@ -85,139 +49,38 @@ specs/007-lazy-render/
 ```text
 src/
 ├── components/
-│   ├── App.tsx                    # Main component (orchestrator)
-│   ├── LazyLoadingGrid.tsx        # MODIFIED: Enhanced with IntersectionObserver
-│   ├── AvailableGrid.tsx          # MODIFIED: Uses LazyLoadingGrid
-│   ├── CollectionList.tsx         # MODIFIED: Uses LazyLoadingGrid
-│   ├── WishlistList.tsx           # MODIFIED: Uses LazyLoadingGrid
-│   ├── PokemonCard.tsx            # UNCHANGED: Already memo-optimized
-│   └── [other components]         # UNCHANGED
+│   ├── LazyLoadingGrid.tsx      # IntersectionObserver + batching; ensure cache reuse hooks
+│   ├── AvailableGrid.tsx        # Consumes LazyLoadingGrid + cached data
+│   ├── CollectionList.tsx       # Consumes LazyLoadingGrid + cached data
+│   ├── WishlistList.tsx         # Consumes LazyLoadingGrid + cached data
+│   ├── PokemonCard.tsx          # Displays card; unchanged layout/UX
+│   └── SkeletonCard.tsx         # Placeholders; ensure consistent sizing
 ├── hooks/
-│   ├── useLazyRender.ts           # NEW: Custom hook for lazy rendering logic
-│   └── [existing hooks]
+│   └── useLazyRender.ts         # Hook managing observer, buffer, cache reuse
 ├── services/
-│   ├── lazyRenderService.ts       # NEW: Intersection observer management
-│   └── [existing services]
+│   ├── lazyRenderService.ts     # Observer orchestration & batching
+│   ├── pokemonApi.ts            # External API client (single-call per endpoint)
+│   ├── pokemonService.ts        # Business logic reusing caches
+│   └── nameRegistry.ts          # Names cache (feature 005) with version-aware invalidation
+├── utils/
+│   └── constants.ts             # Shared constants (e.g., buffer size, thresholds)
 └── styles/
-    └── theme.ts                   # UNCHANGED: Chakra UI theme
+    └── theme.ts                 # Chakra theme (no changes expected)
 
 tests/
 ├── unit/
-│   ├── hooks/
-│   │   └── useLazyRender.test.tsx # NEW: Hook unit tests
-│   └── [existing unit tests]
+│   ├── hooks/useLazyRender.test.tsx
+│   ├── services/lazyRenderService.test.ts
+│   └── services/nameRegistry.test.ts        # Ensure version-aware cache reuse
 ├── integration/
-│   ├── lazy-loading-grid.test.jsx # NEW: Component integration tests
-│   └── [existing integration tests]
-└── [existing test structure]
+│   ├── lazy-loading-grid.test.jsx           # Scroll, buffer, cache reuse flows
+│   └── search-performance.test.jsx          # Names cache impact on search
+└── contract/
+    └── component-contracts.test.jsx         # Card/grid contracts unchanged
 ```
 
-**Structure Decision**: Single-package web application. Lazy rendering integrates into existing component hierarchy. `LazyLoadingGrid` becomes the core lazy rendering wrapper used by all three grid components (AvailableGrid, CollectionList, WishlistList). No new directories needed; features fit within existing `src/components/`, `src/hooks/`, and `src/services/` structure aligned with constitution architecture.
+**Structure Decision**: Single-package web application. Feature touches existing components, hook, and services under `src/` with focused test additions under `tests/` (unit and integration).
 
 ## Complexity Tracking
 
-No constitution violations identified. Feature integrates cleanly with existing architecture without requiring deviations from established principles.
-
----
-
-## Constitution Check - Phase 1 Re-evaluation
-
-*GATE: Post-design validation after Phase 1 (design) completion*
-
-### Design Review Against Constitution
-
-After completing Phase 1 (research, data model, contracts, quickstart), design has been re-evaluated against all principles:
-
-### Principle I: Code Quality First ✅
-**Status**: PASS  
-**Verification**:
-- Data model clearly separates concerns (Viewport, BufferZone, CardRenderQueue, VisibleCardSet)
-- API contracts are explicit with type signatures, preconditions, postconditions
-- Service layer (LazyRenderService) encapsulates low-level IntersectionObserver logic
-- Hook layer (useLazyRender) provides React-friendly interface
-- Code is simple and maintainable (no over-engineering)
-
-### Principle II: Testing Standards (NON-NEGOTIABLE) ✅
-**Status**: PASS  
-**Verification**:
-- Contracts define comprehensive test cases for each hook/service
-- Unit tests specified for LazyRenderService and useLazyRender
-- Integration tests cover all user stories (load, scroll, search, resize)
-- Performance tests ensure success criteria (1s load, 30fps scroll)
-- 80%+ code coverage target established in quickstart.md
-
-### Principle III: User Experience Consistency ✅
-**Status**: PASS  
-**Verification**:
-- SkeletonCard uses Chakra UI Skeleton component (consistent with theme)
-- PokemonCard component unchanged (existing UX maintained)
-- Skeleton dimensions match PokemonCard exactly (no layout shift)
-- Placeholder content provides visual feedback
-- Search behavior maintained (all cards in DOM, no breaking changes)
-- Accessibility: aria-busy on skeleton, focus preservation on cards
-
-### Principle IV: Fast Development Velocity ✅
-**Status**: PASS  
-**Verification**:
-- No new external dependencies (IntersectionObserver is native Web API)
-- Reuses existing LazyLoadingGrid component (minimal new code)
-- Leverages Chakra UI + React 19 infrastructure
-- Build time unaffected (native API, no compilation overhead)
-- Implementation can proceed incrementally (service → hook → component)
-
-### Development Standards Compliance
-
-✅ **Linting & Formatting**: All contracts use TypeScript strict mode with full type coverage  
-✅ **Styling**: Exclusively uses Chakra UI components and theme.ts (no custom CSS)  
-✅ **Code Review**: API contracts provide clear acceptance criteria for review  
-✅ **Performance**: Baseline established (1s load, 30fps scroll, <100MB memory)  
-✅ **Documentation**: Data model, contracts, and quickstart comprehensively documented  
-✅ **Test Execution**: Tests will use `--run` flag with 4 worker threads per constitution  
-
-### Architecture Compliance
-
-✅ **Component Structure**: Follows established patterns (LazyLoadingGrid wrapper → consumer components)  
-✅ **Data Flow**: Unidirectional (Viewport → BufferZone → CardRenderQueue → VisibleCardSet → render)  
-✅ **State Management**: Single source of truth (VisibleCardSet via useLazyRender hook)  
-✅ **Service Layer**: Separation of concerns (LazyRenderService handles observer, hook handles React lifecycle)  
-✅ **Error Handling**: Graceful fallback for unsupported browsers (feature detection)  
-
-### Risks Mitigated
-
-| Risk | Mitigation | Status |
-|------|-----------|--------|
-| **Layout Shift** | Fixed skeleton dimensions, CSS containment | Design ensures no shift |
-| **Memory Leak** | Proper observer cleanup, WeakMap tracking | Specified in contracts |
-| **IntersectionObserver Performance** | Debouncing + throttling (100ms), batching | Documented in research.md |
-| **Search Integration** | Threshold-based (50 items), reset on filter change | Specified in contracts |
-| **Scroll Position Loss** | Never unmount cards from DOM | Explicit in data model |
-| **Cross-Browser** | Feature detection + fallback | Documented in research.md |
-
-### Design Quality Metrics
-
-- **Completeness**: All requirements from spec addressed in design ✅
-- **Clarity**: Type definitions, contracts, and examples provided ✅
-- **Consistency**: Aligns with existing codebase patterns ✅
-- **Testability**: Contract tests defined for all public APIs ✅
-- **Performance**: Success criteria measurable and documented ✅
-- **Accessibility**: WCAG considerations addressed ✅
-
-### Phase 1 Gate Result
-
-**🟢 APPROVED FOR PHASE 2 IMPLEMENTATION**
-
-All constitution checks pass. Design is sound, comprehensive, and ready for implementation. No violations or workarounds required. Development can proceed with confidence that the implementation will align with all established principles.
-
-### Phase 2 Prerequisites Met
-
-- [x] Feature specification complete and detailed
-- [x] Research phase resolved all NEEDS CLARIFICATION items
-- [x] Data model defines all entities with clear relationships
-- [x] API contracts specify hook, service, and component interfaces
-- [x] Quickstart provides step-by-step implementation guide
-- [x] Agent context updated with implementation details
-- [x] Constitution check re-evaluation complete (Phase 1 PASS)
-- [x] No blockers or dependencies identified
-
-**Status**: Ready to begin Phase 2 (Implementation) tasks.
-
+No constitution violations; no additional complexity justifications required.

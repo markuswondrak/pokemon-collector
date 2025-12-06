@@ -8,8 +8,11 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
-    "test:coverage": "vitest run --coverage"
+    "test": "vitest run tests/unit tests/contract",
+    "test:unit": "vitest run tests/unit tests/contract",
+    "test:integration": "vitest run tests/integration --reporter=verbose",
+    "test:all": "vitest run",
+    "test:coverage": "vitest run --coverage tests/unit tests/contract"
   },
   "dependencies": {
     "@chakra-ui/react": "^3.30.0",

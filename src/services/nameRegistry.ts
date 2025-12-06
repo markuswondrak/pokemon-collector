@@ -1,6 +1,5 @@
 // T001: NameRegistry module - Preload and manage all Pokemon names
-import { MAX_POKEMON_INDEX, NAMES_CACHE_KEY_PREFIX } from '../utils/constants.ts'
-import { APP_VERSION } from '../utils/version.ts'
+import { MAX_POKEMON_INDEX, NAMES_CACHE_KEY_PREFIX, APP_VERSION } from '../utils/constants.ts'
 import * as pokemonApi from './pokemonApi.ts'
 
 /**
@@ -29,6 +28,7 @@ class NameRegistry {
   private _ready: boolean = false
   private _error: string | null = null
   private _loading: boolean = false
+  private lastValidVersion: string | null = null
 
   get ready(): boolean {
     return this._ready
@@ -286,6 +286,34 @@ class NameRegistry {
   }
 
   /**
+   * T005: Invalidate cache on version change
+   * Should be called when app version changes to force refresh once
+   * Returns true if invalidation occurred, false if no action needed
+   */
+  invalidateOnVersionChange(): boolean {
+    if (this.lastValidVersion === APP_VERSION) {
+      return false // Already validated for this version
+    }
+    
+    // Version changed - invalidate caches
+    this.lastValidVersion = APP_VERSION
+    this.byId.clear()
+    this.all = []
+    this._ready = false
+    this._error = null
+    this._loading = false
+    
+    // Also invalidate API response cache
+    pokemonApi.invalidateResponseCache()
+    
+    if (import.meta.env.DEV) {
+      console.log('[NameRegistry] Cache invalidated for version change')
+    }
+    
+    return true
+  }
+
+  /**
    * Reset registry (for testing)
    */
   reset(): void {
@@ -294,6 +322,7 @@ class NameRegistry {
     this._ready = false
     this._error = null
     this._loading = false
+    this.lastValidVersion = null
   }
 }
 

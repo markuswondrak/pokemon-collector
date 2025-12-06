@@ -12,6 +12,12 @@
  * - Memory-efficient WeakMap tracking
  */
 
+import {
+  LAZY_RENDER_BUFFER_SIZE,
+  LAZY_RENDER_BATCH_DELAY,
+  LAZY_RENDER_INTERSECTION_THRESHOLD
+} from '../utils/constants'
+
 export interface LazyRenderConfig {
   bufferPx: number;      // Buffer zone margin (default: 200px)
   debounceMs: number;    // Debounce delay for intersection events (default: 100ms)
@@ -37,9 +43,9 @@ export class LazyRenderService {
 
   constructor(config: Partial<LazyRenderConfig> = {}) {
     this.config = {
-      bufferPx: config.bufferPx ?? 200,
-      debounceMs: config.debounceMs ?? 100,
-      threshold: config.threshold ?? 0,
+      bufferPx: config.bufferPx ?? LAZY_RENDER_BUFFER_SIZE,
+      debounceMs: config.debounceMs ?? LAZY_RENDER_BATCH_DELAY,
+      threshold: config.threshold ?? LAZY_RENDER_INTERSECTION_THRESHOLD,
     };
   }
 
