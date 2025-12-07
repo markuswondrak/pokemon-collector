@@ -2,6 +2,8 @@
 
 Have a look at the application [**here**](https://markuswondrak.github.io/pokemon-collector/).
 
+[![Deploy React to GitHub Pages](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml/badge.svg)](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml)
+
 This application is a personal Pokemon collection manager built with React and Vite. It allows users to browse the full list of Pokemon, mark them as caught, and manage a wishlist.
 
 **Note:** This project serves as a demonstration for [**Spec Kit**](https://github.com/github/spec-kit), a tool for spec driven development.
