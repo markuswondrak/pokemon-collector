@@ -125,7 +125,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Suggest next steps if implementation cannot proceed
    - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-9. Completion validation:
+9. Terminal command usage:
+   - **Avoid unnecessary redirection**: Do not use `2>&1` or similar redirection unless specifically needed to combine streams or suppress output
+   - **Use clean syntax**: Run commands directly (e.g., `pnpm build` not `pnpm build 2>&1`)
+   - **Let tools handle output**: The run_in_terminal tool captures both stdout and stderr by default
+
+10. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
