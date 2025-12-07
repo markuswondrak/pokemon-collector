@@ -1,10 +1,10 @@
-# Pokemon Collector (Demo)
+# Pokemon Collector
+
+Have a look at the application [**here**](https://markuswondrak.github.io/pokemon-collector/).
 
 This application is a personal Pokemon collection manager built with React and Vite. It allows users to browse the full list of Pokemon, mark them as caught, and manage a wishlist.
 
-**Note:** This project serves as a demonstration for **Spec Kit**, a tool for spec driven development.
-
-[Check out the Spec Kit Repository](https://github.com/github/spec-kit)
+**Note:** This project serves as a demonstration for [**Spec Kit**](https://github.com/github/spec-kit), a tool for spec driven development.
 
 ## Features
 
