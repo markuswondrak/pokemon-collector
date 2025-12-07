@@ -18,6 +18,8 @@ Auto-generated from all feature plans. Last updated: 2025-11-30
 - TypeScript 5.9+ (strict mode enabled) + React 19, Chakra UI 3.30, Axios 1.13, Vite 7 (008-simplify-render-cache)
 - Browser localStorage (Base64-encoded Data URLs for images, JSON for collection/wishlist) (008-simplify-render-cache)
 - LocalStorage (Key: `pokemon-collector:collection`) (004-manage-collection)
+- TypeScript 5.9+ + React 19, Chakra UI v3.30+, react-virtuoso (005-search-and-filter)
+- Browser localStorage (for filter state persistence if needed, though not explicitly requested, spec implies session state) (005-search-and-filter)
 
 - TypeScript 5.9+ (strict mode enabled) + React 19, Vite 7+, Axios (HTTP client), Vitest + React Testing Library (001-pokemon-collection)
 
@@ -38,9 +40,9 @@ npm test && npm run lint
 TypeScript 5.9+ (strict mode enabled): Follow standard conventions
 
 ## Recent Changes
+- 005-search-and-filter: Added TypeScript 5.9+ + React 19, Chakra UI v3.30+, react-virtuoso
 - 004-manage-collection: Added TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+
 - 004-manage-collection: Added TypeScript 5.9+ + React 19, Chakra UI v2.8+, Vite 7+
-- 004-manage-collection: Added [if applicable, e.g., PostgreSQL, CoreData, files or N/A]
 
 
 <!-- MANUAL ADDITIONS START -->

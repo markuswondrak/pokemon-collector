@@ -1,18 +1,29 @@
-import { Box, Button, Heading, Spinner, Text, VStack, Tabs } from '@chakra-ui/react'
+import { Box, Button, Heading, Spinner, Text, VStack, Center } from '@chakra-ui/react'
 import { Toaster, toaster } from './components/Toaster'
 import { usePokemonIndex } from './hooks/usePokemonIndex'
 import { useCollection } from './hooks/useCollection'
+import { usePokemonSearch } from './hooks/usePokemonSearch'
 import { LazyLoadingGrid } from './components/LazyLoadingGrid'
+import { SearchBar } from './components/SearchBar'
+import { FilterTabs } from './components/FilterTabs'
 
 function App() {
 	const { pokemonList, isLoading: isIndexLoading, error: indexError, retry } = usePokemonIndex();
 	const { collection, toggleCaught, toggleWishlist } = useCollection();
 
-	const isLoading = isIndexLoading;
+	const { 
+		searchQuery, 
+		setSearchQuery, 
+		filterStatus, 
+		setFilterStatus, 
+		filteredPokemon,
+		counts 
+	} = usePokemonSearch({
+		pokemonList,
+		userCollection: collection,
+	});
 
-	const caughtPokemon = pokemonList.filter(p => collection.caught.includes(p.id));
-	const wishlistPokemon = pokemonList.filter(p => collection.wishlist.includes(p.id));
-	const availablePokemon = pokemonList.filter(p => !collection.caught.includes(p.id) && !collection.wishlist.includes(p.id));
+	const isLoading = isIndexLoading;
 
 	const handleToggleCaught = (id: number) => {
 		const wasCaught = collection.caught.includes(id);
@@ -68,8 +79,9 @@ function App() {
 	};
 
 	return (
-		<Box p={5}>
-			<VStack gap={4} align="stretch">
+		<Box minH="100vh" bg="gray.50">
+			<Toaster />
+			<VStack gap={4} align="stretch" maxW="container.xl" mx="auto" p={4}>
 				<Heading>Pokemon Collector</Heading>
 				
 				{isLoading && (
@@ -92,47 +104,50 @@ function App() {
 
 				{!isLoading && !indexError && (
 					<Box>
-						<Text mb={4}>Loaded {pokemonList.length} Pokemon.</Text>
-						<Tabs.Root defaultValue="available" lazyMount unmountOnExit>
-							<Tabs.List mb={4}>
-								<Tabs.Trigger value="available">Available ({availablePokemon.length})</Tabs.Trigger>
-								<Tabs.Trigger value="caught">Caught ({caughtPokemon.length})</Tabs.Trigger>
-								<Tabs.Trigger value="wishlist">Wishlist ({wishlistPokemon.length})</Tabs.Trigger>
-							</Tabs.List>
-							<Tabs.Content value="available">
-								<LazyLoadingGrid 
-									pokemonList={availablePokemon} 
-									caughtIds={collection.caught}
-									wishlistIds={collection.wishlist}
-									onToggleCaught={handleToggleCaught}
-									onToggleWishlist={handleToggleWishlist}
+						<Box 
+							position="sticky" 
+							top="0" 
+							zIndex="sticky" 
+							bg="gray.50" 
+							pb={4} 
+							pt={2}
+							shadow="sm"
+							mx="-4"
+							px="4"
+						>
+							<VStack gap={4} align="stretch">
+								<SearchBar value={searchQuery} onChange={setSearchQuery} />
+								<FilterTabs 
+									status={filterStatus} 
+									onStatusChange={setFilterStatus} 
+									counts={counts} 
 								/>
-							</Tabs.Content>
-							<Tabs.Content value="caught">
-								<LazyLoadingGrid 
-									pokemonList={caughtPokemon} 
-									caughtIds={collection.caught}
-									wishlistIds={collection.wishlist}
-									onToggleCaught={handleToggleCaught}
-									onToggleWishlist={handleToggleWishlist}
-								/>
-							</Tabs.Content>
-							<Tabs.Content value="wishlist">
-								<LazyLoadingGrid 
-									pokemonList={wishlistPokemon} 
-									caughtIds={collection.caught}
-									wishlistIds={collection.wishlist}
-									onToggleCaught={handleToggleCaught}
-									onToggleWishlist={handleToggleWishlist}
-								/>
-							</Tabs.Content>
-						</Tabs.Root>
+							</VStack>
+						</Box>
+
+						<Text mb={4} mt={2}>Loaded {pokemonList.length} Pokemon.</Text>
+
+						{filteredPokemon.length === 0 && searchQuery ? (
+							<Center py={10}>
+								<VStack>
+									<Text fontSize="lg" fontWeight="bold">No Pokemon found</Text>
+									<Text color="gray.500">Try adjusting your search.</Text>
+								</VStack>
+							</Center>
+						) : (
+							<LazyLoadingGrid 
+								pokemonList={filteredPokemon} 
+								caughtIds={collection.caught}
+								wishlistIds={collection.wishlist}
+								onToggleCaught={handleToggleCaught}
+								onToggleWishlist={handleToggleWishlist}
+							/>
+						)}
 					</Box>
 				)}
 			</VStack>
-			<Toaster />
 		</Box>
-	)
+	);
 }
 
 export default App

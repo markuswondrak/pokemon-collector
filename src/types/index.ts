@@ -26,3 +26,5 @@ export interface StorageSchema {
 	[STORAGE_KEYS.TIMESTAMP]: number;
 	[STORAGE_KEYS.COLLECTION]: UserCollection;
 }
+
+export type FilterStatus = 'all' | 'caught' | 'wishlist';
