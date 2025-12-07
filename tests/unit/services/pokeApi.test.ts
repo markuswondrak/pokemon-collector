@@ -4,7 +4,7 @@ import { pokeApi } from '../../../src/services/api/pokeApi';
 describe('pokeApi', () => {
 	beforeEach(() => {
 		vi.restoreAllMocks();
-		global.fetch = vi.fn();
+		globalThis.fetch = vi.fn();
 	});
 
 	afterEach(() => {
@@ -19,14 +19,14 @@ describe('pokeApi', () => {
 			],
 		};
 
-		(global.fetch as any).mockResolvedValue({
+		(globalThis.fetch as any).mockResolvedValue({
 			ok: true,
 			json: async () => mockResponse,
 		});
 
 		const result = await pokeApi.fetchPokemonList();
 
-		expect(global.fetch).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon?limit=10000');
+		expect(globalThis.fetch).toHaveBeenCalledWith('https://pokeapi.co/api/v2/pokemon?limit=10000');
 		expect(result).toHaveLength(2);
 		expect(result[0]).toEqual({
 			id: 1,
@@ -36,7 +36,7 @@ describe('pokeApi', () => {
 	});
 
 	it('should throw error on non-ok response', async () => {
-		(global.fetch as any).mockResolvedValue({
+		(globalThis.fetch as any).mockResolvedValue({
 			ok: false,
 			status: 500,
 		});
@@ -54,7 +54,7 @@ describe('pokeApi', () => {
 	});
 
 	it('should retry once on failure', async () => {
-		(global.fetch as any)
+		(globalThis.fetch as any)
 			.mockResolvedValueOnce({ ok: false, status: 500 }) // First attempt fails
 			.mockResolvedValueOnce({ // Second attempt succeeds
 				ok: true,
@@ -69,14 +69,14 @@ describe('pokeApi', () => {
 		
 		const result = await promise;
 
-		expect(global.fetch).toHaveBeenCalledTimes(2);
+		expect(globalThis.fetch).toHaveBeenCalledTimes(2);
 		expect(result).toEqual([]);
 		
 		vi.useRealTimers();
 	});
 
 	it('should throw after retry fails', async () => {
-		(global.fetch as any)
+		(globalThis.fetch as any)
 			.mockResolvedValue({ ok: false, status: 500 }); // All attempts fail
 
 		vi.useFakeTimers();
@@ -89,7 +89,7 @@ describe('pokeApi', () => {
 		await vi.advanceTimersByTimeAsync(3000);
 		await expectation;
 
-		expect(global.fetch).toHaveBeenCalledTimes(2); // Initial + 1 retry
+		expect(globalThis.fetch).toHaveBeenCalledTimes(2); // Initial + 1 retry
 		
 		vi.useRealTimers();
 	});
