@@ -1,0 +1,30 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "UserCollection",
+  "description": "Schema for user collection data stored in localStorage",
+  "type": "object",
+  "properties": {
+    "caught": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1025
+      },
+      "uniqueItems": true,
+      "description": "List of caught Pokemon IDs"
+    },
+    "wishlist": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 1025
+      },
+      "uniqueItems": true,
+      "description": "List of wishlisted Pokemon IDs"
+    }
+  },
+  "required": ["caught", "wishlist"],
+  "additionalProperties": false
+}

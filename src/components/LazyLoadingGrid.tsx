@@ -1,11 +1,15 @@
 import React, { forwardRef } from 'react';
 import { VirtuosoGrid } from 'react-virtuoso';
-import { SimpleGrid, Box, SimpleGridProps } from '@chakra-ui/react';
+import { SimpleGrid, Box, SimpleGridProps, Text } from '@chakra-ui/react';
 import { PokemonRef } from '../types';
 import { PokemonCard } from './PokemonCard';
 
 interface LazyLoadingGridProps {
   pokemonList: PokemonRef[];
+  caughtIds?: number[];
+  wishlistIds?: number[];
+  onToggleCaught?: (id: number) => void;
+  onToggleWishlist?: (id: number) => void;
 }
 
 // 1. Define the List container (The Grid itself)
@@ -28,7 +32,21 @@ const GridItem = forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>
   );
 });
 
-export const LazyLoadingGrid: React.FC<LazyLoadingGridProps> = ({ pokemonList }) => {
+export const LazyLoadingGrid: React.FC<LazyLoadingGridProps> = ({
+  pokemonList,
+  caughtIds = [],
+  wishlistIds = [],
+  onToggleCaught,
+  onToggleWishlist,
+}) => {
+  if (pokemonList.length === 0) {
+    return (
+      <Box p={10} textAlign="center" color="gray.500">
+        <Text>No Pokemon found in this list.</Text>
+      </Box>
+    );
+  }
+
   return (
     <VirtuosoGrid
       useWindowScroll
@@ -37,9 +55,18 @@ export const LazyLoadingGrid: React.FC<LazyLoadingGridProps> = ({ pokemonList })
         List: GridList as any,
         Item: GridItem,
       }}
-      itemContent={(index) => (
-        <PokemonCard pokemon={pokemonList[index]} />
-      )}
+      itemContent={(index) => {
+        const pokemon = pokemonList[index];
+        return (
+          <PokemonCard
+            pokemon={pokemon}
+            isCaught={caughtIds.includes(pokemon.id)}
+            isWishlisted={wishlistIds.includes(pokemon.id)}
+            onToggleCaught={onToggleCaught ? () => onToggleCaught(pokemon.id) : undefined}
+            onToggleWishlist={onToggleWishlist ? () => onToggleWishlist(pokemon.id) : undefined}
+          />
+        );
+      }}
     />
   );
 };

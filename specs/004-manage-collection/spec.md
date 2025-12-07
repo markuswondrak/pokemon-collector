@@ -68,12 +68,18 @@ As a user, I want to see my caught Pokemon and wishlist in separate groups so I 
 - **FR-003**: System MUST persist the state of each Pokemon ("Caught", "Wishlisted", "Available") in LocalStorage immediately upon change.
 - **FR-004**: System MUST prevent the transition from "Caught" to "Wishlisted" (a caught Pokemon cannot be wishlisted).
 - **FR-005**: System MUST automatically remove "Wishlisted" status if a Pokemon is marked as "Caught".
-- **FR-006**: System MUST display Pokemon in distinct visual groups or grids based on their status (e.g., All, Caught, Wishlist).
+- **FR-006**: System MUST provide 3 distinct grids/views corresponding to the states: "Available", "Caught", and "Wishlisted".
+  - The "Available" grid MUST show ONLY Pokemon that are NOT in "Caught" or "Wishlisted" lists (Mutually Exclusive).
 - **FR-007**: System MUST update the UI immediately when state changes (optimistic UI).
+- **FR-008**: System MUST display a Toast notification with an "Undo" action whenever a Pokemon is moved out of the current view (e.g., Caught from Available).
+  - The Toast should appear for a short duration (e.g., 3-5 seconds).
+  - Clicking "Undo" MUST revert the state change immediately.
+- **FR-009**: System MUST use Chakra UI `Tabs` component for switching between the three views (Available, Caught, Wishlist).
 
 ### Key Entities *(include if feature involves data)*
 
-- **UserCollection**: The data structure stored in LocalStorage containing lists of `collectedIds` and `wishlistIds`.
+- **UserCollection**: The data structure stored in LocalStorage key `pokemon-collector:collection`.
+  - Schema: `{ "caught": number[], "wishlist": number[] }`
 - **PokemonState**: Enum/Type representing the three states: Available, Caught, Wishlisted.
 
 ## Success Criteria *(mandatory)*
@@ -86,3 +92,18 @@ As a user, I want to see my caught Pokemon and wishlist in separate groups so I 
 
 - The "Available" state is the default for any ID not present in the `collectedIds` or `wishlistIds` lists.
 - The UI layout allows for displaying multiple grids or switching between views (e.g., Tabs or stacked sections).
+
+## Clarifications
+
+### Session 2025-12-07
+
+- Q: Storage format for collection data?
+  - A: Key `pokemon-collector:collection`, Value `{"caught": number[], "wishlist": number[]}`.
+- Q: How should the collection grids be organized?
+  - A: 3 distinct grids for each state: Collected, Wishlisted, Available.
+- Q: Definition of "Available" grid content?
+  - A: Mutually Exclusive - "Available" shows ONLY items that are NOT Caught or Wishlisted.
+- Q: UX feedback when an item leaves the current grid?
+  - A: Toast notification with "Undo" action.
+- Q: UI component for switching views?
+  - A: Chakra UI Tabs.
