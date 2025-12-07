@@ -92,18 +92,18 @@ As a user, I want the cache to survive closing the browser so I don't have to re
 
 ### Functional Requirements
 
-- **FR-001**: System MUST display Pokemon in a virtualized grid (windowing) to handle large datasets efficiently.
+- **FR-001**: System MUST display Pokemon in a virtualized grid using `react-virtuoso` to handle large datasets efficiently.
 - **FR-002**: System MUST display the Pokemon name immediately using data from the Global Index (Feature 1).
 - **FR-003**: System MUST trigger image loading only when the card component enters the viewport (Intersection Observer or Virtualizer callback).
 - **FR-004**: System MUST display a loading spinner while the image is being fetched/processed.
-- **FR-005**: System MUST register a Service Worker to intercept network requests.
+- **FR-005**: System MUST register a Service Worker (via Workbox/`vite-plugin-pwa`) to intercept network requests.
 - **FR-006**: System MUST intercept all HTTP requests targeting the Pokemon image domain.
 - **FR-007**: System MUST implement a "Cache-First" strategy for image requests.
 - **FR-008**: System MUST store images using the Cache Storage API (not LocalStorage).
 - **FR-009**: System MUST serve cached images immediately if available.
 - **FR-010**: System MUST fetch, cache, and return images from the network if not in cache.
 - **FR-011**: System MUST ensure the cache persists across browser sessions.
-- **FR-012**: System MUST gracefully handle cache write failures (e.g., Quota Exceeded).
+- **FR-012**: System MUST gracefully handle cache write failures and rely on standard browser eviction policies for storage management.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -126,3 +126,11 @@ As a user, I want the cache to survive closing the browser so I don't have to re
 - A library like `react-window` or `react-virtuoso` is available/allowed for virtual scrolling.
 - Browser supports Service Workers and Cache API.
 - Pokemon images are static and do not require frequent invalidation.
+
+## Clarifications
+
+### Session 2025-12-07
+- Q: Cache Eviction Strategy (LRU vs Browser)? → A: Browser Eviction (Rely on browser's built-in quota management).
+- Q: Service Worker Implementation? → A: Workbox (Use `vite-plugin-pwa` or similar).
+- Q: Virtual Scrolling Library? → A: react-virtuoso.
+
