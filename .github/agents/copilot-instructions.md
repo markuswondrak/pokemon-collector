@@ -37,9 +37,9 @@ npm test && npm run lint
 TypeScript 5.9+ (strict mode enabled): Follow standard conventions
 
 ## Recent Changes
+- 002-browsing-on-demand: Added TypeScript 5.9+
+- 002-browsing-on-demand: Added TypeScript 5.9+
 - 001-global-data-index: Added TypeScript 5.9+, React 19, Chakra UI v2.8+, Vite 7+, Vitest, LocalStorage (Index)
-- 008-simplify-render-cache: Added TypeScript 5.9+ (strict mode enabled) + React 19, Chakra UI 3.30, Axios 1.13, Vite 7
-- 007-lazy-render: Added TypeScript 5.9+ (strict mode), React 19, React DOM 19 + IntersectionObserver Web API (native, no installation), existing LazyLoadingGrid component, Chakra UI v2.8+
 
 
 <!-- MANUAL ADDITIONS START -->

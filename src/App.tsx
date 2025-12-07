@@ -1,5 +1,6 @@
 import { Box, Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react'
 import { usePokemonIndex } from './hooks/usePokemonIndex'
+import { LazyLoadingGrid } from './components/LazyLoadingGrid'
 
 function App() {
 	const { pokemonList, isLoading, error, retry } = usePokemonIndex();
@@ -29,8 +30,8 @@ function App() {
 
 				{!isLoading && !error && (
 					<Box>
-						<Text>Loaded {pokemonList.length} Pokemon.</Text>
-						{/* List will be implemented in future tasks/features */}
+						<Text mb={4}>Loaded {pokemonList.length} Pokemon.</Text>
+						<LazyLoadingGrid pokemonList={pokemonList} />
 					</Box>
 				)}
 			</VStack>
