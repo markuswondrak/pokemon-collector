@@ -36,4 +36,5 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: './tests/setup.ts',
   },
+  base: "/pokemon-collector/"
 })
