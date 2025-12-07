@@ -7,6 +7,7 @@ interface UsePokemonIndexResult {
 	pokemonList: PokemonRef[];
 	isLoading: boolean;
 	error: Error | null;
+	retry: () => void;
 }
 
 export const usePokemonIndex = (): UsePokemonIndexResult => {
@@ -14,36 +15,45 @@ export const usePokemonIndex = (): UsePokemonIndexResult => {
 	const [isLoading, setIsLoading] = useState<boolean>(true);
 	const [error, setError] = useState<Error | null>(null);
 
-	useEffect(() => {
-		const loadData = async () => {
-			try {
-				setIsLoading(true);
-				setError(null);
+	const loadData = async () => {
+		try {
+			setIsLoading(true);
+			setError(null);
 
-				// For US1, we just fetch from API and store.
-				// Caching logic (US2) will be added later.
-				
-				// Check if we have data in storage (placeholder for US2, but good to have structure)
-				// const cachedData = storageService.get('pokemon-collector:index');
-				// if (cachedData) { ... }
+			const CACHE_KEY = 'pokemon-collector:index';
+			const TIMESTAMP_KEY = 'pokemon-collector:index-timestamp';
+			const TTL = 24 * 60 * 60 * 1000; // 24 hours
 
-				const data = await pokeApi.fetchPokemonList();
-				
-				setPokemonList(data);
-				
-				// Store data and timestamp
-				storageService.set('pokemon-collector:index', data);
-				storageService.set('pokemon-collector:index-timestamp', Date.now());
+			const cachedData = storageService.get(CACHE_KEY);
+			const cachedTimestamp = storageService.get(TIMESTAMP_KEY);
 
-			} catch (err) {
-				setError(err instanceof Error ? err : new Error('Unknown error occurred'));
-			} finally {
+			const now = Date.now();
+			const isCacheValid = cachedData && cachedTimestamp && (now - (cachedTimestamp as number) < TTL);
+
+			if (isCacheValid) {
+				setPokemonList(cachedData as PokemonRef[]);
 				setIsLoading(false);
+				return;
 			}
-		};
 
+			const data = await pokeApi.fetchPokemonList();
+			
+			setPokemonList(data);
+			
+			// Store data and timestamp
+			storageService.set(CACHE_KEY, data);
+			storageService.set(TIMESTAMP_KEY, now);
+
+		} catch (err) {
+			setError(err instanceof Error ? err : new Error('Unknown error occurred'));
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
 		loadData();
 	}, []);
 
-	return { pokemonList, isLoading, error };
+	return { pokemonList, isLoading, error, retry: loadData };
 };

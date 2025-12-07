@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { usePokemonIndex } from '../../../src/hooks/usePokemonIndex';
 import { pokeApi } from '../../../src/services/api/pokeApi';
@@ -70,5 +70,80 @@ describe('usePokemonIndex', () => {
 
     expect(result.current.error).toBe(error);
     expect(result.current.pokemonList).toEqual([]);
+  });
+
+  it('should use cached data if available and valid (within 24h)', async () => {
+    const now = Date.now();
+    const validTimestamp = now - (23 * 60 * 60 * 1000); // 23 hours ago
+    
+    (storageService.get as any).mockImplementation((key: string) => {
+      if (key === 'pokemon-collector:index') return mockPokemonList;
+      if (key === 'pokemon-collector:index-timestamp') return validTimestamp;
+      return null;
+    });
+
+    const { result } = renderHook(() => usePokemonIndex());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.pokemonList).toEqual(mockPokemonList);
+    expect(pokeApi.fetchPokemonList).not.toHaveBeenCalled();
+  });
+
+  it('should fetch new data if cache is expired (> 24h)', async () => {
+    const now = Date.now();
+    const expiredTimestamp = now - (25 * 60 * 60 * 1000); // 25 hours ago
+    
+    (storageService.get as any).mockImplementation((key: string) => {
+      if (key === 'pokemon-collector:index') return mockPokemonList;
+      if (key === 'pokemon-collector:index-timestamp') return expiredTimestamp;
+      return null;
+    });
+
+    (pokeApi.fetchPokemonList as any).mockResolvedValue(mockPokemonList);
+
+    const { result } = renderHook(() => usePokemonIndex());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(pokeApi.fetchPokemonList).toHaveBeenCalled();
+    expect(storageService.set).toHaveBeenCalledWith('pokemon-collector:index', mockPokemonList);
+    expect(storageService.set).toHaveBeenCalledWith('pokemon-collector:index-timestamp', expect.any(Number));
+  });
+
+  it('should retry fetching data when retry is called', async () => {
+    const error = new Error('API Error');
+    (storageService.get as any).mockReturnValue(null);
+    (pokeApi.fetchPokemonList as any)
+      .mockRejectedValueOnce(error)
+      .mockResolvedValueOnce(mockPokemonList);
+
+    const { result } = renderHook(() => usePokemonIndex());
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.error).toBe(error);
+
+    // Call retry
+    act(() => {
+      result.current.retry();
+    });
+
+    expect(result.current.isLoading).toBe(true);
+    expect(result.current.error).toBeNull();
+
+    await waitFor(() => {
+      expect(result.current.isLoading).toBe(false);
+    });
+
+    expect(result.current.pokemonList).toEqual(mockPokemonList);
+    expect(result.current.error).toBeNull();
+    expect(pokeApi.fetchPokemonList).toHaveBeenCalledTimes(2);
   });
 });

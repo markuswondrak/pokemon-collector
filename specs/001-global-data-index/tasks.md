@@ -33,17 +33,17 @@
 **Goal**: App loads from cache without network requests.
 **Independent Test**: Open the app after data has been cached and verify no network request is made for the index.
 
-- [ ] T010 [US2] Implement cache check logic (read from storage on init) in `src/hooks/usePokemonIndex.ts`
-- [ ] T011 [US2] Implement TTL (24h) validation logic (compare timestamp) in `src/hooks/usePokemonIndex.ts`
+- [x] T010 [US2] Implement cache check logic (read from storage on init) in `src/hooks/usePokemonIndex.ts`
+- [x] T011 [US2] Implement TTL (24h) validation logic (compare timestamp) in `src/hooks/usePokemonIndex.ts`
 
 ## Phase 5: User Story 3 - Network Error Handling (P2)
 
 **Goal**: App handles network failures and storage limits gracefully.
 **Independent Test**: Simulate a network failure during the initial fetch and verify the retry behavior.
 
-- [ ] T012 [US3] Implement retry logic (1 attempt, 3s delay) in `src/services/api/pokeApi.ts`
-- [ ] T013 [US3] Implement `QuotaExceededError` handling in `src/services/storage/localStorage.ts` and propagate to UI
-- [ ] T014 [US3] Implement Error UI with manual "Retry" button in `src/App.tsx`
+- [x] T012 [US3] Implement retry logic (1 attempt, 3s delay) in `src/services/api/pokeApi.ts`
+- [x] T013 [US3] Implement `QuotaExceededError` handling in `src/services/storage/localStorage.ts` and propagate to UI
+- [x] T014 [US3] Implement Error UI with manual "Retry" button in `src/App.tsx`
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 

@@ -1,8 +1,8 @@
-import { Box, Heading, Spinner, Text, VStack } from '@chakra-ui/react'
+import { Box, Button, Heading, Spinner, Text, VStack } from '@chakra-ui/react'
 import { usePokemonIndex } from './hooks/usePokemonIndex'
 
 function App() {
-	const { pokemonList, isLoading, error } = usePokemonIndex();
+	const { pokemonList, isLoading, error, retry } = usePokemonIndex();
 
 	return (
 		<Box p={5}>
@@ -18,7 +18,12 @@ function App() {
 
 				{error && (
 					<Box color="red.500" p={4} borderWidth={1} borderColor="red.200" borderRadius="md">
-						<Text>Error: {error.message}</Text>
+						<VStack align="start" gap={2}>
+							<Text>Error: {error.message}</Text>
+							<Button onClick={retry} colorScheme="red" size="sm">
+								Retry
+							</Button>
+						</VStack>
 					</Box>
 				)}
 

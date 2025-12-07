@@ -13,25 +13,33 @@ interface PokeApiResponse {
 }
 
 export const pokeApi = {
-	fetchPokemonList: async (): Promise<PokemonRef[]> => {
-		const response = await fetch(`${BASE_URL}/pokemon?limit=10000`);
-		
-		if (!response.ok) {
-			throw new Error('Failed to fetch pokemon list');
-		}
-
-		const data: PokeApiResponse = await response.json();
-
-		return data.results.map((item) => {
-			// Since the id field is missing, we must extract it from the url string (e.g., .../pokemon/1/) 
-			const idMatch = item.url.match(/\/(\d+)\/$/);
-			const id = idMatch ? parseInt(idMatch[1], 10) : 0;
+	fetchPokemonList: async (retryCount = 0): Promise<PokemonRef[]> => {
+		try {
+			const response = await fetch(`${BASE_URL}/pokemon?limit=10000`);
 			
-			return {
-				id,
-				name: item.name,
-				imageUrl: `${IMAGE_BASE_URL}/${id}.png`,
-			};
-		});
+			if (!response.ok) {
+				throw new Error('Failed to fetch pokemon list');
+			}
+
+			const data: PokeApiResponse = await response.json();
+
+			return data.results.map((item) => {
+				// Since the id field is missing, we must extract it from the url string (e.g., .../pokemon/1/) 
+				const idMatch = item.url.match(/\/(\d+)\/$/);
+				const id = idMatch ? parseInt(idMatch[1], 10) : 0;
+				
+				return {
+					id,
+					name: item.name,
+					imageUrl: `${IMAGE_BASE_URL}/${id}.png`,
+				};
+			});
+		} catch (error) {
+			if (retryCount < 1) {
+				await new Promise(resolve => setTimeout(resolve, 3000));
+				return pokeApi.fetchPokemonList(retryCount + 1);
+			}
+			throw error;
+		}
 	},
 };
