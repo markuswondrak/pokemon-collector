@@ -1,7 +1,7 @@
 # Tasks: Global Data Index (Preload)
 
 **Feature**: Global Data Index (Preload)
-**Status**: Todo
+**Status**: Completed
 
 ## Phase 1: Setup
 
@@ -47,8 +47,8 @@
 
 ## Phase 6: Polish & Cross-Cutting Concerns
 
-- [ ] T015 Verify strict mode compliance in `src/main.tsx`
-- [ ] T016 Verify performance (load time < 200ms) using DevTools
+- [x] T015 Verify strict mode compliance in `src/main.tsx`
+- [x] T016 Verify performance (load time < 200ms) using DevTools
 
 ## Dependencies
 
