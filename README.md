@@ -1,8 +1,8 @@
 # Pokemon Collector
 
-Have a look at the application [**here**](https://markuswondrak.github.io/pokemon-collector/).
+[![Deploy to GitHub Pages](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml/badge.svg)](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml)
 
-[![Deploy React to GitHub Pages](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml/badge.svg)](https://github.com/markuswondrak/pokemon-collector/actions/workflows/deploy.yaml)
+Have a look at the application [**here**](https://markuswondrak.github.io/pokemon-collector/).
 
 This application is a personal Pokemon collection manager built with React and Vite. It allows users to browse the full list of Pokemon, mark them as caught, and manage a wishlist.
 
