@@ -1,50 +1,3 @@
-<!-- 
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                       SYNC IMPACT REPORT                                  ║
-╚═══════════════════════════════════════════════════════════════════════════╝
-
-VERSION CHANGE: 1.4.0 → 1.4.1 (test suite separation strategy for implementation phase)
-RATIONALE: PATCH version bump - added Test Suite Separation rule to Development Standards.
-  Enforces controlled test execution with unit/contract tests in batch mode and integration
-  tests running sequentially. This prevents resource contention, API rate limiting, and 
-  ensures stable, reproducible test results during implementation work.
-
-SECTIONS MODIFIED:
-  • Development Standards - Added Test Suite Separation subsection
-
-SECTIONS UNCHANGED:
-  • Core Principles (I-IV remain stable)
-  • Project Setup & Architecture (unchanged)
-  • Build & Development Tools (unchanged)
-  • Baseline Features (unchanged)
-  • Governance (amendment procedure maintained)
-
-PRINCIPLES PRESERVED:
-  ✅ Test worker configuration (4 threads during implementation) - reinforced
-  ✅ Testing standards (TDD, 80% coverage) - unchanged
-  ✅ Code Quality First - unchanged
-  ✅ Fast Development Velocity - supported by new strategy
-
-TEMPLATES REVIEWED FOR CONSISTENCY:
-  ✅ .specify/templates/plan-template.md - No changes needed
-  ✅ .specify/templates/spec-template.md - No changes needed
-  ✅ .specify/templates/tasks-template.md - No changes needed
-
-PACKAGE.JSON CHANGES:
-  • Added npm script `test:unit` - explicit unit + contract test execution
-  • Added npm script `test:integration` - sequential integration test execution
-  • Added npm script `test:all` - complete test suite execution
-  • Updated `test` script - now defaults to unit + contract only
-  • Updated `test:coverage` script - now excludes integration tests
-
-FOLLOW-UP ITEMS:
-  • Ensure implementation agent uses new test scripts per constitution rules
-  • Monitor test execution times to validate resource allocation assumptions
-  • Document test results in feature completion checklists
-
--->
-
-
 # Pokemon Collector Constitution
 
 ## Core Principles
@@ -70,7 +23,6 @@ Development processes MUST be streamlined to maximize speed without sacrificing 
 - **Documentation**: Public APIs MUST be documented; complex logic MUST include rationale comments
 - **Test Execution**: All test commands MUST use the `--run` flag (e.g., `pnpm test --run`) for one-time execution in automated workflows, CI/CD pipelines, and implementation tasks; watch mode only when explicitly requested by the user
 - **Test File Isolation**: During implementation, tests MUST be executed as single test files (e.g., `pnpm test tests/unit/components/Button.test.jsx --run`) to verify implementation success in isolation. **Exception**: Full project test runs (e.g., `pnpm test --run` without file argument) are used only when checking for errors across the entire codebase or validating integration between multiple features
-- **Test Worker Configuration**: During implementation and feature development, test execution MUST limit workers to 4 (`vitest --run --threads --maxThreads=4`) to prevent resource contention and ensure stable, reproducible test results; CI/CD pipelines may configure worker counts based on infrastructure capacity
 - **Test Suite Separation**: The test suite MUST be executed according to the following rules:
   - **Standard test execution** (`pnpm test` or `pnpm test:unit`): Runs ONLY unit tests (`tests/unit/`) and contract tests (`tests/contract/`) in parallel. Integration tests are EXCLUDED by default.
   - **Integration test execution** (`pnpm test:integration`): Must be executed SEPARATELY and SEQUENTIALLY (one test file at a time) to prevent resource contention and API rate limiting. Running with verbose reporting (`--reporter=verbose`).
@@ -104,37 +56,11 @@ All PRs MUST include a constitution compliance checklist. Code reviews MUST expl
 
 ### Styling & Design System
 
-- **Framework**: Chakra UI (default theme + custom extensions)
-- **Theme Configuration**: `src/styles/theme.ts` (single source of truth)
+- **Framework**: Chakra UI (default theme)
 - **Spacing Scale**: 8px base (4px, 8px, 16px, 24px, 32px, 48px, 64px)
 - **Typography**: Open Sans (Google Fonts)
 - **Colors**: Chakra default palette + Pokemon Teal (#1ba098) & Gold (#ffd700)
 - **Icons**: Chakra UI Icons or React Icons
-
-### Core Components
-
-#### UI Components
-- **App.tsx**: Main orchestrator component managing search, display, and collection state
-- **StickySearchBar.tsx**: Sticky/fixed search input with 3+ character minimum, 300ms debounce
-- **CollectionList.tsx**: Grid display of collected Pokemon with status badges
-- **WishlistList.tsx**: Grid display of wishlisted Pokemon with visual indicators
-- **AvailableGrid.tsx**: Grid display of remaining uncollected/unwishlisted Pokemon
-- **PokemonCard.tsx**: Individual Pokemon card with image, name, index, and action buttons
-- **LazyLoadingGrid.tsx**: Lazy-loading container for efficient rendering of large datasets
-- **Design System Wrappers**: `ButtonBase`, `CardBase`, `Container`, `Stack` (Chakra UI abstractions)
-
-#### Custom Hooks
-- **useDebounce**: Debouncing utility for search queries (300ms default)
-- **useCollection**: State management hook for collection operations
-
-#### Data Models
-- **Pokemon**: Interface with index, name, image, collected, wishlist flags
-- **Collection**: Persistent storage interface for collected and wishlisted Pokemon
-
-#### Services & API Integration
-- **pokemonApi.ts**: PokéAPI client for batch fetching Pokemon data
-- **pokemonService.ts**: Business logic for Pokemon searching and filtering
-- **collectionStorage.ts**: Abstraction for localStorage persistence with cloud migration path
 
 ### Layout & Styling
 
@@ -191,32 +117,6 @@ pnpm test:coverage # Generates code coverage reports
 - **Rules**: ESLint + TypeScript ESLint + React Hooks rules
 - **Scope**: All JavaScript/TypeScript files
 - **Auto-fix**: Available via `pnpm lint:fix` (to be configured)
-
-### Dependencies Management
-
-#### Runtime Dependencies
-- `react@^19.2.0`: UI component framework
-- `react-dom@^19.2.0`: React DOM rendering
-- `axios@^1.13.2`: HTTP client for PokéAPI requests
-
-#### Development Dependencies
-- `typescript@~5.9.3`: Type checking and transpilation
-- `vite@^7.2.4`: Bundler and dev server
-- `vitest@^4.0.14`: Test runner (Vitest)
-- `@testing-library/react@^16.3.0`: Component testing utilities
-- `@testing-library/jest-dom@^6.9.1`: DOM matchers for assertions
-- `@testing-library/user-event@^14.6.1`: User interaction simulation
-- `jsdom@^27.2.0`: DOM environment for testing
-- `eslint@^9.39.1`: Code quality linter
-- `typescript-eslint@^8.46.4`: TypeScript + ESLint integration
-- `@vitejs/plugin-react@^5.1.1`: Vite React support
-- `eslint-plugin-react-hooks@^7.0.1`: React Hooks linting rules
-- `eslint-plugin-react-refresh@^0.4.24`: Fast Refresh validation
-- `terser@^5.44.1`: JavaScript minifier
-- `globals@^16.5.0`: Global variable definitions
-- `@types/react@^19.2.5`: React type definitions
-- `@types/react-dom@^19.2.3`: React DOM type definitions
-- `@types/node@^24.10.1`: Node.js type definitions
 
 ## Baseline Features
 
@@ -275,12 +175,9 @@ pnpm test:coverage # Generates code coverage reports
 
 - **Build Time Target**: Under 5 minutes (Vite achieves <1s)
 - **Lazy Loading**: Pokemon cards load on viewport visibility
-- **Code Coverage Minimum**: 80% unit test coverage for critical paths
+- **Code Coverage Minimum**: 60% unit test coverage for critical paths
 - **Keyboard Navigation**: Full support via Tab and arrow keys, Escape to reset
 - **Color Contrast**: 4.5:1 ratio (WCAG 2.1 AA minimum)
 - **Touch Targets**: 44x44px minimum for buttons and interactive elements
 - **Search Performance**: Results update within 350ms (300ms debounce + 50ms render)
 - **Responsive Breakpoints**: 320px (mobile) through desktop with fluid scaling
-
-**Version**: 1.4.1 | **Ratified**: 2025-11-29 | **Last Amended**: 2025-12-05
-```

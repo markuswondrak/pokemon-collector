@@ -23,10 +23,10 @@
 **Goal**: App fetches and stores data on first launch.
 **Independent Test**: Clear browser storage, open the app, and verify that data is fetched and stored.
 
-- [ ] T006 [US1] Create `usePokemonIndex` hook with state management (loading, data, error) in `src/hooks/usePokemonIndex.ts`
-- [ ] T007 [US1] Integrate `pokeApi` service to fetch data in `src/hooks/usePokemonIndex.ts`
-- [ ] T008 [US1] Integrate `localStorage` service to store fetched data in `src/hooks/usePokemonIndex.ts`
-- [ ] T009 [US1] Implement loading UI with Chakra UI `Spinner` or `Progress` in `src/App.tsx`
+- [x] T006 [US1] Create `usePokemonIndex` hook with state management (loading, data, error) in `src/hooks/usePokemonIndex.ts`
+- [x] T007 [US1] Integrate `pokeApi` service to fetch data in `src/hooks/usePokemonIndex.ts`
+- [x] T008 [US1] Integrate `localStorage` service to store fetched data in `src/hooks/usePokemonIndex.ts`
+- [x] T009 [US1] Implement loading UI with Chakra UI `Spinner` or `Progress` in `src/App.tsx`
 
 ## Phase 4: User Story 2 - Subsequent App Launch (P1)
 
