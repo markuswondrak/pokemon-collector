@@ -1,0 +1,40 @@
+{
+  "name": "filter_pokemon",
+  "description": "Filter the Pokemon grid based on user criteria such as type, stats, name, or generation.",
+  "parameters": {
+    "type": "OBJECT",
+    "properties": {
+      "types": {
+        "type": "ARRAY",
+        "items": {
+          "type": "STRING",
+          "enum": [
+            "normal", "fire", "water", "grass", "electric", "ice", "fighting", "poison", "ground",
+            "flying", "psychic", "bug", "rock", "ghost", "dragon", "steel", "dark", "fairy"
+          ]
+        },
+        "description": "List of Pokemon types to include."
+      },
+      "minStat": {
+        "type": "NUMBER",
+        "description": "Minimum base stat total or specific stat value (e.g., 'strong' implies high stats > 400)."
+      },
+      "nameContains": {
+        "type": "STRING",
+        "description": "Substring to search for in the Pokemon's name."
+      },
+      "generation": {
+        "type": "NUMBER",
+        "description": "The generation number (1-9)."
+      },
+      "matching_pokemon_names": {
+        "type": "ARRAY",
+        "items": {
+          "type": "STRING"
+        },
+        "description": "List of Pokemon names that match the user's description, especially for vague queries like 'pink pokemon' or 'legendary pokemon'."
+      }
+    },
+    "required": []
+  }
+}

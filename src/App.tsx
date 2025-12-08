@@ -6,10 +6,18 @@ import { usePokemonSearch } from './hooks/usePokemonSearch'
 import { LazyLoadingGrid } from './components/LazyLoadingGrid'
 import { SearchBar } from './components/SearchBar'
 import { FilterTabs } from './components/FilterTabs'
+import { FloatingChatButton } from './components/FloatingChatButton'
+import { ChatWindow } from './components/Chat/ChatWindow'
+import { useChat } from './hooks/useChat'
+import { useGoogleAuth } from './hooks/useGoogleAuth'
+import { useGemini } from './hooks/useGemini'
 
 function App() {
 	const { pokemonList, isLoading: isIndexLoading, error: indexError, retry } = usePokemonIndex();
 	const { collection, toggleCaught, toggleWishlist } = useCollection();
+	const { isOpen, toggleChat, messages, addMessage, isLoading: isChatLoading, setLoading, error: chatError, setError } = useChat();
+	const { session, isInitializing, login, logout } = useGoogleAuth();
+	const { sendMessage: sendGeminiMessage, isLoading: isGeminiLoading, error: geminiError } = useGemini();
 
 	const { 
 		searchQuery, 
@@ -17,13 +25,65 @@ function App() {
 		filterStatus, 
 		setFilterStatus, 
 		filteredPokemon,
-		counts 
+		counts,
+		aiFilter,
+		setAiFilter,
+		clearAiFilter,
 	} = usePokemonSearch({
 		pokemonList,
 		userCollection: collection,
 	});
 
 	const isLoading = isIndexLoading;
+	const isAuthenticated = !!session?.accessToken;
+
+	const handleSendMessage = async (content: string) => {
+		if (!session?.accessToken) return;
+
+		// Add user message
+		addMessage({ role: 'user', content });
+		setLoading(true);
+		setError(null);
+
+		try {
+			const response = await sendGeminiMessage(
+				[...messages, { role: 'user', content }],
+				session.accessToken
+			);
+
+			if (response.filterIntent) {
+				setAiFilter(response.filterIntent);
+				
+				const filterDescription = [];
+				if (response.filterIntent.matching_pokemon_names?.length) {
+					filterDescription.push(`${response.filterIntent.matching_pokemon_names.length} matching Pokemon`);
+				}
+				if (response.filterIntent.types?.length) {
+					filterDescription.push(`types: ${response.filterIntent.types.join(', ')}`);
+				}
+				if (response.filterIntent.nameContains) {
+					filterDescription.push(`name contains: ${response.filterIntent.nameContains}`);
+				}
+
+				addMessage({
+					role: 'model',
+					content: `I found ${filterDescription.join(', ')}. The grid has been filtered!`,
+				});
+			} else if (response.text) {
+				addMessage({ role: 'model', content: response.text });
+			}
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to get response';
+			setError(errorMessage);
+			addMessage({ 
+				role: 'model', 
+				content: `Sorry, I encountered an error: ${errorMessage}`,
+				isError: true,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
 
 	const handleToggleCaught = (id: number) => {
 		const wasCaught = collection.caught.includes(id);
@@ -146,6 +206,21 @@ function App() {
 					</Box>
 				)}
 			</VStack>
+			<FloatingChatButton onClick={toggleChat} />
+			<ChatWindow 
+				isOpen={isOpen} 
+				onClose={toggleChat}
+				messages={messages}
+				isAuthenticated={isAuthenticated}
+				isAuthLoading={isInitializing}
+				isLoading={isChatLoading || isGeminiLoading}
+				error={chatError || geminiError}
+				onLogin={login}
+				onLogout={logout}
+				onSendMessage={handleSendMessage}
+				aiFilter={aiFilter}
+				onClearFilter={clearAiFilter}
+			/>
 		</Box>
 	);
 }
