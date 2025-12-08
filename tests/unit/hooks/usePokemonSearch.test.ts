@@ -197,4 +197,90 @@ describe('usePokemonSearch', () => {
 		expect(result.current.filteredPokemon).toHaveLength(1);
 		expect(result.current.filteredPokemon[0].name).toBe("farfetch'd");
 	});
+
+	it('should filter by AI filter: matching_pokemon_names', () => {
+		const { result } = renderHook(() =>
+			usePokemonSearch({
+				pokemonList: mockPokemonList,
+				userCollection: mockUserCollection,
+			})
+		);
+
+		act(() => {
+			result.current.setAiFilter({
+				matching_pokemon_names: ['pikachu', 'mewtwo'],
+			});
+		});
+
+		expect(result.current.filteredPokemon).toHaveLength(2);
+		expect(result.current.filteredPokemon.map((p) => p.name)).toEqual([
+			'pikachu',
+			'mewtwo',
+		]);
+	});
+
+	it('should filter by AI filter: nameContains', () => {
+		const { result } = renderHook(() =>
+			usePokemonSearch({
+				pokemonList: mockPokemonList,
+				userCollection: mockUserCollection,
+			})
+		);
+
+		act(() => {
+			result.current.setAiFilter({
+				nameContains: 'char',
+			});
+		});
+
+		expect(result.current.filteredPokemon).toHaveLength(1);
+		expect(result.current.filteredPokemon[0].name).toBe('charmander');
+	});
+
+	it('should clear AI filter', () => {
+		const { result } = renderHook(() =>
+			usePokemonSearch({
+				pokemonList: mockPokemonList,
+				userCollection: mockUserCollection,
+			})
+		);
+
+		act(() => {
+			result.current.setAiFilter({
+				matching_pokemon_names: ['pikachu'],
+			});
+		});
+
+		expect(result.current.filteredPokemon).toHaveLength(1);
+
+		act(() => {
+			result.current.clearAiFilter();
+		});
+
+		expect(result.current.filteredPokemon).toHaveLength(4);
+		expect(result.current.aiFilter).toBeNull();
+	});
+
+	it('should combine AI filter with search and status filters', () => {
+		const { result } = renderHook(() =>
+			usePokemonSearch({
+				pokemonList: mockPokemonList,
+				userCollection: mockUserCollection,
+			})
+		);
+
+		// Set AI filter to pikachu and bulbasaur
+		act(() => {
+			result.current.setAiFilter({
+				matching_pokemon_names: ['pikachu', 'bulbasaur'],
+			});
+		});
+
+		// Both are caught, so filtering by caught should still show both
+		act(() => {
+			result.current.setFilterStatus('caught');
+		});
+
+		expect(result.current.filteredPokemon).toHaveLength(2);
+	});
 });
