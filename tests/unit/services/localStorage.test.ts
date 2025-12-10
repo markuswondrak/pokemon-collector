@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { storageService } from '../../../src/services/storage/localStorage';
-import { STORAGE_KEYS } from '../../../src/types';
+import { STORAGE_KEYS, PokemonRef } from '../../../src/types';
 
 describe('storageService', () => {
 	beforeEach(() => {
@@ -10,7 +10,7 @@ describe('storageService', () => {
 
 	it('should store and retrieve data', () => {
 		const key = STORAGE_KEYS.INDEX;
-		const data = [{ id: 1, name: 'bulbasaur', imageUrl: 'url' }];
+		const data: PokemonRef[] = [{ id: 1, name: 'bulbasaur', imageUrl: 'url', types: ['grass'] }];
 
 		storageService.set(key, data);
 		const retrieved = storageService.get(key);
@@ -25,7 +25,7 @@ describe('storageService', () => {
 
 	it('should handle QuotaExceededError', () => {
 		const key = STORAGE_KEYS.INDEX;
-		const data = [{ id: 1, name: 'bulbasaur', imageUrl: 'url' }];
+		const data: PokemonRef[] = [{ id: 1, name: 'bulbasaur', imageUrl: 'url', types: ['grass'] }];
 
 		// Mock setItem to throw QuotaExceededError
 		const setItemSpy = vi.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {

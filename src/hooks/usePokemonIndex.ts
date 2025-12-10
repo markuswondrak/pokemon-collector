@@ -31,9 +31,14 @@ export const usePokemonIndex = (): UsePokemonIndexResult => {
 			const isCacheValid = cachedData && cachedTimestamp && (now - (cachedTimestamp as number) < TTL);
 
 			if (isCacheValid) {
-				setPokemonList(cachedData as PokemonRef[]);
-				setIsLoading(false);
-				return;
+				const list = cachedData as PokemonRef[];
+				// Check if data is migrated (has types)
+				if (list.length > 0 && 'types' in list[0]) {
+					setPokemonList(list);
+					setIsLoading(false);
+					return;
+				}
+				// If cache exists but is missing types, we proceed to fetch new data
 			}
 
 			const data = await pokeApi.fetchPokemonList();

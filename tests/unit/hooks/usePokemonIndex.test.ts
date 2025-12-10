@@ -21,8 +21,8 @@ vi.mock('../../../src/services/storage/localStorage', () => ({
 
 describe('usePokemonIndex', () => {
   const mockPokemonList: PokemonRef[] = [
-    { id: 1, name: 'bulbasaur', imageUrl: 'url/1.png' },
-    { id: 2, name: 'ivysaur', imageUrl: 'url/2.png' },
+    { id: 1, name: 'bulbasaur', imageUrl: 'url/1.png', types: ['grass', 'poison'] },
+    { id: 2, name: 'ivysaur', imageUrl: 'url/2.png', types: ['grass', 'poison'] },
   ];
 
   beforeEach(() => {

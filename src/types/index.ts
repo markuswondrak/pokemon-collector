@@ -1,7 +1,28 @@
+export type PokemonType =
+	| 'normal'
+	| 'fire'
+	| 'water'
+	| 'electric'
+	| 'grass'
+	| 'ice'
+	| 'fighting'
+	| 'poison'
+	| 'ground'
+	| 'flying'
+	| 'psychic'
+	| 'bug'
+	| 'rock'
+	| 'ghost'
+	| 'dragon'
+	| 'steel'
+	| 'dark'
+	| 'fairy';
+
 export interface PokemonRef {
 	id: number;
 	name: string;
 	imageUrl: string;
+	types: PokemonType[];
 }
 
 export interface UserCollection {

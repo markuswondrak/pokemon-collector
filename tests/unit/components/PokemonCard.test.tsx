@@ -18,6 +18,7 @@ describe('PokemonCard', () => {
     id: 25,
     name: 'pikachu',
     imageUrl: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png',
+    types: ['electric'],
   };
 
   it('renders pokemon name and id', () => {
@@ -27,12 +28,27 @@ describe('PokemonCard', () => {
     expect(screen.getByText('#025')).toBeInTheDocument();
   });
 
+  it('renders type badges', () => {
+    renderWithChakra(<PokemonCard pokemon={mockPokemon} />);
+    expect(screen.getByText('electric')).toBeInTheDocument();
+  });
+
   it('renders image with correct src and alt', () => {
     renderWithChakra(<PokemonCard pokemon={mockPokemon} />);
     
     const image = screen.getByRole('img');
     expect(image).toHaveAttribute('src', mockPokemon.imageUrl);
     expect(image).toHaveAttribute('alt', mockPokemon.name);
+  });
+
+  it('links image to bulbapedia page', () => {
+    renderWithChakra(<PokemonCard pokemon={mockPokemon} />);
+    
+    const link = screen.getByRole('link');
+    expect(link).toHaveAttribute('href', 'https://bulbapedia.bulbagarden.net/wiki/Pikachu_(Pokémon)');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    expect(link).toContainElement(screen.getByRole('img'));
   });
 
   it('renders catch button when handler is provided', () => {

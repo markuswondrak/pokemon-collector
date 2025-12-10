@@ -1,9 +1,11 @@
 import React from 'react';
-import { Box, Text, VStack, Button, Flex } from '@chakra-ui/react';
+import { Box, Text, VStack, Button, Flex, Badge, Link } from '@chakra-ui/react';
 import { PokemonRef } from '../types';
 import { LazyImage } from './LazyImage';
 import { TbPokeball } from 'react-icons/tb';
 import { FaHeart } from 'react-icons/fa';
+import { TYPE_COLORS } from '../utils/typeColors';
+import { getWikiUrl } from '../utils/wikiUrl';
 
 interface PokemonCardProps {
   pokemon: PokemonRef;
@@ -31,12 +33,20 @@ export const PokemonCard: React.FC<PokemonCardProps> = ({
     >
       <VStack gap={2}>
         <Box boxSize="100px" mx="auto">
-          <LazyImage
-            src={pokemon.imageUrl}
-            alt={pokemon.name}
-            boxSize="100px"
-            objectFit="contain"
-          />
+          <Link 
+            href={getWikiUrl(pokemon.name)} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            display="block"
+            _hover={{ opacity: 0.8 }}
+          >
+            <LazyImage
+              src={pokemon.imageUrl}
+              alt={pokemon.name}
+              boxSize="100px"
+              objectFit="contain"
+            />
+          </Link>
         </Box>
         <Text fontSize="sm" color="gray.500">
           #{pokemon.id.toString().padStart(3, '0')}
@@ -44,6 +54,19 @@ export const PokemonCard: React.FC<PokemonCardProps> = ({
         <Text fontWeight="bold" textTransform="capitalize">
           {pokemon.name}
         </Text>
+        <Flex gap={1} justify="center" wrap="wrap">
+          {pokemon.types?.map((type) => (
+            <Badge
+              key={type}
+              bg={TYPE_COLORS[type]}
+              color="white"
+              textTransform="capitalize"
+              size="sm"
+            >
+              {type}
+            </Badge>
+          ))}
+        </Flex>
         <Flex gap={2} mt={2} wrap="wrap" justify="center">
           {onToggleCaught && (
             <Button

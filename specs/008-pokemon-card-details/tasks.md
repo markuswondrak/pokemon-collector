@@ -21,7 +21,7 @@ description: "Task list for Pokemon Card Details feature"
 
 **Purpose**: Project initialization and basic structure
 
-- [ ] T001 Verify project structure and dependencies in `package.json`
+- [x] T001 Verify project structure and dependencies in `package.json`
 
 ---
 
@@ -31,9 +31,9 @@ description: "Task list for Pokemon Card Details feature"
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T002 Update `PokemonRef` interface and add `PokemonType` type in `src/types/index.ts`
-- [ ] T003 [P] Create `src/utils/typeColors.ts` with color mappings from research
-- [ ] T004 [P] Create `src/utils/wikiUrl.ts` with URL generation logic from research
+- [x] T002 Update `PokemonRef` interface and add `PokemonType` type in `src/types/index.ts`
+- [x] T003 [P] Create `src/utils/typeColors.ts` with color mappings from research
+- [x] T004 [P] Create `src/utils/wikiUrl.ts` with URL generation logic from research
 
 **Checkpoint**: Foundation ready - user story implementation can now begin in parallel
 
@@ -49,15 +49,15 @@ description: "Task list for Pokemon Card Details feature"
 
 > **NOTE: Write these tests FIRST, ensure they FAIL before implementation**
 
-- [ ] T005 [P] [US1] Create/Update unit test for `pokeApi` type fetching in `tests/unit/services/pokeApi.test.ts`
-- [ ] T006 [P] [US1] Create unit test for `PokemonCard` badges in `tests/unit/components/PokemonCard.test.tsx`
+- [x] T005 [P] [US1] Create/Update unit test for `pokeApi` type fetching in `tests/unit/services/pokeApi.test.ts`
+- [x] T006 [P] [US1] Create unit test for `PokemonCard` badges in `tests/unit/components/PokemonCard.test.tsx`
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Implement `fetchPokemonTypes` (inverted index strategy) in `src/services/api/pokeApi.ts`
-- [ ] T008 [US1] Update `fetchPokemonList` to merge types in `src/services/api/pokeApi.ts`
-- [ ] T009 [US1] Update `usePokemonIndex.ts` to handle new data structure
-- [ ] T010 [US1] Update `PokemonCard.tsx` to display badges using `typeColors` util
+- [x] T007 [US1] Implement `fetchPokemonTypes` (inverted index strategy) in `src/services/api/pokeApi.ts`
+- [x] T008 [US1] Update `fetchPokemonList` to merge types in `src/services/api/pokeApi.ts`
+- [x] T009 [US1] Update `usePokemonIndex.ts` to handle new data structure
+- [x] T010 [US1] Update `PokemonCard.tsx` to display badges using `typeColors` util
 
 **Checkpoint**: At this point, User Story 1 should be fully functional and testable independently
 
@@ -71,11 +71,11 @@ description: "Task list for Pokemon Card Details feature"
 
 ### Tests for User Story 2 ⚠️
 
-- [ ] T011 [P] [US2] Update unit test for `PokemonCard` wiki link in `tests/unit/components/PokemonCard.test.tsx`
+- [x] T011 [P] [US2] Update unit test for `PokemonCard` wiki link in `tests/unit/components/PokemonCard.test.tsx`
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Update `PokemonCard.tsx` to wrap image in link using `wikiUrl` util
+- [x] T012 [US2] Update `PokemonCard.tsx` to wrap image in link using `wikiUrl` util
 
 **Checkpoint**: At this point, User Stories 1 AND 2 should both work independently
 
@@ -85,8 +85,8 @@ description: "Task list for Pokemon Card Details feature"
 
 **Purpose**: Improvements that affect multiple user stories
 
-- [ ] T013 Run full test suite `pnpm test` to ensure no regressions
-- [ ] T014 Verify implementation against `quickstart.md` scenarios
+- [x] T013 Run full test suite `pnpm test` to ensure no regressions
+- [x] T014 Verify implementation against `quickstart.md` scenarios
 
 ---
 

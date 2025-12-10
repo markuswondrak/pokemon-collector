@@ -9,10 +9,10 @@ vi.mock('../../../src/hooks/useDebounce', () => ({
 }));
 
 const mockPokemonList: PokemonRef[] = [
-	{ id: 1, name: 'bulbasaur', imageUrl: 'url1' },
-	{ id: 4, name: 'charmander', imageUrl: 'url4' },
-	{ id: 25, name: 'pikachu', imageUrl: 'url25' },
-	{ id: 150, name: 'mewtwo', imageUrl: 'url150' },
+	{ id: 1, name: 'bulbasaur', imageUrl: 'url1', types: ['grass', 'poison'] },
+	{ id: 4, name: 'charmander', imageUrl: 'url4', types: ['fire'] },
+	{ id: 25, name: 'pikachu', imageUrl: 'url25', types: ['electric'] },
+	{ id: 150, name: 'mewtwo', imageUrl: 'url150', types: ['psychic'] },
 ];
 
 const mockUserCollection: UserCollection = {
@@ -174,9 +174,9 @@ describe('usePokemonSearch', () => {
 	});
 
 	it('should handle special characters in search', () => {
-		const specialPokemon = [
-			{ id: 122, name: 'mr. mime', imageUrl: 'url122' },
-			{ id: 83, name: "farfetch'd", imageUrl: 'url83' },
+		const specialPokemon: PokemonRef[] = [
+			{ id: 122, name: 'mr. mime', imageUrl: 'url122', types: ['psychic', 'fairy'] },
+			{ id: 83, name: "farfetch'd", imageUrl: 'url83', types: ['normal', 'flying'] },
 		];
 		const { result } = renderHook(() =>
 			usePokemonSearch({
