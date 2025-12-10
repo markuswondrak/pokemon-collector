@@ -55,6 +55,7 @@ describe('ChatWindow', () => {
 			setError: mockSetError,
 			isOpen: true,
 			toggleChat: vi.fn(),
+			clearMessages: vi.fn(),
 		});
 
 		vi.mocked(useGemini).mockReturnValue({

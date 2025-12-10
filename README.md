@@ -15,6 +15,7 @@ This application is a personal Pokemon collection manager built with React and V
     -   **Catch**: Mark Pokemon as owned/caught.
     -   **Wishlist**: Add Pokemon to a wishlist for future hunting.
 -   **Search & Filter**: Quickly find Pokemon by name or ID.
+-   **AI Chat Agent**: Filter Pokemon using natural language queries powered by Google Gemini.
 -   **Local Persistence**: Your collection data is saved locally in your browser, so you don't lose progress on refresh.
 -   **Responsive Design**: Optimized for both desktop and mobile viewing.
 
@@ -44,6 +45,23 @@ This application is a personal Pokemon collection manager built with React and V
     ```
 
 4.  Open your browser and navigate to `http://localhost:5173`.
+
+### AI Chat Configuration
+
+To enable the AI chat features, you need to set up Google OAuth:
+
+1.  **Google Cloud Setup**:
+    -   Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+    -   Enable the **Gemini API**.
+    -   Create an **OAuth 2.0 Client ID** (Web application).
+    -   Add `http://localhost:5173` to **Authorized JavaScript origins**.
+
+2.  **Environment Setup**:
+    -   Create a `.env` file in the project root.
+    -   Add your Client ID:
+        ```env
+        VITE_GOOGLE_CLIENT_ID=your-client-id.apps.googleusercontent.com
+        ```
 
 ### Running Tests
 
