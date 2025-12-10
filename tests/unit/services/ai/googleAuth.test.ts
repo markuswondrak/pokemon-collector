@@ -30,7 +30,7 @@ describe('GoogleAuthService', () => {
 		service.init('test-client-id');
 		expect(mockGoogle.accounts.oauth2.initTokenClient).toHaveBeenCalledWith({
 			client_id: 'test-client-id',
-			scope: 'https://www.googleapis.com/auth/cloud-platform',
+			scope: 'https://www.googleapis.com/auth/generative-language.retriever',
 			callback: expect.any(Function),
 		});
 	});

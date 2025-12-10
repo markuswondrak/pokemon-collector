@@ -1,40 +1,84 @@
 import { Box, VStack, Heading, IconButton, Portal, Text, Spinner, HStack } from '@chakra-ui/react';
 import { FaTimes } from 'react-icons/fa';
 import { ChatMessage as ChatMessageComponent } from './ChatMessage';
-import { ChatMessage } from '../../types/chat';
+import { FilterIntent } from '../../types/chat';
 import { AuthButton } from './AuthButton';
 import { ChatInput } from './ChatInput';
-import { FilterIntent } from '../../types/chat';
+import { useChat } from '../../hooks/useChat';
+import { useGemini } from '../../hooks/useGemini';
+import { useGoogleAuth } from '../../hooks/useGoogleAuth';
 
 interface ChatWindowProps {
 	isOpen: boolean;
 	onClose: () => void;
-	messages: ChatMessage[];
-	isAuthenticated: boolean;
-	isAuthLoading: boolean;
-	isLoading: boolean;
-	error: string | null;
-	onLogin: () => void;
-	onLogout: () => void;
-	onSendMessage: (message: string) => void;
 	aiFilter: FilterIntent | null;
+	onSetAiFilter: (filter: FilterIntent) => void;
 	onClearFilter: () => void;
 }
 
 export const ChatWindow = ({ 
 	isOpen, 
 	onClose,
-	messages,
-	isAuthenticated,
-	isAuthLoading,
-	isLoading,
-	error,
-	onLogin,
-	onLogout,
-	onSendMessage,
 	aiFilter,
+	onSetAiFilter,
 	onClearFilter,
 }: ChatWindowProps) => {
+	const { messages, addMessage, isLoading: isChatLoading, setLoading, error: chatError, setError } = useChat();
+	const { sendMessage: sendGeminiMessage, isLoading: isGeminiLoading, error: geminiError } = useGemini();
+	const { session, isInitializing, login, logout } = useGoogleAuth();
+
+	const accessToken = session?.accessToken || null;
+	const isAuthenticated = !!accessToken;
+	const isLoading = isChatLoading || isGeminiLoading;
+	const error = chatError || geminiError;
+
+	const handleSendMessage = async (content: string) => {
+		if (!accessToken) return;
+
+		addMessage({ role: 'user', content });
+		setLoading(true);
+		setError(null);
+
+		try {
+			const response = await sendGeminiMessage(
+				[...messages, { role: 'user', content }],
+				accessToken
+			);
+
+			if (response.filterIntent) {
+				onSetAiFilter(response.filterIntent);
+				
+				const filterDescription = [];
+				if (response.filterIntent.matching_pokemon_names?.length) {
+					filterDescription.push(`${response.filterIntent.matching_pokemon_names.length} matching Pokemon`);
+				}
+				if (response.filterIntent.types?.length) {
+					filterDescription.push(`types: ${response.filterIntent.types.join(', ')}`);
+				}
+				if (response.filterIntent.nameContains) {
+					filterDescription.push(`name contains: ${response.filterIntent.nameContains}`);
+				}
+
+				addMessage({
+					role: 'model',
+					content: `I found ${filterDescription.join(', ')}. The grid has been filtered!`,
+				});
+			} else if (response.text) {
+				addMessage({ role: 'model', content: response.text });
+			}
+		} catch (err) {
+			const errorMessage = err instanceof Error ? err.message : 'Failed to get response';
+			setError(errorMessage);
+			addMessage({ 
+				role: 'model', 
+				content: `Sorry, I encountered an error: ${errorMessage}`,
+				isError: true,
+			});
+		} finally {
+			setLoading(false);
+		}
+	};
+
 	if (!isOpen) return null;
 
 	const hasActiveFilter = aiFilter?.matching_pokemon_names && aiFilter.matching_pokemon_names.length > 0;
@@ -98,7 +142,7 @@ export const ChatWindow = ({
 				)}
 
 				<VStack flex={1} p={3} overflowY="auto" gap={3} align="stretch">
-					{!isAuthenticated && !isAuthLoading && (
+					{!isAuthenticated && !isInitializing && (
 						<Box textAlign="center" py={4}>
 							<Text mb={4} fontSize="sm" color="gray.600">
 								Sign in with Google to chat with the AI assistant
@@ -106,13 +150,13 @@ export const ChatWindow = ({
 							<AuthButton
 								isAuthenticated={false}
 								isLoading={false}
-								onLogin={onLogin}
-								onLogout={onLogout}
+								onLogin={login}
+								onLogout={logout}
 							/>
 						</Box>
 					)}
 
-					{isAuthLoading && (
+					{isInitializing && (
 						<Box textAlign="center" py={4}>
 							<Spinner size="sm" />
 							<Text mt={2} fontSize="sm" color="gray.600">
@@ -165,7 +209,7 @@ export const ChatWindow = ({
 
 				{isAuthenticated && (
 					<ChatInput
-						onSend={onSendMessage}
+						onSend={handleSendMessage}
 						disabled={isLoading}
 						placeholder="Ask about Pokemon..."
 					/>
@@ -176,8 +220,8 @@ export const ChatWindow = ({
 						<AuthButton
 							isAuthenticated={true}
 							isLoading={false}
-							onLogin={onLogin}
-							onLogout={onLogout}
+							onLogin={login}
+							onLogout={logout}
 						/>
 					</Box>
 				)}

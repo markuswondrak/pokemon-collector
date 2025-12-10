@@ -30,7 +30,7 @@ describe('GeminiService', () => {
 
 		const response = await service.sendMessage([{ role: 'user', content: 'Hi' }], 'test-access-token');
 		expect(mockFetch).toHaveBeenCalledWith(
-			'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent',
+			'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent',
 			expect.objectContaining({
 				method: 'POST',
 				headers: expect.objectContaining({

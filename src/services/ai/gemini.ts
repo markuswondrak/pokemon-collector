@@ -5,68 +5,25 @@ const FILTER_TOOL = {
 		{
 			name: 'filter_pokemon',
 			description:
-				'Filter the Pokemon grid based on user criteria. IMPORTANT: The client only has Pokemon names ' +
-				'and IDs. You MUST use matching_pokemon_names to provide a list of Pokemon names that match the ' +
-				'user\'s query. For queries about types (fire, water, etc.), generations, stats, or any Pokemon ' + 
-				'characteristics, you must determine which Pokemon match and return their names in matching_pokemon_names.',
+				'Filters the Pokemon grid based on natural language queries. ' +
+				'Since the client lacks metadata, you explicitly calculate matches. ' +
+				'Analyze the user query for types, generations, stats, colors, or names ' +
+				'and return the specific list of matching Pokemon names.',
 			parameters: {
 				type: 'OBJECT',
 				properties: {
-					types: {
-						type: 'ARRAY',
-						items: {
-							type: 'STRING',
-							enum: [
-								'normal',
-								'fire',
-								'water',
-								'grass',
-								'electric',
-								'ice',
-								'fighting',
-								'poison',
-								'ground',
-								'flying',
-								'psychic',
-								'bug',
-								'rock',
-								'ghost',
-								'dragon',
-								'steel',
-								'dark',
-								'fairy',
-							],
-						},
-						description: 'List of Pokemon types to include.',
-					},
-					minStat: {
-						type: 'NUMBER',
-						description:
-							"Minimum base stat total or specific stat value (e.g., 'strong' implies high stats > 400).",
-					},
-					nameContains: {
-						type: 'STRING',
-						description: "Substring to search for in the Pokemon's name.",
-					},
-					generation: {
-						type: 'NUMBER',
-						description: 'The generation number (1-9).',
-					},
 					matching_pokemon_names: {
 						type: 'ARRAY',
-						items: {
-							type: 'STRING',
-						},
-						description:
-							"REQUIRED: List of exact Pokemon names that match the user's query. Use " + 
-							"this for ALL queries including types (e.g., 'fire pokemon' -> ['charmander', " + 
-							"'charmeleon', 'charizard', ...]), generations (e.g., 'gen 1' -> ['bulbasaur', " + 
-							"'ivysaur', ...]), stats (e.g., 'strong pokemon' -> ['mewtwo', 'rayquaza', ...]), " + 
-							"or any characteristics. Only omit this if the user is asking a general question " + 
-							"that doesn't require filtering.",
+						items: { type: 'STRING' },
+						description: 'The list of Pokemon names that match the user request (e.g. ["Charmander", "Vulpix"]).'
 					},
+					// Optional: Behalte dies NUR, wenn du im UI Feedback geben willst
+					active_filters: {
+						type: 'STRING',
+						description: 'A short summary of what was filtered for UI display, e.g. "Strong Fire Types from Gen 1".'
+					}
 				},
-				required: [],
+				required: ['matching_pokemon_names'],
 			},
 		},
 	],
@@ -127,7 +84,9 @@ export class GeminiService {
 		});
 
 		if (!response.ok) {
-			throw new Error(`Gemini API Error: ${response.statusText}`);
+			const errorData = await response.json();
+			const errorMessage = errorData?.error?.message || response.statusText;
+			throw new Error(`Gemini API Error: ${errorMessage}`);
 		}
 
 		const data = await response.json();
