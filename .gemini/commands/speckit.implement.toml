@@ -108,7 +108,7 @@ You **MUST** consider the user input before proceeding (if not empty).
 
 6. Execute implementation following the task plan:
    - **Phase-by-phase execution**: Complete each phase before moving to the next
-   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together  
+   - **Respect dependencies**: Run sequential tasks in order, parallel tasks [P] can run together
    - **Follow TDD approach**: Execute test tasks before their corresponding implementation tasks
    - **File-based coordination**: Tasks affecting the same files must run sequentially
    - **Validation checkpoints**: Verify each phase completion before proceeding
@@ -128,7 +128,12 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Suggest next steps if implementation cannot proceed
    - **IMPORTANT** For completed tasks, make sure to mark the task off as [X] in the tasks file.
 
-9. Completion validation:
+9. Terminal command usage:
+   - **Avoid unnecessary redirection**: Do not use `2>&1` or similar redirection unless specifically needed to combine streams or suppress output
+   - **Use clean syntax**: Run commands directly (e.g., `pnpm build` not `pnpm build 2>&1`)
+   - **Let tools handle output**: The run_in_terminal tool captures both stdout and stderr by default
+
+10. Completion validation:
    - Verify all required tasks are completed
    - Check that implemented features match the original specification
    - Validate that tests pass and coverage meets requirements
@@ -136,4 +141,65 @@ You **MUST** consider the user input before proceeding (if not empty).
    - Report final status with summary of completed work
 
 Note: This command assumes a complete task breakdown exists in tasks.md. If tasks are incomplete or missing, suggest running `/speckit.tasks` first to regenerate the task list.
-"""
+
+## Constitution Compliance: Test Execution Rule
+
+Per the project constitution (Development Standards), all test commands **MUST** use the `--run` flag for one-time execution:
+- Use: `pnpm test --run`
+- Never: `pnpm test` (without --run flag) in implementation tasks
+- Exception: Only use watch mode (`pnpm test`) if explicitly requested by the user
+
+This ensures deterministic test runs during implementation and prevents unintended watch mode in automated workflows.
+
+## Code Style
+
+- **Indentation**: Use **tabs** instead of spaces for indentation in all source files.
+
+## Test Suite Execution Strategy
+
+The test suite **MUST** be executed according to strict separation rules:
+
+### Unit Tests (Can Run All at Once)
+- **Command**: `pnpm test --run` or `pnpm test:unit --run`
+- **Scope**: Unit tests (`tests/unit/`) AND Contract tests (`tests/contract/`) together
+- **Execution**: ALL unit and contract tests run in parallel in a single command
+- **Purpose**: Fast feedback during development
+- **Expected Duration**: < 1 minute
+
+### Integration Tests (Must Run One-by-One ONLY)
+- **Command**: `pnpm test:integration tests/integration/<specific-test-file>`
+- **Scope**: Execute only ONE integration test file at a time
+- **Execution**: NEVER run all integration tests together; always run individual test files
+- **Purpose**: End-to-end validation of feature interactions without resource contention
+- **Expected Duration**: 5-20 seconds per test file
+- **Critical Rule**: MUST specify the individual test file path, never run the full `tests/integration/` directory at once
+
+### Examples
+
+✅ **CORRECT - Unit Tests (All Together)**:
+```bash
+pnpm test:unit
+pnpm test
+```
+
+✅ **CORRECT - Integration Test (Individual)**:
+```bash
+pnpm test:integration tests/integration/collection.us1.test.jsx
+pnpm test:integration tests/integration/lazy-loading-grid.test.jsx
+```
+
+❌ **WRONG - Integration Tests (Full Suite)**:
+```bash
+pnpm test:integration          # ← FORBIDDEN: runs entire integration suite
+pnpm test:all                  # ← Use only before deployment, not during implementation
+```
+
+### Rationale
+
+- **Unit tests in parallel**: Fast feedback loop, no resource constraints
+- **Integration tests one-by-one**: Prevents API rate limiting, resource exhaustion, and reduces noise in test output for focused debugging
+
+## Integration Test Execution Rule
+
+Integration tests must be executed individually, never as the full suite in a single command. Run each integration test file one-by-one to avoid long, brittle runs and to keep diagnostics focused.
+"
